@@ -19,36 +19,7 @@ diag_log format ["[ADV_INDEX] Cluster size threshold=%1 min structures", _cluste
 // === PHASE 1: Get all map locations with their sizes ===
 private _center = [worldSize/2, worldSize/2, 0];
 
-// Location types - NameLocal removed to avoid clutter, small objectives caught by DBSCAN
-private _locationConfigs = [
-    ["NameCityCapital", "civilian", "capital", 100, 1.5],  // Size multiplier
-    ["NameCity", "civilian", "city", 75, 1.3],
-    ["NameVillage", "civilian", "village", 50, 1.2],
-    ["Airport", "military", "local", 95, 1.5],
-    ["Strategic", "military", "local", 85, 1.2]
-];
-
-private _allLocations = [];
-
-{
-    _x params ["_locType", "_category", "_subtype", "_basePriority", "_sizeMultiplier"];
-    private _locs = nearestLocations [_center, [_locType], worldSize];
-    
-    {
-        private _loc = _x;
-        private _locPos = locationPosition _loc;
-        private _locName = text _loc;
-        private _locSize = size _loc;  // Returns [width, height]
-        
-        // Calculate radius from location's actual size
-        private _width = _locSize select 0;
-        private _height = _locSize select 1;
-        private _radius = ((_width max _height) * _sizeMultiplier) max 100;
-        
-        _allLocations pushBack [_locPos, _locName, _locType, _category, _subtype, _basePriority, _radius];
-        
-    } forEach _locs;
-} forEach _locationConfigs;
+private _allLocations = [_center] call FLO_fnc_objectiveCollectMapLocations;
 
 diag_log format ["[ADV_INDEX] Found %1 map locations", count _allLocations];
 
@@ -198,6 +169,8 @@ private _coveredRadii = _mergedObjectives apply { _x select 5 };
 private _allBuildings = nearestTerrainObjects [_center, ["HOUSE", "BUILDING"], worldSize, false];
 private _uncoveredBuildings = _allBuildings select {
     private _bPos = getPos _x;
+    if ([_bPos] call FLO_fnc_objectivePositionExcluded) exitWith { false };
+
     private _isCovered = false;
     {
         private _objPos = _coveredPositions select _forEachIndex;

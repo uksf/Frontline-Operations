@@ -3,7 +3,10 @@ class Objective {
 
     class objectiveConfig {};
     class buildObjectiveLinks {};
+    class moduleObjectiveExclusion {};
+    class objectiveCollectMapLocations {};
     class objectiveIndexer {};
+    class objectivePositionExcluded {};
     class dbscanCluster {};
     class dbscanGetNeighbors {};
     class buildObjectiveGraph {};

@@ -8,7 +8,7 @@ class CfgPatches {
             "cba_xeh",
             "cba_settings"
         };
-        units[] = {};
+        units[] = {"FLO_ModuleObjectiveExclusion"};
         weapons[] = {};
     };
 };
@@ -19,6 +19,7 @@ class Extended_PreInit_EventHandlers {
     };
 };
 
+#include "CfgVehicles.hpp"
 #include "UI\addon_defines.hpp"
 #include "IDS_Logistics\CfgLogistics.hpp"
 #include "IDS_Logistics\dialogs\BuildMenuDialog.hpp"
