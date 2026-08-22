@@ -10,6 +10,10 @@
 [] call FLO_fnc_playerSideAdapterInit;
 
 if (isServer) then {
+    ["uksf_mission_fireMissionCompleted", {
+        _this call FLO_fnc_gtnArtilleryHandleUKSFCompletion;
+    }] call CBA_fnc_addEventHandler;
+
     [] spawn {
         if (missionNamespace getVariable ["FLO_AddonServerBootstrapStarted", false]) exitWith {
             diag_log "[FLO_INIT] Addon server bootstrap already started";

@@ -165,50 +165,7 @@ class FLO {
         class gtnCommanderVisualDebug {};
     };
 
-    class GTNAssets {
-        file = "\z\flo\addons\main\Functions\AI\GTN\Assets";
-
-        class gtnAirAssetManager        {};
-        class gtnAirTaskOrder           {};
-        class gtnAirApplyVirtualCASEffect {};
-        class gtnAirAuthorizeSortie {};
-        class gtnAirDefenseActivateAgainstLiveAircraft {};
-        class gtnAirDefenseBuildContactIndex {};
-        class gtnAirDefenseGetState {};
-        class gtnAirDefenseHandoffActivatedAircraft {};
-        class gtnAirDefenseIsObservedEngagement {};
-        class gtnAirDefenseProcessContacts {};
-        class gtnAirDefenseResolveVirtualEngagement {};
-        class gtnAirDefenseStartContactWorker {};
-        class gtnAirDistancePointToSegment2D {};
-        class gtnAirInitializeOffMapReserves {};
-        class gtnAirParkCombatGroupOffMap {};
-        class gtnAirResolveReserveRoutePositions {};
-        class gtnAirTryRevirtualizeLiveMission {};
-        class gtnBroadcastCommanderRadioMessage {};
-        class gtnBroadcastArtilleryRadio {};
-        class gtnBuildArtilleryMissionRecord {};
-        class gtnCollectArtilleryVehicles {};
-        class gtnBuildArtilleryFirePlan {};
-        class gtnCommanderRadioMessage {};
-        class gtnProcessArtilleryRadioQueue {};
-        class gtnQueueArtilleryRadioMission {};
-        class gtnArtilleryGetAvailableGroups {};
-        class gtnArtillerySelectLiveBattery {};
-        class gtnArtilleryCanRequestMission {};
-        class gtnArtilleryCalculateMissionCost {};
-        class gtnArtilleryApplyVirtualFireEffect {};
-        class gtnArtilleryAuthorizeMission {};
-        class gtnArtilleryEvaluateObservedTarget {};
-        class gtnArtilleryManager       {};
-        class gtnArtilleryFireMission   {};
-        class gtnArtilleryProcessObservedFireRequests {};
-        class gtnProcessCounterBatteryRequests {};
-        class gtnRecordCounterBatteryExposure {};
-        class gtnSupportAssetCanProvideAbstractSupport {};
-        class gtnArtillerySyncCachedGroup {};
-        class gtnArtillerySyncObservedSpotter {};
-    };
+    #include "Functions\AI\GTN\Assets\CfgFunctions.hpp"
     
     class AITasks {
         file = "\z\flo\addons\main\Functions\AI\Tasks";

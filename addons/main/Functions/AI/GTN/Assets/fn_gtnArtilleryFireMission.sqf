@@ -64,72 +64,30 @@ _realGroup setVariable ["FLO_patrolConfig", nil, true];
 
 ["GTN Artillery", 3, format["Artillery %1 - cleared patrol/waypoints", _gid]] call FLO_fnc_log;
 
-["GTN Artillery", 3, format [
-    "Artillery %1 - executing %2 planned rounds across %3 guns",
-    _gid,
-    _firePlan get "plannedRounds",
-    count _vehiclePlans
-]] call FLO_fnc_log;
-
-// === PHASE 3: EXECUTE FIRE MISSIONS (PARALLEL) ===
-private _activeScripts = [];
-
-{
-    private _script = [_x, _gid] spawn {
-        params ["_vehiclePlan", "_gid"];
-        private _veh = _vehiclePlan get "vehicle";
-        private _ammo = _vehiclePlan get "ammo";
-        private _salvo = _vehiclePlan get "salvo";
-        private _targets = _vehiclePlan get "targets";
-        
-        // --- PREPARE ---
-        private _setupTimeout = diag_tickTime + 30;
-        waitUntil {
-            sleep 1;
-            (unitReady (gunner _veh)) || (diag_tickTime > _setupTimeout) || !alive _veh
-        };
-        
-        if (!alive _veh) exitWith {};
-        if (_targets isEqualTo []) exitWith {};
-
-        private _watchPos = _targets select 0;
-        _veh doWatch _watchPos;
-        sleep 2;
-        
-        // --- CHECK AMMO/RANGE ---
-        if (_ammo isEqualTo "") exitWith {
-            ["GTN Artillery", 2, format["Artillery %1 (Unit %2) - no ammo", _gid, _veh]] call FLO_fnc_log;
-        };
-        if !((_targets select 0) inRangeOfArtillery [[_veh], _ammo]) exitWith {
-            ["GTN Artillery", 2, format["Artillery %1 (Unit %2) - target out of range", _gid, _veh]] call FLO_fnc_log;
-        };
-        
-        // --- FIRE LOOP ---
-        {
-            if (!alive _veh) exitWith {};
-            if (_x inRangeOfArtillery [[_veh], _ammo]) then {
-                _veh commandArtilleryFire [_x, _ammo, _salvo];
-                if (_salvo > 1) then { sleep 1.5; };
-                
-                private _waitStart = diag_tickTime;
-                waitUntil {
-                    sleep 0.5;
-                    (unitReady _veh) || !alive _veh || (diag_tickTime - _waitStart > 60)
-                };
-            };
-        } forEach _targets;
-    };
-    _activeScripts pushBack _script;
-} forEach _vehiclePlans;
-
-// === PHASE 4: Wait for completion ===
-waitUntil {
-    sleep 1;
-    (_activeScripts findIf { !scriptDone _x }) isEqualTo -1
+private _missionRecord = (_mgr get "missions") get _gid;
+if (isNil "_missionRecord") exitWith {
+    ["GTN Artillery", 1, format ["Artillery %1 has no registered mission", _gid]] call FLO_fnc_log;
+    [_gdata] call FLO_fnc_virtualizationClearMissionLock;
 };
 
-["GTN Artillery", 3, format["Artillery %1 fire mission complete (all units)", _gid]] call FLO_fnc_log;
+private _artillery = (_vehiclePlans select 0) get "vehicle";
+private _gunner = gunner _artillery;
+private _missionId = _missionRecord get "missionId";
+private _plannedRounds = _missionRecord get "plannedRounds";
 
-// === PHASE 5: Cleanup ===
-// Pass objNull as vehicle since we handled multiple. Cleanup will use leader for scoot origin.
-_mgr call ["_cleanupMission", [_gid, objNull]];
+if (isNull _artillery || {isNull _gunner}) exitWith {
+    [_missionId, _artillery, false, 0, "Selected battery has no live gun", [_gid]] call FLO_fnc_gtnArtilleryHandleUKSFCompletion;
+};
+
+["GTN Artillery", 3, format [
+    "Artillery %1 delegated mission %2 (%3 rounds) to UKSF walking fire",
+    _gid,
+    _missionId,
+    _plannedRounds
+]] call FLO_fnc_log;
+
+[
+    "uksf_mission_requestFireMission",
+    [_artillery, _artillery, _targetPos, _missionId, _plannedRounds, [_gid]],
+    _gunner
+] call CBA_fnc_targetEvent;

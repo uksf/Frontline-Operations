@@ -388,16 +388,11 @@ if (isNil "FLO_GTNArtilleryManager") then {
                 false
             };
 
+            _missionRecord set ["impactPoints", []];
+            _missionRecord set ["etaMin", -1];
+            _missionRecord set ["etaMax", -1];
             if (_targetSide in [east, west]) then {
-                private _alertPayload = [];
-                if ((keys _firePlan) isNotEqualTo []) then {
-                    _alertPayload = [
-                        _firePlan get "etaMin",
-                        _firePlan get "etaMax",
-                        _firePlan get "impactPoints"
-                    ];
-                };
-                [_targetPos, _rounds, _accuracy, _targetSide, _alertPayload] call FLO_fnc_gtnAlertIncomingArtillery;
+                [_targetPos, _rounds, _accuracy, _targetSide, []] call FLO_fnc_gtnAlertIncomingArtillery;
             };
 
             // Mark as on mission to prevent virtualization

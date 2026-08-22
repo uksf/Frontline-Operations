@@ -6,7 +6,8 @@ class CfgPatches {
         requiredAddons[] = {
             "cba_main",
             "cba_xeh",
-            "cba_settings"
+            "cba_settings",
+            "uksf_mission"
         };
         units[] = {"FLO_ModuleObjectiveExclusion"};
         weapons[] = {};
