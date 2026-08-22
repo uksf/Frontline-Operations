@@ -35,6 +35,11 @@ private _usableVehicles = [];
     private _ammo = (getArtilleryAmmo [_x]) param [0, ""];
     if (_ammo == "") then { continue };
     if !(_targetPos inRangeOfArtillery [[_x], _ammo]) then { continue };
+    private _availableRounds = 0;
+    {
+        if ((_x select 0) == _ammo) then { _availableRounds = _availableRounds + (_x select 1); };
+    } forEach (magazinesAmmo _x);
+    if (_availableRounds < _totalRounds) then { continue };
 
     _usableVehicles pushBack [
         _x,
@@ -44,6 +49,8 @@ private _usableVehicles = [];
 } forEach _vehicles;
 
 if (_usableVehicles isEqualTo []) exitWith { createHashMap };
+// UKSF walking-fire requests use one gun, so one gun must hold the full mission.
+_usableVehicles resize 1;
 
 private _gunCount = count _usableVehicles;
 private _baseRoundsPerGun = floor (_totalRounds / _gunCount);
