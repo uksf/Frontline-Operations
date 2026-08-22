@@ -93,8 +93,6 @@ if (hasInterface) then {
             !isNull player && {player == player}
         };
 
-        titleText ["Frontline Operations Group Presents...", "PLAIN", 3];
-
         StartingLocationDone = false;
         FLO_ClientFinalizeDone = false;
         FLO_ClientUiReady = false;
@@ -125,55 +123,7 @@ if (hasInterface) then {
             ["INIT_CLIENT", 1, "Mission loading timeout reached"] call FLO_fnc_log;
         };
 
-        private _phase0Timeout = diag_tickTime + 30;
-        waitUntil {
-            sleep 0.3;
-            (!isNil "FLO_InitPhase" && {FLO_InitPhase >= 1}) || {diag_tickTime > _phase0Timeout}
-        };
-
-        sleep 1;
-
-        private _isSavedGame = !isNil "FLO_IsLoadedSave" && {FLO_IsLoadedSave};
-        if (_isSavedGame) exitWith {
-            ["INIT_CLIENT", 3, "Server detected saved game - skipping setup dialog"] call FLO_fnc_log;
-            StartingLocationDone = true;
-        };
-
-        private _configReady = !isNil "FLO_MissionConfig"
-            && {FLO_MissionConfig isEqualType createHashMap}
-            && {(keys FLO_MissionConfig) isNotEqualTo []};
-        private _initClosed = !isNil "FLO_InitPhase" && {FLO_InitPhase > 1};
-        private _missionReady = !isNil "FLO_MissionReady" && {FLO_MissionReady};
-        private _setupStillPending = !_configReady && {!_initClosed && {!_missionReady}};
-
-        if (!_setupStillPending) exitWith {
-            ["INIT_CLIENT", 3, "Mission setup already in progress or complete - skipping setup dialog"] call FLO_fnc_log;
-            StartingLocationDone = true;
-        };
-
-        if ([] call FLO_fnc_openFactionDialog) exitWith {};
-
-        [] spawn {
-            private _noticeLogged = false;
-
-            while {
-                private _configReady = !isNil "FLO_MissionConfig"
-                    && {FLO_MissionConfig isEqualType createHashMap}
-                    && {(keys FLO_MissionConfig) isNotEqualTo []};
-                private _initClosed = !isNil "FLO_InitPhase" && {FLO_InitPhase > 1};
-                private _missionReady = !isNil "FLO_MissionReady" && {FLO_MissionReady};
-
-                !_configReady && {!_initClosed && {!_missionReady}}
-            } do {
-                if ([] call FLO_fnc_openFactionDialog) exitWith {};
-
-                if (!_noticeLogged) then {
-                    ["INIT_CLIENT", 3, "Fresh setup is waiting for a logged-in admin or hosted server"] call FLO_fnc_log;
-                    _noticeLogged = true;
-                };
-
-                sleep 2;
-            };
-        };
+        StartingLocationDone = true;
+        ["INIT_CLIENT", 3, "Mission setup is supplied by flops\\settings.sqf"] call FLO_fnc_log;
     };
 };

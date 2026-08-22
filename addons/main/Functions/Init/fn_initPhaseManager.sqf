@@ -9,7 +9,7 @@
  *
  * Phases:
  *   0: Save Detection - Check for saved game, load config if present
- *   1: Mission Config - Wait for faction dialog OR use saved config
+ *   1: Mission Config - Load mission settings OR use saved config
  *   2: Factions - Load faction scripts based on config
  *   3: Objectives - Index objectives OR restore from save
  *   4: Virtualization - Setup virtualization OR restore from save
@@ -64,12 +64,12 @@ if (_hasSave) then {
     FLO_MissionConfig = _savedConfig;
     publicVariable "FLO_MissionConfig";
 
-    diag_log "[FLO_INIT] Loading from saved game - skipping faction dialog";
+    diag_log "[FLO_INIT] Loading mission configuration from saved game";
 } else {
     // Explicitly re-publish false to ensure clients get the value
     FLO_IsLoadedSave = false;
     publicVariable "FLO_IsLoadedSave";
-    diag_log "[FLO_INIT] Fresh start - will wait for faction dialog";
+    diag_log "[FLO_INIT] Fresh start - will load flops\\settings.sqf";
 };
 
 sleep 0.5;

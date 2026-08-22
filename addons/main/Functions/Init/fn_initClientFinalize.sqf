@@ -122,9 +122,6 @@ player createDiaryRecord ["Diary", ["Mission Status",
 
     uiSleep 0.5;
     titleText ["", "BLACK IN", 2, true, true];
-    private _msg = "<t size='1.2' color='#00ff00'>Mission Initialized</t><br/><t size='0.9'>All systems ready</t>";
-    [_msg, 0, 0.3, 3, 0] spawn BIS_fnc_dynamicText;
-    hintSilent "";
     [{
         FLO_ClientUiReady = true;
         ["FLO_ClientUIReady", []] call CBA_fnc_localEvent;
