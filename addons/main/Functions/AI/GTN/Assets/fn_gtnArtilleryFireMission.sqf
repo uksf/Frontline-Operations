@@ -2,14 +2,9 @@
     Function: FLO_fnc_gtnArtilleryFireMission
 
     Description:
-    Executes an artillery fire mission using a beaten zone pattern.
-    Fires one round at a time with waitUntil unitReady for reliable completion.
-    
-    Pattern: Beaten zone cone spreading towards target
-    - Offset increases with each round (walking fire towards target)
-    - Random lateral dispersion within accuracy radius
-    - MLRS fires salvos instead of single rounds
-    - Heavier artillery (SPGs) fire more rounds, more accurately
+    Prepares a live FLO artillery group and delegates physical firing to the
+    UKSF walking-fire request API. FLO cleanup resumes from the completion
+    event.
 
     Arguments:
     0: Group ID <STRING>

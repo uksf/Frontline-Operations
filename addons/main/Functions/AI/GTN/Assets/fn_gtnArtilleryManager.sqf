@@ -4,15 +4,9 @@
     Description:
     Manages artillery groups that exist in the virtualization system.
     For target areas inside the shared virtualization activation bubble, the
-    manager unvirtualizes and executes a real fire mission.
+    manager unvirtualizes a battery and delegates physical firing to UKSF.
     For remote areas, the manager keeps artillery virtual and applies a
     virtual combat effect instead of spawning real assets.
-
-    Firing pattern inspired by LAMBS Danger fnc_doArtillery:
-    - Beaten zone cone pattern spreading towards the target
-    - MLRS detection with salvo fire
-    - Round-by-round firing with waitUntil unitReady
-    - Heavier artillery fires more rounds, more accurately
 
     Returns:
     HashMap object with methods to request fire missions.
