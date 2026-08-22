@@ -169,14 +169,14 @@ private _coveredRadii = _mergedObjectives apply { _x select 5 };
 private _allBuildings = nearestTerrainObjects [_center, ["HOUSE", "BUILDING"], worldSize, false];
 private _uncoveredBuildings = _allBuildings select {
     private _bPos = getPos _x;
-    if ([_bPos] call FLO_fnc_objectivePositionExcluded) exitWith { false };
-
-    private _isCovered = false;
-    {
-        private _objPos = _coveredPositions select _forEachIndex;
-        private _objRad = _coveredRadii select _forEachIndex;
-        if (_bPos distance2D _objPos < _objRad) exitWith { _isCovered = true };
-    } forEach _coveredPositions;
+    private _isCovered = [_bPos] call FLO_fnc_objectivePositionExcluded;
+    if (!_isCovered) then {
+        {
+            private _objPos = _coveredPositions select _forEachIndex;
+            private _objRad = _coveredRadii select _forEachIndex;
+            if (_bPos distance2D _objPos < _objRad) exitWith { _isCovered = true };
+        } forEach _coveredPositions;
+    };
     !_isCovered
 };
 
