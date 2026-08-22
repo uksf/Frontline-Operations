@@ -118,9 +118,6 @@ if (_allSuccess) then {
     diag_log "[FLO_INIT] ========================================";
     diag_log format ["[FLO_INIT] INITIALIZATION FAILED: %1", FLO_InitError];
     diag_log "[FLO_INIT] ========================================";
-    
-    // Notify all players of failure
-    [FLO_InitError] remoteExec ["hint", 0];
 };
 
 _allSuccess

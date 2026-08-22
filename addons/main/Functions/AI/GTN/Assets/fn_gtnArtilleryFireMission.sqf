@@ -43,9 +43,22 @@ if (_vehiclePlans isEqualTo []) exitWith {
 
 ["GTN Artillery", 3, format["Artillery %1 - found %2 valid guns", _gid, count _vehiclePlans]] call FLO_fnc_log;
 
+private _missionRecord = (_mgr get "missions") get _gid;
+if (isNil "_missionRecord") exitWith {
+    ["GTN Artillery", 1, format ["Artillery %1 has no registered mission", _gid]] call FLO_fnc_log;
+    [_gdata] call FLO_fnc_virtualizationClearMissionLock;
+};
+
 // === PHASE 2: Clear patrol and waypoints ===
-if !([_gid, [], true, "GTN_ARTILLERY_FIRE"] call FLO_fnc_updateVirtualGroupWaypoints) then {
-    throw format ["Artillery %1 route clear was rejected", _gid];
+if !([_gid, [], true, "GTN_ARTILLERY_FIRE"] call FLO_fnc_updateVirtualGroupWaypoints) exitWith {
+    [
+        _missionRecord get "missionId",
+        objNull,
+        false,
+        0,
+        "Battery route clear was rejected",
+        [_gid]
+    ] call FLO_fnc_gtnArtilleryHandleUKSFCompletion;
 };
 
 // Clear the FLO_patrolConfig variable from real group
@@ -58,12 +71,6 @@ _realGroup setVariable ["FLO_patrolConfig", nil, true];
 { doStop _x; } forEach units _realGroup;
 
 ["GTN Artillery", 3, format["Artillery %1 - cleared patrol/waypoints", _gid]] call FLO_fnc_log;
-
-private _missionRecord = (_mgr get "missions") get _gid;
-if (isNil "_missionRecord") exitWith {
-    ["GTN Artillery", 1, format ["Artillery %1 has no registered mission", _gid]] call FLO_fnc_log;
-    [_gdata] call FLO_fnc_virtualizationClearMissionLock;
-};
 
 private _artillery = (_vehiclePlans select 0) get "vehicle";
 private _gunner = gunner _artillery;

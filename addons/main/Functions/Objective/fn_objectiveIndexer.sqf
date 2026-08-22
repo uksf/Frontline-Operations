@@ -197,6 +197,7 @@ if (count _uncoveredBuildings >= _clusterMinStructures) then {
         private _sumX = 0; private _sumY = 0;
         { _sumX = _sumX + (_x select 0); _sumY = _sumY + (_x select 1); } forEach _cluster;
         private _clusterPos = [_sumX / count _cluster, _sumY / count _cluster, 0];
+        if ([_clusterPos] call FLO_fnc_objectivePositionExcluded) then { continue };
         
         private _maxDist = 0;
         { private _d = _clusterPos distance2D _x; if (_d > _maxDist) then { _maxDist = _d }; } forEach _cluster;

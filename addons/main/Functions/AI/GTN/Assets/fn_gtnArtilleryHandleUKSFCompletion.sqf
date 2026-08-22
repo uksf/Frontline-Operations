@@ -31,6 +31,10 @@ private _missionRecord = _missions get _groupId;
 if ((_missionRecord get "missionId") != _requestId) exitWith {
     ["GTN Artillery", 1, format ["UKSF artillery completion %1 did not match battery %2", _requestId, _groupId]] call FLO_fnc_log;
 };
+if (_missionRecord getOrDefault ["completionHandled", false]) exitWith {
+    ["GTN Artillery", 2, format ["Ignored duplicate UKSF artillery completion %1", _requestId]] call FLO_fnc_log;
+};
+_missionRecord set ["completionHandled", true];
 
 _missionRecord set ["roundsFired", _roundsFired];
 _missionRecord set ["fireSucceeded", _success];

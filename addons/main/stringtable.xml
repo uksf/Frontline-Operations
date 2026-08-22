@@ -8,19 +8,9 @@
                 <English>OBJECTIVE</English>
             </Key>
         </Container>
-        <Container name="REP_AGG">
-            <Key ID="STR_FLO_REP_AGG_INCBRIBE">
-                <English>Local contacts confirm bribe successful. Guerilla activity decreased.</English>
-            </Key>
-        </Container>
         <Container name="RESOURCES"></Container>
         <Container name="SUPPORT DISABLED"></Container>
         <Container name="UPDATE"></Container>
         <Container name="WARNING"></Container>
-        <Container name="titles">
-            <Key ID="STR_FLO_REPUTATION_TITLE">
-                <English>REPUTATION</English>
-            </Key>
-        </Container>
     </Package>
 </Project>

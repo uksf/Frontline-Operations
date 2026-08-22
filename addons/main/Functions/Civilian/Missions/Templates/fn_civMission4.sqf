@@ -24,11 +24,6 @@ private _pos = getPosATL _road;
 private _taskId = _offer get "missionId";
 [true, _taskId, [_offer get "briefing", _offer get "taskTitle", ""], _pos, "CREATED", 1, false, "defend", true] call BIS_fnc_taskCreate;
 
-[
-    "<t color='#1AA3FF' font='PuristaBold' align='right' shadow='1' size='2.5'>Mission: Create Roadblock</t><br /><t align='right' shadow='1' size='2'>- 1x Observation Post</t><br /><t align='right' shadow='1' size='2'>- 2x Sandbag Bunkers</t>",
-    5
-] remoteExec ["FLO_fnc_showDynamicText", 0, false];
-
 private _trigger = createTrigger ["EmptyDetector", _pos, false];
 _trigger setTriggerArea [100, 100, 0, false, 100];
 _trigger setTriggerInterval 5;

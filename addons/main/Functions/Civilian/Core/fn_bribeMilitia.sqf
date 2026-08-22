@@ -48,13 +48,6 @@ if !([
 FLO_ReputationHandle set ["value", 15];
 publicVariable "FLO_ReputationHandle";
 
-[
-    {
-        params ["_targetOwner"];
-        [["%1: %2", "STR_FLO_REPUTATION_TITLE", "STR_FLO_REP_AGG_INCBRIBE"], "success", false, _targetOwner] call FLO_fnc_sendNotification;
-    },
-    [_owner],
-    12
-] call CBA_fnc_waitAndExecute;
+["Militia accepted the bribe.", "success", false, _owner] call FLO_fnc_sendNotification;
 
 true

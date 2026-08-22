@@ -10,6 +10,10 @@
 [] call FLO_fnc_playerSideAdapterInit;
 
 if (isServer) then {
+    uksf_mission_artillerySupport = false;
+    publicVariable "uksf_mission_artillerySupport";
+    ["INIT", 3, "Disabled autonomous UKSF artillery requests; FLO owns authorization"] call FLO_fnc_log;
+
     ["uksf_mission_fireMissionCompleted", {
         _this call FLO_fnc_gtnArtilleryHandleUKSFCompletion;
     }] call CBA_fnc_addEventHandler;
@@ -80,7 +84,6 @@ if (isServer) then {
             diag_log "[FLO_INIT] Phase Manager completed successfully";
         } else {
             diag_log format ["[FLO_INIT] Phase Manager FAILED: %1", FLO_InitError];
-            [format ["Mission initialization failed: %1", FLO_InitError]] remoteExec ["hint", 0];
         };
     };
 };
@@ -107,8 +110,16 @@ if (hasInterface) then {
                 sleep 1;
                 !isNull player
                 && {player == player}
-                && {!isNil "FLO_MissionReady"}
-                && {FLO_MissionReady}
+                && {
+                    (missionNamespace getVariable ["FLO_MissionReady", false])
+                    || {(missionNamespace getVariable ["FLO_InitPhase", 0]) == -1}
+                }
+            };
+
+            if ((missionNamespace getVariable ["FLO_InitPhase", 0]) == -1) exitWith {
+                private _error = missionNamespace getVariable ["FLO_InitError", "Unknown initialization error"];
+                ["INIT_CLIENT", 1, format ["Mission initialization failed: %1", _error]] call FLO_fnc_log;
+                hint format ["Mission initialization failed:\n%1\n\nCheck the server RPT for details.", _error];
             };
 
             if (!FLO_ClientFinalizeDone) then {

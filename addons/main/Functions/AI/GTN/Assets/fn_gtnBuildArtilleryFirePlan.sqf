@@ -32,8 +32,8 @@ if (_totalRounds <= 0) exitWith { createHashMap };
 
 private _usableVehicles = [];
 {
-    private _ammo = (getArtilleryAmmo [_x]) param [0, ""];
-    if (_ammo == "") then { continue };
+    private _ammo = currentMagazine _x;
+    if (_ammo == "" || {!(_ammo in getArtilleryAmmo [_x])}) then { continue };
     if !(_targetPos inRangeOfArtillery [[_x], _ammo]) then { continue };
     private _availableRounds = 0;
     {

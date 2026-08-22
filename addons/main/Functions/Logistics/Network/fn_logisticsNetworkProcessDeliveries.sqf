@@ -23,14 +23,10 @@ private _deliveryRadius = _network get "NODE_DELIVERY_RADIUS";
     if ((_shipment getVariable ["FLO_LogisticsOriginNodeId", ""]) == _nodeId) then {
         if !(_shipment getVariable ["FLO_LogisticsSameNodeWarned", false]) then {
             _shipment setVariable ["FLO_LogisticsSameNodeWarned", true, true];
+            private _contributorUid = _shipment getVariable ["FLO_LogisticsContributorUID", ""];
             {
-                if ((side group _x) isEqualTo _managedSide) then {
-                    [
-                        "Supply shipments must be delivered to a different logistics node.",
-                        "warning",
-                        false,
-                        owner _x
-                    ] call FLO_fnc_sendNotification;
+                if (getPlayerUID _x == _contributorUid) then {
+                    ["Supply shipments must be delivered to a different logistics node.", "warning", false, owner _x] call FLO_fnc_sendNotification;
                 };
             } forEach ([false] call FLO_fnc_getConnectedHumanPlayers);
         };

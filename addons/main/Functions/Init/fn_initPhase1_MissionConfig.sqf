@@ -140,8 +140,9 @@ try {
         } forEach ["rearBaseGroups", "frontlineBaseGroups", "priorityBonusGroups", "hotBonusGroups"];
     } forEach ["westGTNGarrisonHandle", "eastGTNGarrisonHandle"];
 
-    if ((FLO_MissionConfig get "startingResources") != 5000) then {
-        throw "Mission config startingResources must be 5000";
+    private _startingResources = FLO_MissionConfig get "startingResources";
+    if !(_startingResources isEqualType 0 && {_startingResources >= 0}) then {
+        throw format ["Mission config startingResources must be non-negative, got %1", _startingResources];
     };
     private _objectiveSizeThreshold = FLO_MissionConfig get "objectiveSizeThreshold";
     if !(_objectiveSizeThreshold in [4, 8, 12, 24]) then {
