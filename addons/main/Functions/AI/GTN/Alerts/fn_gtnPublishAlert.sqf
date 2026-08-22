@@ -44,10 +44,6 @@ FLO_GTN_AlertSequence = FLO_GTN_AlertSequence + 1;
 private _sideKey = ([_targetSide] call FLO_fnc_gtnSideContext) get "sideKey";
 private _alertId = format ["FLO_GTN_ALERT_%1_%2", _sideKey, FLO_GTN_AlertSequence];
 
-if (_message != "") then {
-    [_message, "warning", false, _targetSide] call FLO_fnc_sendNotification;
-};
-
 if (isNil "FLO_GTN_PendingAlertPublishes") then {
     FLO_GTN_PendingAlertPublishes = createHashMapFromArray [
         ["EAST", []],

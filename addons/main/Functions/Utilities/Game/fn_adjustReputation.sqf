@@ -18,7 +18,3 @@ private _newScore = _REPSCORE + _amount;
 _newScore = _newScore max 0 min 16;
 FLO_ReputationHandle set ["value", _newScore];
 publicVariable "FLO_ReputationHandle";
-
-// Notification
-private _msg = ["STR_FLO_REP_DEC", "STR_FLO_REP_INC"] select (_type isEqualTo "increase");
-[_msg, "success"] call FLO_fnc_sendNotification; 

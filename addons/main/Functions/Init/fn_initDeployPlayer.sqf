@@ -10,7 +10,7 @@ if (isNull player || {player != player} || {!local player}) exitWith {
     throw "Initial player deployment requires a valid local player"
 };
 
-titleText ["Deploying...", "BLACK FADED", 0.1, true, true];
+titleText ["", "BLACK FADED", 0.1, true, true];
 FLO_ClientDeploymentFailed = false;
 player setVariable ["FLO_InitPlayerActivation", nil, false];
 [player] remoteExecCall ["FLO_fnc_initActivatePlayer", 2];

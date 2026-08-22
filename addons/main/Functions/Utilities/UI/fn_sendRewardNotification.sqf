@@ -2,8 +2,7 @@
  * Function: FLO_fnc_notification
  * 
  * Description:
- * Displays a notification to all players and plays a success sound.
- * Used for reward announcements after completing objectives.
+ * Records objective rewards without a player-facing campaign banner.
  *
  * Parameters:
  * _this select 0: NUMBER - The reward points amount
@@ -22,5 +21,4 @@ params [
     ["_objectiveStr", "STR_FLO_OBJECTIVE", [""]]
 ];
 
-// Display notification to all players
-[["STR_FLO_REWARD_SECURED", _objectiveStr, _reward], "success", true] call FLO_fnc_sendNotification; 
+["REWARDS", 3, format ["Objective reward secured: objective=%1 reward=%2", _objectiveStr, _reward]] call FLO_fnc_log;

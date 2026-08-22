@@ -60,6 +60,7 @@ private _deliveryRadius = _network get "NODE_DELIVERY_RADIUS";
     };
 
     private _contributorName = _shipment getVariable ["FLO_LogisticsContributorName", "A player"];
+    private _contributorUid = _shipment getVariable ["FLO_LogisticsContributorUID", ""];
     if (_contributorName == "") then { _contributorName = "A player"; };
     _shipment setVariable ["FLO_LogisticsDelivered", true, true];
     _node set ["deliveryCount", (_node get "deliveryCount") + 1];
@@ -76,9 +77,9 @@ private _deliveryRadius = _network get "NODE_DELIVERY_RADIUS";
     _stats set ["supplyShipments", (_stats get "supplyShipments") + 1];
 
     {
-        if ((side group _x) isEqualTo _managedSide) then {
+        if (getPlayerUID _x == _contributorUid) then {
             [
-                format ["%1 delivered +%2 Local Supplies to %3 (%4/%5).", _contributorName, round _restored, _node get "type", round (_node get "throughput"), _node get "throughputMax"],
+                format ["Delivered +%1 Local Supplies to %2 (%3/%4).", round _restored, _node get "type", round (_node get "throughput"), _node get "throughputMax"],
                 "success",
                 false,
                 owner _x

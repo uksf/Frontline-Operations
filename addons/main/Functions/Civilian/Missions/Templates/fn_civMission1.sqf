@@ -27,7 +27,6 @@ private _road = selectRandom _roads;
 private _pos = getPosATL _road;
 private _taskId = _offer get "missionId";
 [true, _taskId, [_offer get "briefing", _offer get "taskTitle", ""], _pos, "CREATED", 1, true, "repair", true] call BIS_fnc_taskCreate;
-["STR_FLO_MISSIONCIV_REPAIR", "info"] remoteExec ["FLO_fnc_sendNotification", 0];
 
 private _civilianVehicles = (FLO_FactionCatalog get "CIVILIAN") get "vehicles";
 private _vehicleType = if (_civilianVehicles isNotEqualTo []) then { selectRandom _civilianVehicles } else { "C_Offroad_01_F" };

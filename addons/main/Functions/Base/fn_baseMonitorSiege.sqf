@@ -58,7 +58,7 @@ while {alive _base && {!_lost}} do {
         _statusMarker setMarkerText format ["%1 UNDER SIEGE: %2:%3", _label, _minutes, [_seconds, 2] call CBA_fnc_formatNumber];
 
         if ((diag_tickTime - _lastNotification) >= _notificationInterval) then {
-            [format ["%1 under siege! %2 minutes remaining", _label, ceil (_timeLeft / 60)], "warning", false, 0] call FLO_fnc_sendNotification;
+            [_baseSide, "HQ", format ["%1 under siege. %2 minutes remaining.", _label, ceil (_timeLeft / 60)]] remoteExec ["FLO_fnc_gtnCommanderRadioMessage", 0];
             _lastNotification = diag_tickTime;
         };
 
@@ -68,7 +68,7 @@ while {alive _base && {!_lost}} do {
             deleteMarker _statusMarker;
             _statusMarker = "";
             if (_holdoutTime > 0) then {
-                [format ["%1 defense successful! Timer reset.", _label], "success", false, 0] call FLO_fnc_sendNotification;
+                [_baseSide, "HQ", format ["%1 defence successful. Siege timer reset.", _label]] remoteExec ["FLO_fnc_gtnCommanderRadioMessage", 0];
                 ["BASE", 3, format ["%1 siege ended after successful defense", _label]] call FLO_fnc_log;
             };
         };
@@ -83,7 +83,7 @@ if (_lost) then {
         _statusMarker setMarkerTextLocal format ["%1 LOST!", _label];
         _statusMarker setMarkerColor "ColorBlack";
     };
-    [format ["%1 has fallen to enemy forces!", _label], "error", false, 0] call FLO_fnc_sendNotification;
+    [_baseSide, "HQ", format ["%1 has fallen to enemy forces.", _label]] remoteExec ["FLO_fnc_gtnCommanderRadioMessage", 0];
     ["BASE", 2, format ["%1 lost after %2-second siege", _label, _maxHoldTime]] call FLO_fnc_log;
 
     { deleteVehicle _x } forEach (nearestObjects [_base, _cleanupObjectTypes, _cleanupRadius]);

@@ -26,7 +26,7 @@ if !(_playerSide in [east, west]) exitWith { _result };
 private _sideKey = ([_playerSide] call FLO_fnc_gtnSideContext) get "sideKey";
 private _candidates = [_playerSide] call FLO_fnc_gtnCollectIntelPickupRevealCandidates;
 if (_candidates isEqualTo []) exitWith {
-    [format ["Recovered enemy intel at %1, but no actionable strategic lead was extracted.", _gridPos], "info", false, _playerSide] call FLO_fnc_sendNotification;
+    [_playerSide, "HQ", format ["Recovered enemy intel at %1, but no actionable strategic lead was extracted.", _gridPos]] remoteExec ["FLO_fnc_gtnCommanderRadioMessage", 0];
     ["INTEL", 2, format ["Intel pickup at %1 for %2 produced no actionable reveal", _gridPos, _sideKey]] call FLO_fnc_log;
     _result
 };
@@ -82,7 +82,7 @@ if (_selectedPool isEqualTo []) exitWith { _result };
 private _selected = _selectedPool select 0;
 private _message = _selected get "message";
 
-[_message, "intel", false, _playerSide] call FLO_fnc_sendNotification;
+[_playerSide, "HQ", _message] remoteExec ["FLO_fnc_gtnCommanderRadioMessage", 0];
 [
     _playerSide,
     _selected get "alertType",

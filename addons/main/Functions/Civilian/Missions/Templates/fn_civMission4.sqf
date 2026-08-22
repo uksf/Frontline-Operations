@@ -23,7 +23,6 @@ private _road = selectRandom _roads;
 private _pos = getPosATL _road;
 private _taskId = _offer get "missionId";
 [true, _taskId, [_offer get "briefing", _offer get "taskTitle", ""], _pos, "CREATED", 1, true, "defend", true] call BIS_fnc_taskCreate;
-["STR_FLO_MISSIONCIV_CHECKPOINT", "info"] remoteExec ["FLO_fnc_sendNotification", 0];
 
 [
     "<t color='#1AA3FF' font='PuristaBold' align='right' shadow='1' size='2.5'>Mission: Create Roadblock</t><br /><t align='right' shadow='1' size='2'>- 1x Observation Post</t><br /><t align='right' shadow='1' size='2'>- 2x Sandbag Bunkers</t>",

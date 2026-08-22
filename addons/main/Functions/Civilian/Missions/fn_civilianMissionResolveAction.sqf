@@ -39,7 +39,6 @@ switch (toUpper _mode) do {
         };
 
         [0.35, "increase"] call FLO_fnc_adjustReputation;
-        ["ScoreAdded", ["Vehicle Repaired", 0]] remoteExec ["BIS_fnc_showNotification", 0];
         ["MISSION_COMPLETE", [true, "repair_vehicle"]] call FLO_fnc_civilianMissionManager;
         true
     };
@@ -73,7 +72,6 @@ switch (toUpper _mode) do {
         deleteVehicle _trigger;
 
         [0.35, "increase"] call FLO_fnc_adjustReputation;
-        ["ScoreAdded", ["Resources Delivered", 0]] remoteExec ["BIS_fnc_showNotification", 0];
         ["MISSION_COMPLETE", [true, "deliver_supplies"]] call FLO_fnc_civilianMissionManager;
         true
     };
@@ -93,7 +91,6 @@ switch (toUpper _mode) do {
         deleteVehicle _trigger;
 
         [0.35, "increase"] call FLO_fnc_adjustReputation;
-        ["ScoreAdded", ["Minefield Cleared", 0]] remoteExec ["BIS_fnc_showNotification", 0];
         ["MISSION_COMPLETE", [true, "clear_minefield"]] call FLO_fnc_civilianMissionManager;
         true
     };
@@ -110,7 +107,6 @@ switch (toUpper _mode) do {
         deleteVehicle _trigger;
 
         [0.35, "increase"] call FLO_fnc_adjustReputation;
-        ["ScoreAdded", ["Checkpoint Established", 0]] remoteExec ["BIS_fnc_showNotification", 0];
 
         if ((FLO_ReputationHandle get "value") < 7) then {
             private _hostileForce = call FLO_fnc_civilianGetHostileForcePool;

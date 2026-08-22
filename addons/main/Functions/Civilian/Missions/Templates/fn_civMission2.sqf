@@ -28,7 +28,6 @@ _supplyBox allowDamage false;
 
 private _taskId = _offer get "missionId";
 [true, _taskId, [_offer get "briefing", _offer get "taskTitle", ""], _deliveryPos, "CREATED", 1, true, "container", true] call BIS_fnc_taskCreate;
-["STR_FLO_MISSIONCIV_DELIVER", "info"] remoteExec ["FLO_fnc_sendNotification", 0];
 
 if ((FLO_ReputationHandle get "value") < 7) then {
     private _hostileForce = call FLO_fnc_civilianGetHostileForcePool;
