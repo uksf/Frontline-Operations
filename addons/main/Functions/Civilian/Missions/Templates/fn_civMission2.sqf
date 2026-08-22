@@ -27,7 +27,7 @@ private _supplyBox = createVehicle ["IG_supplyCrate_F", _startPos, [], 0, "NONE"
 _supplyBox allowDamage false;
 
 private _taskId = _offer get "missionId";
-[true, _taskId, [_offer get "briefing", _offer get "taskTitle", ""], _deliveryPos, "CREATED", 1, true, "container", true] call BIS_fnc_taskCreate;
+[true, _taskId, [_offer get "briefing", _offer get "taskTitle", ""], _deliveryPos, "CREATED", 1, false, "container", true] call BIS_fnc_taskCreate;
 
 if ((FLO_ReputationHandle get "value") < 7) then {
     private _hostileForce = call FLO_fnc_civilianGetHostileForcePool;

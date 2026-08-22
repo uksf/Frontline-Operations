@@ -35,7 +35,7 @@ switch (toUpper _mode) do {
 
         private _taskId = _vehicle getVariable ["missionTaskId", ""];
         if (_taskId != "") then {
-            [_taskId, "SUCCEEDED", true] call BIS_fnc_taskSetState;
+            [_taskId, "SUCCEEDED", false] call BIS_fnc_taskSetState;
         };
 
         [0.35, "increase"] call FLO_fnc_adjustReputation;
@@ -49,7 +49,7 @@ switch (toUpper _mode) do {
 
         private _taskId = _vehicle getVariable ["missionTaskId", ""];
         if (_taskId != "") then {
-            [_taskId, "FAILED", true] call BIS_fnc_taskSetState;
+            [_taskId, "FAILED", false] call BIS_fnc_taskSetState;
         };
 
         [-0.35, "decrease"] call FLO_fnc_adjustReputation;
@@ -64,7 +64,7 @@ switch (toUpper _mode) do {
         private _taskId = _trigger getVariable ["missionTaskId", ""];
         private _box = _trigger getVariable ["supplyBox", objNull];
         if (_taskId != "") then {
-            [_taskId, "SUCCEEDED", true] call BIS_fnc_taskSetState;
+            [_taskId, "SUCCEEDED", false] call BIS_fnc_taskSetState;
         };
         if (!isNull _box) then {
             deleteVehicle _box;
@@ -83,7 +83,7 @@ switch (toUpper _mode) do {
         private _taskId = _trigger getVariable ["missionTaskId", ""];
         private _decorVehicle = _trigger getVariable ["decorVehicle", objNull];
         if (_taskId != "") then {
-            [_taskId, "SUCCEEDED", true] call BIS_fnc_taskSetState;
+            [_taskId, "SUCCEEDED", false] call BIS_fnc_taskSetState;
         };
         if (!isNull _decorVehicle) then {
             deleteVehicle _decorVehicle;
@@ -102,7 +102,7 @@ switch (toUpper _mode) do {
         private _taskId = _trigger getVariable ["missionTaskId", ""];
         private _pos = _trigger getVariable ["targetPos", getPosATL _trigger];
         if (_taskId != "") then {
-            [_taskId, "SUCCEEDED", true] call BIS_fnc_taskSetState;
+            [_taskId, "SUCCEEDED", false] call BIS_fnc_taskSetState;
         };
         deleteVehicle _trigger;
 
