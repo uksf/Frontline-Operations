@@ -32,7 +32,7 @@ private _markers = [];
     if ((_groupData get "attachedTo") != "") then { continue };
 
     private _groupType = _groupData get "groupType";
-    if (_groupType in ["civilian", "civ_pedestrian", "civ_building", "civilianVehicle", "civ_car"]) then { continue };
+    if (_groupType in ["artillery", "civilian", "civ_pedestrian", "civ_building", "civilianVehicle", "civ_car"]) then { continue };
 
     private _isActive = _groupData get "isActive";
     private _inCombat = _groupData get "inCombat";

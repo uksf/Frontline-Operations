@@ -19,9 +19,9 @@ private _logistics = [FLO_Logistics_Networks get _viewerSideKey] call FLO_fnc_lo
 private _enemyLogisticsIntel = [_viewerSide] call FLO_fnc_gtnBuildEnemyLogisticsIntelSnapshot;
 
 private _viewerAttackCounts = createHashMap;
-private _enemyAttackCounts = createHashMap;
 {
     private _groupData = _y;
+    if ((_groupData get "side") != _viewerSide) then { continue };
     if ((_groupData get "unitCount") <= 0) then { continue };
     if ((_groupData get "commanderOrder") != "ATTACK") then { continue };
     private _objectiveId = _groupData get "attackObjective";
@@ -30,11 +30,8 @@ private _enemyAttackCounts = createHashMap;
         throw format ["ATTACK group %1 has no objective", _x];
     };
 
-    private _counts = [_enemyAttackCounts, _viewerAttackCounts] select ((_groupData get "side") isEqualTo _viewerSide);
-    if ((_groupData get "side") in [_viewerSide, _enemySide]) then {
-        private _count = if (_objectiveId in _counts) then { _counts get _objectiveId } else { 0 };
-        _counts set [_objectiveId, _count + 1];
-    };
+    private _count = _viewerAttackCounts getOrDefault [_objectiveId, 0];
+    _viewerAttackCounts set [_objectiveId, _count + 1];
 } forEach (call FLO_fnc_virtualizationGetGroupMap);
 
 private _rankedAttacks = [];
@@ -97,35 +94,30 @@ private _footholdCount = 0;
     if (_objectiveId in _viewerAttackCounts) then {
         _intent = "ATTACK";
     } else {
-        if (_objectiveId in _enemyAttackCounts && {_owner isEqualTo _viewerSide}) then {
-            _intent = "DEFEND";
+        if (_owner isEqualTo _viewerSide && {_integrationState == "FOOTHOLD"}) then {
+            _intent = "FOOTHOLD";
         } else {
-            if (_owner isEqualTo _viewerSide && {_integrationState == "FOOTHOLD"}) then {
-                _intent = "FOOTHOLD";
-            } else {
-                if (_owner isEqualTo _viewerSide) then {
-                    {
-                        if (((FLO_Objectives get _x) get "owner") isEqualTo _enemySide) exitWith { _intent = "SCREEN" };
-                    } forEach (_objective get "linkedObjectives");
-                };
+            if (_owner isEqualTo _viewerSide) then {
+                {
+                    if (((FLO_Objectives get _x) get "owner") isEqualTo _enemySide) exitWith { _intent = "SCREEN" };
+                } forEach (_objective get "linkedObjectives");
             };
         };
     };
 
     private _friendlyLocal = [_objective get "opforCount", _objective get "bluforCount"] select (_viewerSide isEqualTo west);
-    private _enemyLocal = [_objective get "bluforCount", _objective get "opforCount"] select (_viewerSide isEqualTo west);
     _nodes pushBack createHashMapFromArray [
         ["id", _objectiveId],
         ["name", [_objectiveId] call FLO_fnc_campaignObjectiveName],
         ["position", _objective get "position"],
         ["priority", _objective get "priority"],
         ["owner", _ownerKey],
-        ["captureState", _objective get "captureState"],
+        ["captureState", "UNKNOWN"],
         ["integrationState", _integrationState],
         ["friendlyCount", _friendlyLocal],
-        ["enemyCount", _enemyLocal],
-        ["contested", _objective get "contested"],
-        ["underAttack", _objective get "underAttack"],
+        ["enemyCount", "?"],
+        ["contested", false],
+        ["underAttack", false],
         ["intent", _intent]
     ];
 } forEach (keys FLO_Objectives);
@@ -137,14 +129,10 @@ if (_playerObjectiveId != "") then {
     if (_playerObjectiveId in _viewerAttackCounts) then {
         _playerStatus = "IN_ATTACK";
     } else {
-        if (_playerObjectiveId in _enemyAttackCounts && {(_playerObjective get "owner") isEqualTo _viewerSide}) then {
-            _playerStatus = "IN_DEFENSE";
-        } else {
-            _playerStatus = ["OFF_FRONT", "IN_FOOTHOLD"] select (
-                (_playerObjective get "campaignIntegrationState") == "FOOTHOLD"
-                && {(_playerObjective get "owner") isEqualTo _viewerSide}
-            );
-        };
+        _playerStatus = ["OFF_FRONT", "IN_FOOTHOLD"] select (
+            (_playerObjective get "campaignIntegrationState") == "FOOTHOLD"
+            && {(_playerObjective get "owner") isEqualTo _viewerSide}
+        );
     };
 };
 
