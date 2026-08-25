@@ -47,7 +47,13 @@ HEMTT diagnostics must be fixed at the source; do not suppress them. For a manua
 
 ## Start a Campaign
 
-Set `FLO > Campaign > Campaign launch mode` in CBA settings before mission initialization:
+FLO is disabled unless the mission explicitly opts in. Set `cba_settings_hasSettingsFile = 1;` in `description.ext`, then add this line to the mission-root `cba_settings.sqf`:
+
+```sqf
+force force FLO_Enabled = true;
+```
+
+If the setting or file is absent, FLO does not start. Set `FLO > Campaign > Campaign launch mode` in CBA settings before mission initialization:
 
 | Mode | Behavior |
 | --- | --- |

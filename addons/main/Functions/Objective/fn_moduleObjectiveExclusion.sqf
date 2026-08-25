@@ -6,6 +6,7 @@
 
 (_this select 1) params ["_logic"];
 
+if !(missionNamespace getVariable ["FLO_MissionEnabled", false]) exitWith {};
 if (!isServer || {!local _logic}) exitWith {};
 
 private _area = _logic getVariable ["objectarea", []];

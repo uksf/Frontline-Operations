@@ -24,6 +24,33 @@ if (isNil "_settingsFn") exitWith {
     diag_log "[FLO_SETTINGS] CBA settings API is unavailable; required CBA settings were not registered";
 };
 
+private _enabled = [
+    "FLO_Enabled",
+    "CHECKBOX",
+    ["Enable Frontline Operations", "Starts FLO campaign systems only when this setting is true in the mission-root cba_settings.sqf. Server and user presets cannot opt in."],
+    ["FLO", "Campaign"],
+    false,
+    1,
+    {},
+    true
+];
+
+_enabled call _settingsFn;
+
+private _missionEnabled = false;
+private _hasMissionSettingsFile = getMissionConfigValue ["cba_settings_hasSettingsFile", false] in [true, 1];
+if (_hasMissionSettingsFile && {!isNil "cba_settings_missionConfig"}) then {
+    private _missionSetting = cba_settings_missionConfig getVariable ["FLO_Enabled", []];
+    private _missionValue = _missionSetting param [0, false];
+    _missionEnabled = _missionValue isEqualTo true || {_missionValue isEqualTo 1};
+};
+missionNamespace setVariable ["FLO_MissionEnabled", _missionEnabled];
+
+if (!_missionEnabled) exitWith {
+    missionNamespace setVariable ["FLO_SettingsRegistered", true];
+    diag_log "[FLO_SETTINGS] FLO is disabled because this mission did not opt in";
+};
+
 private _campaignLaunchMode = [
     "FLO_CampaignLaunchMode",
     "LIST",

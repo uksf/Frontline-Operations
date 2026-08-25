@@ -7,9 +7,19 @@
  *   shell that loads the addon.
  */
 
+if !(missionNamespace getVariable ["FLO_MissionEnabled", false]) exitWith {
+    diag_log "[FLO_INIT] Disabled for this mission";
+};
+
 [] call FLO_fnc_playerSideAdapterInit;
 
 if (isServer) then {
+    if !(missionNamespace getVariable ["MissionLoadedLitterally", false]) then {
+        if !(call FLO_fnc_MissionLoad) then {
+            throw "FLO_fnc_MissionLoad failed during enabled addon startup";
+        };
+    };
+
     uksf_mission_artillerySupport = false;
     publicVariable "uksf_mission_artillerySupport";
     ["INIT", 3, "Disabled autonomous UKSF artillery requests; FLO owns authorization"] call FLO_fnc_log;

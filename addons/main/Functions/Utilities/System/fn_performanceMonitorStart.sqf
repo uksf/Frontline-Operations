@@ -1,3 +1,4 @@
+if !(missionNamespace getVariable ["FLO_MissionEnabled", false]) exitWith {};
 if (FLO_PerformanceMonitorPfhId >= 0) exitWith {};
 
 [

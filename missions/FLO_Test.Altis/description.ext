@@ -13,6 +13,7 @@ class Header {
 
 disabledAI = 1;
 enableDebugConsole = 1;
+cba_settings_hasSettingsFile = 1;
 
 respawn = 3;
 respawnButton = 1;

@@ -1,4 +1,5 @@
 /* Initializes persistent client UI infrastructure from one postInit owner. */
+if !(missionNamespace getVariable ["FLO_MissionEnabled", false]) exitWith { true };
 if (!hasInterface) exitWith { true };
 if (FLO_ClientUIInitialized) exitWith { true };
 

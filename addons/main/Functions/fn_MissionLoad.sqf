@@ -15,7 +15,8 @@
  * Returns: <BOOL> - Success status
  */
 
-if (!isServer) exitWith {false};
+if !(missionNamespace getVariable ["FLO_MissionEnabled", false]) exitWith { false };
+if (!isServer) exitWith { false };
 
 FLO_MissionSaveVersion = 29;
 

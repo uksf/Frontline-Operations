@@ -1,3 +1,5 @@
 call compile preprocessFileLineNumbers "\z\flo\addons\main\Functions\Init\fn_registerSettings.sqf";
 
-FLO_ObjectiveExclusionAreas = [];
+if (missionNamespace getVariable ["FLO_MissionEnabled", false]) then {
+    FLO_ObjectiveExclusionAreas = [];
+};
