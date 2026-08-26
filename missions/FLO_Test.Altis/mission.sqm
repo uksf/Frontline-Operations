@@ -1,0 +1,59 @@
+version=12;
+class Mission
+{
+    addOns[]=
+    {
+        "A3_Characters_F_BLUFOR",
+        "a3_map_altis",
+        "flo_main"
+    };
+    addOnsAuto[]=
+    {
+        "A3_Characters_F_BLUFOR",
+        "a3_map_altis",
+        "flo_main"
+    };
+    randomSeed=11935690;
+    class Intel
+    {
+        briefingName="Frontline Operations Local Test";
+        overviewText="Playable local campaign test for the FLO and UKSF integration.";
+        startWeather=0.15;
+        startWind=0.1;
+        startWaves=0.1;
+        forecastWeather=0.15;
+        forecastWind=0.1;
+        forecastWaves=0.1;
+        forecastLightnings=0.1;
+        year=2035;
+        month=6;
+        day=24;
+        hour=9;
+        minute=0;
+        startFogDecay=0.005;
+        forecastFogDecay=0.005;
+    };
+    class Groups
+    {
+        items=1;
+        class Item0
+        {
+            side="WEST";
+            class Vehicles
+            {
+                items=1;
+                class Item0
+                {
+                    position[]={14520,18,16700};
+                    id=0;
+                    side="WEST";
+                    vehicle="B_officer_F";
+                    player="PLAYER COMMANDER";
+                    leader=1;
+                    rank="CAPTAIN";
+                    skill=0.6;
+                };
+            };
+        };
+    };
+};
