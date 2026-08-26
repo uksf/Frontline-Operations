@@ -1,23 +1,28 @@
-author = "Frontline Operations Group";
-onLoadName = "Frontline Operations";
-onLoadMission = "FLO HEMTT test shell";
-overviewText = "Frontline Operations addon test shell.";
+/*
+    Based on UKSFTemplate.VR description.ext.
+*/
 
+//--------------------------------------------------- CHANGE BASED ON MISSION --------------------------------------------------
+onLoadName = "UKSF: Frontline Operations Local Test";
+onLoadMission = "Playable local campaign test for the FLO and UKSF integration.";
+overviewText = "UKSF: Frontline Operations Local Test";
+persistenceKey = "FLO_LOCAL_TEST";
+//------------------------------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------- DON'T CHANGE --------------------------------------------------------
+author = "UKSF";
 class Header {
-    gameType = "CTI";
-    minPlayer = 1;
-    maxPlayer = 64;
+    gameType = "Coop";
     minPlayers = 1;
-    maxPlayers = 64;
+    maxPlayers = 1;
 };
-
-disabledAI = 1;
-enableDebugConsole = 1;
-cba_settings_hasSettingsFile = 1;
-
-respawn = 3;
-respawnButton = 1;
+respawn = "BASE";
 respawnOnStart = 0;
-respawnDelay = 7;
+respawnDelay = 1;
 respawnDialog = 0;
-respawnTemplates[] = {"MenuPosition"};
+respawnTemplates[] = { "MenuPosition" };
+reviveMode = 0;
+disabledAI = 1;
+aiKills = 0;
+disableChannels[] = { 0,2,6 };
+cba_settings_hasSettingsFile = 1;
+enableDebugConsole = 1;

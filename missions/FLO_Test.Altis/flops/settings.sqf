@@ -47,8 +47,8 @@ createHashMapFromArray [
     ["eastFactionTuningHandle", createHashMap],
     ["startingResources", 5000],
     ["objectiveSizeThreshold", 8],
-    ["virtualizationDistance", 2000],
-    ["virtualizationUnitCap", 200],
+    ["virtualizationDistance", 1500],
+    ["virtualizationUnitCap", 100],
     ["startingTerritoryWestRatio", 0.5],
     ["startPosition", [worldSize / 2, worldSize / 2, 0]]
 ]
