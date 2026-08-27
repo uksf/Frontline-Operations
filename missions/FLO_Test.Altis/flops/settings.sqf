@@ -1,18 +1,21 @@
 createHashMapFromArray [
     ["bluforHandle", createHashMapFromArray [
-        ["name", "CUSTOM_BLUFOR_FACTION"],
-        ["source", "custom"],
-        ["side", 1]
+        ["name", "British Armed Forces"],
+        ["source", "auto"],
+        ["side", 1],
+        ["factionClass", "CUP_B_GB"]
     ]],
     ["opforHandle", createHashMapFromArray [
-        ["name", "CUSTOM_OPFOR_FACTION"],
-        ["source", "custom"],
-        ["side", 0]
+        ["name", "CSAT"],
+        ["source", "auto"],
+        ["side", 0],
+        ["factionClass", "OPF_F"]
     ]],
     ["civilianHandle", createHashMapFromArray [
-        ["name", "CUSTOM_CIVILIAN_FACTION"],
-        ["source", "custom"],
-        ["side", 3]
+        ["name", "Civilians"],
+        ["source", "auto"],
+        ["side", 3],
+        ["factionClass", "CIV_F"]
     ]],
     ["playerSideKey", "WEST"],
     ["reputationHandle", createHashMapFromArray [
