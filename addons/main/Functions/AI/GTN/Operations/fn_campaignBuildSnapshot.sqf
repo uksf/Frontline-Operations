@@ -1,4 +1,4 @@
-/* Builds the side-filtered Command Net from direct ATTACK group ownership. */
+/* Own GTN intent progress and the maintained intelligence picture. */
 params [["_player", objNull, [objNull]]];
 
 if (isNull _player) then { throw "FLO_fnc_campaignBuildSnapshot: null player" };
@@ -18,47 +18,15 @@ private _economy = [_treasury] call FLO_fnc_sideResourcesGetUiSnapshot;
 private _logistics = [FLO_Logistics_Networks get _viewerSideKey] call FLO_fnc_logisticsNetworkGetSideSnapshot;
 private _enemyLogisticsIntel = [_viewerSide] call FLO_fnc_gtnBuildEnemyLogisticsIntelSnapshot;
 
+private _commander = [_viewerSide] call FLO_fnc_gtnGetCommanderBySide;
+private _observedObjectives = (_commander get "_worldState") get "_objectives";
+private _operationRows = [_commander] call FLO_fnc_campaignBuildOperationRows;
+private _attackRows = _operationRows select { (_x get "kind") == "CAPTURE" };
 private _viewerAttackCounts = createHashMap;
 {
-    private _groupData = _y;
-    if ((_groupData get "side") != _viewerSide) then { continue };
-    if ((_groupData get "unitCount") <= 0) then { continue };
-    if ((_groupData get "commanderOrder") != "ATTACK") then { continue };
-    private _objectiveId = _groupData get "attackObjective";
-    if (_objectiveId == "") then {
-        ["CAMPAIGN", 1, format ["Snapshot found ATTACK group %1 without an objective", _x]] call FLO_fnc_log;
-        throw format ["ATTACK group %1 has no objective", _x];
-    };
-
-    private _count = _viewerAttackCounts getOrDefault [_objectiveId, 0];
-    _viewerAttackCounts set [_objectiveId, _count + 1];
-} forEach (call FLO_fnc_virtualizationGetGroupMap);
-
-private _rankedAttacks = [];
-{
-    private _objectiveId = _x;
-    if !(_objectiveId in FLO_Objectives) then {
-        throw format ["Direct attack references missing objective %1", _objectiveId];
-    };
-    private _objective = FLO_Objectives get _objectiveId;
-    _rankedAttacks pushBack [
-        -(_viewerAttackCounts get _objectiveId),
-        -(_objective get "priority"),
-        _objectiveId,
-        createHashMapFromArray [
-            ["id", format ["ATTACK_%1_%2", _viewerSideKey, _objectiveId]],
-            ["isPrimary", false],
-            ["role", "ATTACKING"],
-            ["targetVisible", true],
-            ["targetId", _objectiveId],
-            ["targetName", [_objectiveId] call FLO_fnc_campaignObjectiveName],
-            ["attackerCount", _viewerAttackCounts get _objectiveId],
-            ["attackerCap", _attackCap]
-        ]
-    ];
-} forEach (keys _viewerAttackCounts);
-_rankedAttacks sort true;
-private _attackRows = _rankedAttacks apply { _x select 3 };
+    _x set ["attackerCap", _attackCap];
+    _viewerAttackCounts set [_x get "targetId", _x get "attackerCount"];
+} forEach _attackRows;
 if (_attackRows isNotEqualTo []) then { (_attackRows select 0) set ["isPrimary", true] };
 
 private _primaryAttack = createHashMapFromArray [
@@ -67,7 +35,8 @@ private _primaryAttack = createHashMapFromArray [
     ["role", "IDLE"],
     ["targetVisible", false],
     ["targetId", ""],
-    ["targetName", "Active Front"],
+    ["targetName", "No offensive underway"],
+    ["status", "Commander evaluating objectives and available forces"],
     ["attackerCount", 0],
     ["attackerCap", _attackCap]
 ];
@@ -80,6 +49,9 @@ private _footholdCount = 0;
 {
     private _objectiveId = _x;
     private _objective = FLO_Objectives get _objectiveId;
+    if !(_objectiveId in _observedObjectives) then {
+        throw format ["Campaign snapshot: %1 objective %2 is absent from initialized World State", _viewerSideKey, _objectiveId];
+    };
     private _owner = _objective get "owner";
     private _ownerKey = "NEUTRAL";
     if (_owner isEqualTo west) then { _ownerKey = "WEST" };
@@ -116,6 +88,8 @@ private _footholdCount = 0;
         ["integrationState", _integrationState],
         ["friendlyCount", _friendlyLocal],
         ["enemyCount", "?"],
+        ["enemyStrengthKnown", false],
+        ["intelConfidence", 0],
         ["contested", false],
         ["underAttack", false],
         ["intent", _intent]
@@ -146,6 +120,7 @@ createHashMapFromArray [
     ["keybind", "Ctrl+Shift+O"],
     ["attack", _primaryAttack],
     ["attacks", _attackRows],
+    ["operations", _operationRows],
     ["player", createHashMapFromArray [
         ["grid", mapGridPosition _player],
         ["position", getPosATL _player],
@@ -158,6 +133,8 @@ createHashMapFromArray [
         ["footholds", _footholdCount]
     ]],
     ["economy", _economy],
+    ["save", call FLO_fnc_saveGetStatus],
+    ["canSave", [_player] call FLO_fnc_saveCanRequest],
     ["logistics", _logistics],
     ["enemyLogisticsIntel", _enemyLogisticsIntel],
     ["objectives", _nodes]

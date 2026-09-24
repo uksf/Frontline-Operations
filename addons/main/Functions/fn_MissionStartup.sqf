@@ -54,7 +54,9 @@ private _allFobContainers = allMissionObjects FLO_FactionFobTerminalType;
 private _fobCount = 0;
 {
     private _building = _x;
-    private _hasContainer = (_allFobContainers findIf { _x distance _building < 20 }) > -1;
+    private _hasContainer = !isNil { _building getVariable "FLO_BaseTerminal" } || {
+        (_allFobContainers findIf { _x distance _building < 20 && {isNull (_x getVariable ["FLO_BaseOwner", objNull])} }) > -1
+    };
     if (_hasContainer) then {
         // Check if this FOB was restored from save (preserve marker)
         private _isRestored = _building getVariable ["FLO_FOB_MarkersRestored", false];
@@ -80,7 +82,9 @@ private _allOpContainers = allMissionObjects FLO_FactionCopTerminalType;
 private _opCount = 0;
 {
     private _building = _x;
-    private _hasContainer = (_allOpContainers findIf { _x distance _building < 15 }) > -1;
+    private _hasContainer = !isNil { _building getVariable "FLO_BaseTerminal" } || {
+        (_allOpContainers findIf { _x distance _building < 15 && {isNull (_x getVariable ["FLO_BaseOwner", objNull])} }) > -1
+    };
 
     if (_hasContainer) then {
         // Check if this OP was restored from save (preserve marker)
@@ -136,11 +140,6 @@ private _opCount = 0;
                         _owner = _objData get "owner";
                     };
                 } forEach (keys FLO_Objectives);
-                if (_owner isEqualType "") then {
-                    private _ownerKey = toUpper _owner;
-                    if (_ownerKey isEqualTo "EAST") then { _owner = east; };
-                    if (_ownerKey isEqualTo "WEST") then { _owner = west; };
-                };
                 if (_owner isEqualTo _enemySide) then { continue };
 
                 private _markerName = format ["respawn_%1_%2", _respawnKey, _counter];

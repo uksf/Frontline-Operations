@@ -42,6 +42,9 @@ private _poolUnits = _pools get "units";
 
     private _infComp = _attachedData get "comp";
     private _infUnitCount = _attachedData get "unitCount";
+    if ((_attachedData get "groupType") == "infantry") then {
+        _infComp = _infComp select [0, _infUnitCount];
+    };
     if (_infUnitCount <= 0 && {_infComp isEqualTo []}) then {
         ["VIRTUALIZATION", 1, format [
             "Transport %1 encountered zero-strength attached group %2 - removing stale passenger record",
@@ -82,7 +85,7 @@ private _poolUnits = _pools get "units";
     _attachedData set ["activeInitialUnitCount", count units _infGroup];
     _attachedData set ["isActive", true];
     _attachedData set ["lastStateChangeTime", diag_tickTime];
-    _infGroup setVariable ["FLO_virtualGroupId", _attachedId];
+    [_attachedId, _infGroup] call FLO_fnc_virtualizationBindRealGroup;
 
     if ([_attachedId, _attachedData, _groupId, _groupData, _transportVehicles] call FLO_fnc_transportMountActivePassengerGroup) then {
         ["VIRTUALIZATION", 3, format [

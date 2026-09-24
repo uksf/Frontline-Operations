@@ -72,6 +72,7 @@ private _logisticsClass = [
     ["REINFORCEMENT_OBJECTIVE_CONTESTED_COLLAPSE_FORCE_RATIO", 0.65],
     ["REINFORCEMENT_OBJECTIVE_CONTESTED_COLLAPSE_INBOUND_CAP", 1],
     ["REINFORCEMENT_DELIVERY_MIN_ENEMY_DISTANCE", 900],
+    ["REINFORCEMENT_DELIVERY_INBOUND_CAP", 6],
     ["SUPPLY_CHAIN_DEPTH_METERS", 1500],
     ["SUPPLY_CHAIN_SOFT_REFRESH_INTERVAL", 60],
     ["NODE_OBJECTIVE_LINK_RADIUS", 3000],
@@ -127,41 +128,7 @@ private _logisticsClass = [
     ["_dispatchDeliveryObjectiveCache", createHashMap],
 
     ["#create", { ([_self] + _this) call FLO_fnc_logisticsNetworkCreate }],
-    ["_setManagedSide", { ([_self] + _this) call FLO_fnc_logisticsNetworkSetManagedSide }],
-    ["_refreshManagedSide", { [_self] call FLO_fnc_logisticsNetworkRefreshManagedSide }],
-    ["_getManagedResourceObject", { FLO_SideResources get (_self get "_managedSideKey") }],
-    ["_objectiveHasStaticAA", { ([_self] + _this) call FLO_fnc_logisticsNetworkObjectiveHasStaticAA }],
-    ["_objectiveIsCollapsePressure", { ([_self] + _this) call FLO_fnc_logisticsNetworkObjectiveIsCollapsePressure }],
-    ["_getRearAATargets", { [_self] call FLO_fnc_logisticsNetworkGetRearAATargets }],
-    ["_captureInitialComposition", { [_self] call FLO_fnc_logisticsNetworkGetComposition }],
-    ["_getCurrentComposition", { [_self] call FLO_fnc_logisticsNetworkGetComposition }],
-    ["_applyObjectiveCaptureGrowth", { ([_self] + _this) call FLO_fnc_logisticsNetworkApplyObjectiveCaptureGrowth }],
-    ["_processPendingCaptureGrowth", { [_self] call FLO_fnc_logisticsNetworkProcessPendingCaptureGrowth }],
-    ["_pickBestTarget", { ([_self] + _this) call FLO_fnc_logisticsNetworkPickBestTarget }],
-    ["_pickHQObjective", { [_self] call FLO_fnc_logisticsNetworkPickHQObjective }],
-    ["_refreshSupplyChain", { [_self] call FLO_fnc_logisticsNetworkRefreshSupplyChain }],
-    ["_ensureSupplyChainFresh", { ([_self] + _this) call FLO_fnc_logisticsNetworkEnsureSupplyChainFresh }],
-    ["_markSupplyChainDirty", { ([_self] + _this) call FLO_fnc_logisticsNetworkMarkSupplyChainDirty }],
-    ["_refreshObjectiveSideIndex", { [_self] call FLO_fnc_logisticsNetworkRefreshObjectiveSideIndex }],
-    ["_describeObjectiveSupplyRole", { ([_self] + _this) call FLO_fnc_logisticsNetworkDescribeObjectiveSupplyRole }],
-    ["_buildTargetPicture", { ([_self] + _this) call FLO_fnc_logisticsNetworkBuildTargetPicture }],
-    ["_getCachedSpawnPosition", { ([_self] + _this) call FLO_fnc_logisticsNetworkGetCachedSpawnPosition }],
-    ["_buildInboundObjectiveCounts", { [_self] call FLO_fnc_logisticsNetworkBuildInboundObjectiveCounts }],
-    ["_buildRecentDispatchCounts", { [_self] call FLO_fnc_logisticsNetworkBuildRecentDispatchCounts }],
-    ["_canDispatchToObjective", { ([_self] + _this) call FLO_fnc_logisticsNetworkCanDispatchToObjective }],
-    ["_pickDeliveryObjective", { ([_self] + _this) call FLO_fnc_logisticsNetworkPickDeliveryObjective }],
-    ["_pickSpawnSourceObjective", { ([_self] + _this) call FLO_fnc_logisticsNetworkPickSpawnSourceObjective }],
-    ["_findSupplySourceObjective", { ([_self] + _this) call FLO_fnc_logisticsNetworkFindSupplySourceObjective }],
-    ["_findSpawnPosition", { ([_self] + _this) call FLO_fnc_logisticsNetworkFindSpawnPosition }],
-    ["_findReinforcementTargets", { [_self] call FLO_fnc_logisticsNetworkFindReinforcementTargets }],
-    ["_getReplacementUrgency", { ([_self] + _this) call FLO_fnc_logisticsNetworkGetReplacementUrgency }],
-    ["_createReplacement", { ([_self] + _this) call FLO_fnc_logisticsNetworkCreateReplacement }],
-    ["_recordReplacement", { ([_self] + _this) call FLO_fnc_logisticsNetworkRecordReplacement }],
-    ["_recordTargetDispatch", { ([_self] + _this) call FLO_fnc_logisticsNetworkRecordTargetDispatch }],
-    ["_replenishTransportReserves", { [_self] call FLO_fnc_logisticsNetworkReplenishTransportReserves }],
-    ["_recordDelivery", { ([_self] + _this) call FLO_fnc_logisticsNetworkRecordDelivery }],
-    ["_startMainLoop", { [_self] call FLO_fnc_logisticsNetworkStartMainLoop }],
-    ["_checkAndReplace", { [_self] call FLO_fnc_logisticsNetworkCheckAndReplace }],
+
     ["getStats", { _self get "_stats" }],
     ["getSideSnapshot", { [_self] call FLO_fnc_logisticsNetworkGetSideSnapshot }],
     ["forceCheck", { [_self] call FLO_fnc_logisticsNetworkCheckAndReplace }],
@@ -185,13 +152,8 @@ try {
             throw format ["Invalid saved logisticsNetworkBySide payload: %1", typeName _savedBySide];
         };
         private _missingSides = ["WEST", "EAST"] select { !(_x in _savedBySide) };
-        private _unexpectedSides = (keys _savedBySide) select { !(_x in ["WEST", "EAST"]) };
-        if (_missingSides isNotEqualTo [] || {_unexpectedSides isNotEqualTo []}) then {
-            throw format [
-                "Saved logistics networks have missing=%1 unsupported=%2",
-                _missingSides,
-                _unexpectedSides
-            ];
+        if (_missingSides isNotEqualTo []) then {
+            throw format ["Saved logistics networks are missing sides %1", _missingSides];
         };
     };
 

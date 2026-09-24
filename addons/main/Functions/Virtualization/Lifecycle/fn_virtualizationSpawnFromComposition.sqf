@@ -26,7 +26,15 @@ private _spawnFailed = false;
     if (isNull _created) then {
         _spawnFailed = true;
     };
-} forEach _comp;
+    if (!isNull _created && {_groupType == "static_aa"}) then {
+        if (_forEachIndex < count _comp) then {
+            _created setVehicleReceiveRemoteTargets true;
+        } else {
+            _created setVehicleReportRemoteTargets true;
+            _created setVehicleRadar 1;
+        };
+    };
+} forEach (_comp + (_groupData get "supportComp"));
 
 if (_spawnFailed) exitWith {
     [_groupData, _realGroup, false] call FLO_fnc_virtualizationDeleteRealGroupAssets;

@@ -42,17 +42,14 @@ if ([_groupData] call FLO_fnc_virtualizationIsTransportCarrier) then {
     } forEach _passengerIds;
 };
 
-if ((_groupData get "mountedIn") != "") then {
-    [_groupData] call FLO_fnc_virtualizationClearMountedIn;
-};
-
 if ((_groupData get "attachedTo") != "") then {
-    [_groupData] call FLO_fnc_virtualizationClearTransportAttachment;
+    [_groupId] call FLO_fnc_virtualizationUnlinkTransportGroups;
 };
 
 private _survivorComp = _aliveUnits apply { typeOf _x };
 
 _groupData set ["groupType", "infantry"];
+_groupData set ["supportComp", []];
 _groupData set ["groupCfg", []];
 _groupData set ["spawnClass", ""];
 _groupData set ["transportRole", false];
@@ -65,6 +62,23 @@ _groupData set ["unitCount", _aliveUnitCount];
 if (_oldGroupType in ["helicopter", "jet", "air", "artillery", "static_aa", "mobile_aa"] || {_groupData get "missionLock" in ["AIR", "ARTILLERY", "TRANSPORT"]}) then {
     [_groupData] call FLO_fnc_virtualizationClearMissionLock;
     [_groupData] call FLO_fnc_virtualizationClearExecutionState;
+};
+
+// Flight destinations can cross water and cannot become infantry orders.
+// End both owners of the old flight before any save/deactivation captures it.
+if ((([_oldGroupType] call FLO_fnc_virtualizationGetArchetype) get "movementDomain") == "AIR") then {
+    [_realGroup] call CBA_fnc_clearWaypoints;
+    doStop _aliveUnits;
+    [_groupData] call FLO_fnc_virtualizationClearCommanderOrder;
+    _groupData set ["waypoints", []];
+    _groupData set ["currentWaypointIndex", 0];
+    _groupData set ["autoPatrol", false];
+    _groupData set ["patrolConfig", []];
+    _groupData set ["autoPatrolRetry", []];
+    _groupData set ["dismountAtWaypoint", -1];
+    _groupData set ["pathSource", ""];
+    [_groupData, "idle"] call FLO_fnc_virtualizationSetRuntimeState;
+    [_groupData] call FLO_fnc_virtualizationRefreshCurrentWaypointSpeed;
 };
 
 [_groupData, _groupId] call FLO_fnc_virtualizationValidateGroup;

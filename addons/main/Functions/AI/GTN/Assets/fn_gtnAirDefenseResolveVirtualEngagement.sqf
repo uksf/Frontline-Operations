@@ -27,7 +27,8 @@ private _candidates = [];
     private _aaData = _groups get _aaId;
     private _aaType = _aaData get "groupType";
 
-    private _engagementRange = [_state get "mobileEngagementRange", _state get "staticEngagementRange"] select (_aaType == "static_aa");
+    private _engagementRange = [_aaData] call FLO_fnc_gtnAirDefenseGetGroupRange;
+    if (_engagementRange <= 0) then { continue };
     private _routeDistance = [(_aaData get "position"), _routeStart, _routeEnd] call FLO_fnc_gtnAirDistancePointToSegment2D;
     if (_routeDistance > _engagementRange) then { continue };
 
@@ -43,6 +44,8 @@ private _candidates = [];
 if (_candidates isEqualTo []) exitWith { createHashMapFromArray [["status", "CLEAR"], ["aaGroupId", ""], ["losses", 0]] };
 _candidates sort true;
 (_candidates select 0) params ["_priority", "_distance", "_aaId", "_aaData", "_pairKey"];
+private _contactPosition = +(_aaData get "position");
+private _contactType = _aaData get "groupType";
 
 private _engagementObserved = [
     [_routeStart, _routeEnd],
@@ -57,7 +60,7 @@ private _activeHandoff = [
 ] call FLO_fnc_gtnAirDefenseHandoffActivatedAircraft;
 if ((keys _activeHandoff) isNotEqualTo []) exitWith { _activeHandoff };
 
-if (_engagementObserved && {!_transportCarrier}) exitWith {
+if (_engagementObserved || {_aaData get "isActive"}) exitWith {
     [_airGroupId, _routeStart] call FLO_fnc_virtualizationUpdateGroupPosition;
     [_airGroupId, createHashMapFromArray [["forceVirtual", false], ["noWaypoints", false]]] call FLO_fnc_virtualizationPatchGroup;
     if ([_airGroupId] call FLO_fnc_virtualizationForceActivateGroup) then {
@@ -70,7 +73,9 @@ if (_engagementObserved && {!_transportCarrier}) exitWith {
         if (!isNull _aircraft) then {
             [_aircraft, _airSide, _groups, _contactIndex, true] call FLO_fnc_gtnAirDefenseActivateAgainstLiveAircraft;
         };
-        if (_aaData get "isActive") then {
+        // The route can enter AA range later. Once the aircraft is physical,
+        // retain its route and passengers; the contact worker wakes AA on entry.
+        if (_airData get "isActive") then {
             ["GTN Air Defense", 3, format [
                 "Observed engagement handed aircraft %1 to physical simulation at %2 against AA %3",
                 _airGroupId,
@@ -79,7 +84,6 @@ if (_engagementObserved && {!_transportCarrier}) exitWith {
             ]] call FLO_fnc_log;
             createHashMapFromArray [["status", "PHYSICAL"], ["aaGroupId", _aaId], ["losses", 0]]
         } else {
-            [_airGroupId, false] call FLO_fnc_gtnAirParkCombatGroupOffMap;
             createHashMapFromArray [["status", "ABORTED"], ["aaGroupId", _aaId], ["losses", 0]]
         }
     } else {
@@ -156,4 +160,7 @@ if !(_airGroupId in _groups) then { _status = "DESTROYED"; };
 ]] call FLO_fnc_log;
 ["FLO_GTN_VirtualAirDefenseEngagement", [_aaId, _airGroupId, _status, _appliedLoss]] call CBA_fnc_localEvent;
 
-createHashMapFromArray [["status", _status], ["aaGroupId", _aaId], ["losses", _appliedLoss]]
+createHashMapFromArray [
+    ["status", _status], ["aaGroupId", _aaId], ["losses", _appliedLoss],
+    ["contactPosition", _contactPosition], ["contactType", _contactType]
+]

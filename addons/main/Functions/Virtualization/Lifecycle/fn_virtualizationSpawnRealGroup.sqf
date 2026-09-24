@@ -14,7 +14,14 @@ private _archetype = [_groupType] call FLO_fnc_virtualizationGetArchetype;
 private _spawnKind = _archetype get "spawnKind";
 
 if ((_archetype get "compositionPreemptsSpawn") && {_comp isNotEqualTo []}) exitWith {
-    [_groupId, _side, _groupType, _position, _comp, _groupData] call FLO_fnc_virtualizationSpawnFromComposition
+    _realGroup = [_groupId, _side, _groupType, _position, _comp, _groupData] call FLO_fnc_virtualizationSpawnFromComposition;
+    if (_groupType == "infantry" && {!isNull _realGroup}) then {
+        private _catalog = _pools get "catalog";
+        if ("infantryRoles" in _catalog) then {
+            [_realGroup, _groupData, _catalog] call FLO_fnc_factionApplyInfantryRanks;
+        };
+    };
+    _realGroup
 };
 
 switch (_spawnKind) do {
@@ -28,7 +35,7 @@ switch (_spawnKind) do {
     };
 
     case "GROUND": {
-        _realGroup = [_groupId, _position, _side, _unitCount, _groupType, _pools] call FLO_fnc_virtualizationSpawnGroundCombatGroup;
+        _realGroup = [_groupId, _position, _side, _unitCount, _groupType, _pools, _groupData] call FLO_fnc_virtualizationSpawnGroundCombatGroup;
     };
 
     case "AIR": {
@@ -36,7 +43,7 @@ switch (_spawnKind) do {
     };
 
     case "ARTILLERY": {
-        _realGroup = [_groupId, _position, _side, _unitCount, _pools] call FLO_fnc_virtualizationSpawnArtilleryGroup;
+        _realGroup = [_groupId, _position, _side, _unitCount, _pools, _groupData] call FLO_fnc_virtualizationSpawnArtilleryGroup;
     };
 
     case "STATIC_AA": {

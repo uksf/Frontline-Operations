@@ -51,5 +51,6 @@ _trigger setVariable ["decorVehicle", _vehicle];
 
 createHashMapFromArray [
     ["taskId", _taskId],
+    ["source", _trigger],
     ["position", _pos]
 ]

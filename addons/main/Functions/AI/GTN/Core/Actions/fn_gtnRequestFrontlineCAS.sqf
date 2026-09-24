@@ -1,11 +1,12 @@
 /* Requests one paid CAS mission from maintained frontline contact intelligence. */
-params [["_cmdr", nil]];
+params ["_cmdr", "_requestedObjective"];
 
 private _metrics = createHashMapFromArray [
     ["assetAvailable", false],
     ["candidateCount", 0],
     ["eligibleCount", 0],
     ["lockedCount", 0],
+    ["airDefenseRejectedCount", 0],
     ["requestedCount", 0],
     ["selectedObjective", ""],
     ["selectedScore", 0],
@@ -26,6 +27,7 @@ private _attackCounts = ((_cmdr get "_objectiveAssignmentCache") get "attackCoun
 private _config = _cmdr get "_config";
 private _locks = _cmdr get "_frontlineCASLocks";
 private _now = diag_tickTime;
+private _knownAirDefense = _ws call ["_getKnownAirDefenseThreats", []];
 
 private _expiredLocks = [];
 {
@@ -39,6 +41,7 @@ private _bestObjectiveId = "";
 private _bestScore = -1e12;
 {
     private _objectiveId = _x;
+    if (_objectiveId != _requestedObjective) then { continue };
     private _contact = _y;
     if !(_objectiveId in _frontline) then { continue };
     if !(_objectiveId in _objectives) then {
@@ -58,6 +61,12 @@ private _bestScore = -1e12;
     if (_activeAttackers < (_config get "frontlineCASMinAttackers")) then { continue };
     if ((_contact get "reportCount") <= 0) then { continue };
     if ((_contact get "confidence") < (_config get "frontlineSupportMinimumConfidence")) then { continue };
+
+    private _targetPos = _contact get "targetPos";
+    if ([_targetPos, _targetPos, _knownAirDefense] call FLO_fnc_gtnAirRouteHasKnownThreat) then {
+        _metrics set ["airDefenseRejectedCount", (_metrics get "airDefenseRejectedCount") + 1];
+        continue;
+    };
 
     private _score = (_contact get "score") + (_activeAttackers * 5);
     _metrics set ["eligibleCount", (_metrics get "eligibleCount") + 1];

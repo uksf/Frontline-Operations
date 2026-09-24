@@ -34,13 +34,8 @@ private _requiredFieldKeys = [
     "mineSpecs"
 ];
 private _missingFields = _requiredFieldKeys select {!(_x in _savedField)};
-private _recordKeys = keys _savedField;
-private _unsupportedFields = _recordKeys select {!(_x in _requiredFieldKeys)};
 if (_missingFields isNotEqualTo []) then {
     throw format ["Minefield record %1 is missing fields %2", _recordIndex, _missingFields];
-};
-if (_unsupportedFields isNotEqualTo []) then {
-    throw format ["Minefield record %1 has unsupported fields %2", _recordIndex, _unsupportedFields];
 };
 
 private _fieldId = _savedField get "id";
@@ -150,13 +145,8 @@ private _packetIds = createHashMap;
     };
 
     private _missingPacketFields = _requiredPacketKeys select {!(_x in _packet)};
-    private _packetKeys = keys _packet;
-    private _unsupportedPacketFields = _packetKeys select {!(_x in _requiredPacketKeys)};
     if (_missingPacketFields isNotEqualTo []) then {
         throw format ["Minefield %1 packet %2 is missing fields %3", _fieldId, _packetIndex, _missingPacketFields];
-    };
-    if (_unsupportedPacketFields isNotEqualTo []) then {
-        throw format ["Minefield %1 packet %2 has unsupported fields %3", _fieldId, _packetIndex, _unsupportedPacketFields];
     };
 
     private _packetId = _packet get "id";
@@ -229,13 +219,8 @@ private _requiredMineSpecKeys = ["type", "posASL"];
     };
 
     private _missingMineFields = _requiredMineSpecKeys select {!(_x in _mineSpec)};
-    private _mineKeys = keys _mineSpec;
-    private _unsupportedMineFields = _mineKeys select {!(_x in _requiredMineSpecKeys)};
     if (_missingMineFields isNotEqualTo []) then {
         throw format ["Minefield %1 mine %2 is missing fields %3", _fieldId, _mineIndex, _missingMineFields];
-    };
-    if (_unsupportedMineFields isNotEqualTo []) then {
-        throw format ["Minefield %1 mine %2 has unsupported fields %3", _fieldId, _mineIndex, _unsupportedMineFields];
     };
 
     private _mineType = _mineSpec get "type";
@@ -243,8 +228,14 @@ private _requiredMineSpecKeys = ["type", "posASL"];
     if !(_mineType isEqualType "") then {
         throw format ["Minefield %1 mine %2 type has invalid type %3", _fieldId, _mineIndex, typeName _mineType];
     };
-    if (_mineType == "" || {!isClass (configFile >> "CfgAmmo" >> _mineType)}) then {
-        throw format ["Minefield %1 mine %2 has invalid ammo class %3", _fieldId, _mineIndex, _mineType];
+    // createMine takes a CfgVehicles class and creates its configured ammo.
+    private _mineConfig = configFile >> "CfgVehicles" >> _mineType;
+    if (_mineType == "" || {!isClass _mineConfig}) then {
+        throw format ["Minefield %1 mine %2 has invalid mine class %3", _fieldId, _mineIndex, _mineType];
+    };
+    private _mineAmmo = getText (_mineConfig >> "ammo");
+    if (_mineAmmo == "" || {!isClass (configFile >> "CfgAmmo" >> _mineAmmo)}) then {
+        throw format ["Minefield %1 mine %2 class %3 has invalid configured ammo %4", _fieldId, _mineIndex, _mineType, _mineAmmo];
     };
     if !(_minePos isEqualType []) then {
         throw format ["Minefield %1 mine %2 posASL has invalid type %3", _fieldId, _mineIndex, typeName _minePos];

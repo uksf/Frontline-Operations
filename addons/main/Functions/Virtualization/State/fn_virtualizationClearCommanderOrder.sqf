@@ -22,5 +22,7 @@ _groupData set ["defendLeaseUntil", -1];
 _groupData set ["garrisonObjective", ""];
 _groupData set ["garrisonPosition", []];
 _groupData set ["commanderOrder", ""];
+_groupData set ["combatAdvanceUntil", 0];
+_groupData set ["commanderIntent", ""];
 
 true

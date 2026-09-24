@@ -11,6 +11,22 @@ if !(missionNamespace getVariable ["FLO_MissionEnabled", false]) exitWith {
     diag_log "[FLO_INIT] Disabled for this mission";
 };
 
+// Display 0 persists beneath gameplay too. Clients/hosts must wait for the
+// gameplay display; menu scenes never create it. CBA clears pending waits at
+// each mission preInit, so a menu-scene wait cannot bootstrap a later mission.
+if (is3DEN) exitWith {};
+if (hasInterface && {isNull findDisplay 46}) exitWith {
+    [{
+        !isNull findDisplay 46
+    }, {
+        [] call FLO_fnc_addonPostInit;
+    }, []] call CBA_fnc_waitUntilAndExecute;
+};
+
+// Campaign persistence owns saving. Native suspend saves serialize the live
+// simulation and script graphs, which cannot safely resume FLO's bootstrap.
+enableSaving [false, false];
+
 [] call FLO_fnc_playerSideAdapterInit;
 
 if (isServer) then {

@@ -15,10 +15,12 @@
  * Returns: <BOOL> - Success status
  */
 
-if !(missionNamespace getVariable ["FLO_MissionEnabled", false]) exitWith { false };
-if (!isServer) exitWith { false };
+// PreInit also runs for menu scenes and clients where gameplay never starts.
+FLO_MissionReady = false;
 
-FLO_MissionSaveVersion = 29;
+if !(missionNamespace getVariable ["FLO_MissionEnabled", false]) exitWith { false };
+
+if (!isServer) exitWith {false};
 
 ["LOAD", 3, "PreInit: mission shell ready for addon bootstrap"] call FLO_fnc_log;
 

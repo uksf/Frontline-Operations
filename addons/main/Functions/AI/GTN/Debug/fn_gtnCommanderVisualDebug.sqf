@@ -159,14 +159,11 @@ if (isNil "FLO_GTN_CommanderDebugMarkers") then { FLO_GTN_CommanderDebugMarkers 
                 _activeIds pushBack _objMarkerId;
 
                 private _ratio = _obj get "forceRatio";
-                private _ratioRounded = round (_ratio * 10) / 10;
+                private _ratioRounded = if (_ratio < 0) then { "?" } else { str (round (_ratio * 10) / 10) };
+                private _enemyCount = _obj get "enemyCount";
+                private _enemyLabelCount = if (_enemyCount < 0) then { "?" } else { str _enemyCount };
                 private _globalObj = FLO_Objectives get _objId;
                 private _owner = _globalObj get "owner";
-                if (_owner isEqualType "") then {
-                    private _ownerKey = toUpper _owner;
-                    if (_ownerKey isEqualTo "EAST") then { _owner = east; };
-                    if (_ownerKey isEqualTo "WEST") then { _owner = west; };
-                };
                 private _ownerLabel = [_owner] call FLO_fnc_gtnCommanderDebugSideLabel;
                 private _wrongOwner = (_owner isNotEqualTo _enemySide);
                 private _objType = [["mil_objective", "mil_warning"] select (_obj get "contested"), "mil_unknown"] select (_wrongOwner);
@@ -177,7 +174,7 @@ if (isNil "FLO_GTN_CommanderDebugMarkers") then { FLO_GTN_CommanderDebugMarkers 
                     _objId,
                     _priority,
                     _obj get "friendlyCount",
-                    _obj get "enemyCount",
+                    _enemyLabelCount,
                     _ratioRounded,
                     _ownerLabel,
                     if (_wrongOwner) then { format [" ! expected %1", _enemyLabel] } else { "" }
@@ -254,7 +251,7 @@ if (isNil "FLO_GTN_CommanderDebugMarkers") then { FLO_GTN_CommanderDebugMarkers 
                 private _groupType = _gData get "groupType";
                 private _groupUnits = _gData get "unitCount";
                 private _targetObjective = if (_isAAMoving) then {
-                    [_gData] call FLO_fnc_virtualizationGetAATargetObjective
+                    (_gData get "aaDeployTargetObjective")
                 } else {
                     _gData get "homeObjective"
                 };
@@ -275,7 +272,7 @@ if (isNil "FLO_GTN_CommanderDebugMarkers") then { FLO_GTN_CommanderDebugMarkers 
                     _reinforcingObjectiveCounts set [_targetObjective, (_reinforcingObjectiveCounts getOrDefault [_targetObjective, 0]) + 1];
                 } else {
                     if (_isAAMoving) then {
-                        private _targetPos = [_gData] call FLO_fnc_virtualizationGetAATargetPos;
+                        private _targetPos = (_gData get "aaDeployTargetPos");
                         if (count _targetPos >= 2) then {
                             private _aaTargetMarkerId = format ["FLO_GTN_DBG_%1_REINF_AA_TGT_%2", _cmdSideKey, _groupId];
                             _activeIds pushBack _aaTargetMarkerId;

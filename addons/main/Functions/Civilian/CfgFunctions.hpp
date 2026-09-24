@@ -6,8 +6,9 @@ class CivilianCore {
     class civilianConfig {};
     class civilianResolveObjective {};
     class civilianBuildRoleProfile {};
-    class civilianBuildAmbientRoute {};
+
     class civilianBuildObjectivePoiCache {};
+    class civilianRebaseSavedShorelineRoutine {};
     class civilianResolveObjectiveContext {};
     class civilianRefreshObjectiveContexts {};
     class civilianMergeObjectiveMemory {};
@@ -50,6 +51,7 @@ class CivilianMissions {
     class civilianBuildMissionOffer {};
     class civilianGetHostileForcePool {};
     class civilianMissionResolveAction {};
+    class civilianRepairActionLocal {};
     class civilianMissionManager {};
     class civilianRequestMission {};
 };

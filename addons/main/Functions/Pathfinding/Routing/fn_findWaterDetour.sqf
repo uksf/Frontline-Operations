@@ -55,15 +55,35 @@ private _exitAnchor = [
 private _offsetStep = FLO_PF_WaterDetourStep;
 private _offsetMax = FLO_PF_WaterDetourMax;
 private _offsetStart = ((_waterSpan * 0.8) max FLO_PF_WaterDetourBaseOffset) min _offsetMax;
+// Detours become persistent patrol anchors too. Use the same shoreline
+// clearance as semantic patrol destinations, including when currently dry.
+private _minimumHeight = 1;
 
+private _offsets = [];
 for "_offset" from _offsetStart to _offsetMax step _offsetStep do {
+    _offsets pushBack _offset;
+};
+// Preserve established routes, then try the narrow shoreline band skipped by
+// the coarse search. Large pivots can all miss a small headland's land corridor.
+private _nearStep = _sampleStep max 10;
+for "_offset" from ((_waterSpan * 0.8) max _nearStep) to (_offsetStart - 1) step _nearStep do {
+    _offsets pushBack _offset;
+};
+// A narrow headland can fit between those probes. Try the remaining 10m
+// offsets only after established coarse and shoreline candidates fail.
+for "_offset" from 10 to ((_offsetStart min FLO_PF_WaterDetourBaseOffset) - 1) step 10 do {
+    _offsets pushBackUnique _offset;
+};
+
+{
+    private _offset = _x;
     {
         private _sideDir = _segmentDir + _x;
         private _candidate = _spanMid getPos [_offset, _sideDir];
-        if (surfaceIsWater _candidate) then {
-            _candidate = [_candidate, ((_offset * 0.75) max 250)] call FLO_fnc_getSafeLandPos;
+        if (surfaceIsWater _candidate || {getTerrainHeightASL _candidate < _minimumHeight}) then {
+            _candidate = [_candidate, ((_offset * 0.75) max 250), _minimumHeight] call FLO_fnc_getSafeLandPos;
         };
-        if (surfaceIsWater _candidate) then { continue };
+        if (surfaceIsWater _candidate || {getTerrainHeightASL _candidate < _minimumHeight}) then { continue };
 
         private _leftProfile = [_startPos, _candidate, _sampleStep] call FLO_fnc_pathSegmentWaterProfile;
         private _rightProfile = [_candidate, _endPos, _sampleStep] call FLO_fnc_pathSegmentWaterProfile;
@@ -74,16 +94,16 @@ for "_offset" from _offsetStart to _offsetMax step _offsetStep do {
         };
 
         private _entryDetour = _entryAnchor getPos [_offset, _sideDir];
-        if (surfaceIsWater _entryDetour) then {
-            _entryDetour = [_entryDetour, ((_offset * 0.75) max 250)] call FLO_fnc_getSafeLandPos;
+        if (surfaceIsWater _entryDetour || {getTerrainHeightASL _entryDetour < _minimumHeight}) then {
+            _entryDetour = [_entryDetour, ((_offset * 0.75) max 250), _minimumHeight] call FLO_fnc_getSafeLandPos;
         };
-        if (surfaceIsWater _entryDetour) then { continue };
+        if (surfaceIsWater _entryDetour || {getTerrainHeightASL _entryDetour < _minimumHeight}) then { continue };
 
         private _exitDetour = _exitAnchor getPos [_offset, _sideDir];
-        if (surfaceIsWater _exitDetour) then {
-            _exitDetour = [_exitDetour, ((_offset * 0.75) max 250)] call FLO_fnc_getSafeLandPos;
+        if (surfaceIsWater _exitDetour || {getTerrainHeightASL _exitDetour < _minimumHeight}) then {
+            _exitDetour = [_exitDetour, ((_offset * 0.75) max 250), _minimumHeight] call FLO_fnc_getSafeLandPos;
         };
-        if (surfaceIsWater _exitDetour) then { continue };
+        if (surfaceIsWater _exitDetour || {getTerrainHeightASL _exitDetour < _minimumHeight}) then { continue };
 
         private _legA = [_startPos, _entryDetour, _sampleStep] call FLO_fnc_pathSegmentWaterProfile;
         private _legB = [_entryDetour, _exitDetour, _sampleStep] call FLO_fnc_pathSegmentWaterProfile;
@@ -96,6 +116,6 @@ for "_offset" from _offsetStart to _offsetMax step _offsetStep do {
     } forEach [90, -90];
 
     if (_detour isNotEqualTo []) exitWith {};
-};
+} forEach _offsets;
 
 [_detour, _sampleCount]

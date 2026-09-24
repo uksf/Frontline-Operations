@@ -4,6 +4,16 @@
  *   Atomically clears a passenger relationship and its carrier manifest entry.
  */
 
+if (canSuspend) exitWith {
+    private _result = false;
+    private _failure = [];
+    isNil {
+        try { _result = _this call FLO_fnc_virtualizationUnlinkTransportGroups; } catch { _failure = [_exception]; };
+    };
+    if (_failure isNotEqualTo []) then { throw (_failure select 0) };
+    _result
+};
+
 params [["_passengerGroupId", "", [""]]];
 
 private _passengerData = [_passengerGroupId] call FLO_fnc_virtualizationRequireGroup;

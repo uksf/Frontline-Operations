@@ -1,9 +1,11 @@
 class UI {
     file = "\z\flo\addons\main\Functions\UI";
 
+    class uiRestoreMapFocus {};
+    class uiWebAction {};
     class initClientUI { postInit = 1; };
     class initClientUIPreInit { preInit = 1; };
-    class safeConfirm {};
+
 };
 
 class UICapture {
@@ -28,6 +30,7 @@ class UISetup {
     class shouldOpenFactionDialog {};
     class openFactionDialog {};
     class factionDialogOnLoad {};
+    class factionDialogInitializeLayout {};
     class factionDialogOnUnload {};
     class factionDialogAddFactionItems {};
     class factionDialogAddItems {};
@@ -47,13 +50,16 @@ class UISetup {
     class factionDialogSelectDefault {};
     class factionDialogShowCompositionTab {};
     class factionDialogStart {};
+    class factionDialogReadConfig {};
+    class factionDialogSelectStartPosition {};
+    class factionDialogWaitForMission {};
+
     class factionDialogValidateFactionSelections {};
 };
 
 class OperationsUI {
     file = "\z\flo\addons\main\Functions\UI\Operations";
 
-    class operationsAddWebEventHandler {};
     class operationsBuildMapDrawData {};
     class operationsDrawMap {};
     class operationsFocusMap {};
@@ -64,17 +70,15 @@ class OperationsUI {
     class operationsPreInit { preInit = 1; };
     class operationsReceiveSnapshot {};
     class operationsRequestSnapshot {};
-    class operationsRestoreMapFocus {};
     class operationsSelectObjective {};
     class operationsShowGuide {};
     class operationsUpdateDialog {};
-    class operationsWebAction {};
+
 };
 
 class DevelopmentUI {
     file = "\z\flo\addons\main\Functions\UI\Development";
 
-    class developmentAddWebEventHandler {};
     class developmentHandleUiEvent {};
     class developmentInitClient {};
     class developmentOpenDialog {};
@@ -88,7 +92,6 @@ class DevelopmentUI {
 class SupportUI {
     file = "\z\flo\addons\main\Functions\UI\Support";
 
-    class supportAddWebEventHandler {};
     class supportBuildSnapshot {};
     class supportDrawMap {};
     class supportFocusMap {};
@@ -101,5 +104,5 @@ class SupportUI {
     class supportRequestSnapshot {};
     class supportRequestSnapshotServer {};
     class supportUpdateDialog {};
-    class supportWebAction {};
+
 };

@@ -1,6 +1,12 @@
 /* Resolves one deterministic-trend remote combat round with bounded friction. */
 params ["_groups", "_eastRefs", "_westRefs", "_supportAvailability", ["_zoneId", "", [""]]];
 
+if (((_eastRefs + _westRefs) findIf {(_x select 1) get "isActive"}) >= 0) then {
+    private _message = format ["Remote engagement %1 contains physical participants; live handoff is required", _zoneId];
+    ["GTN_COMBAT", 1, _message] call FLO_fnc_log;
+    throw _message;
+};
+
 private _eastStats = [_eastRefs] call FLO_fnc_gtnCombatSidePower;
 private _westStats = [_westRefs] call FLO_fnc_gtnCombatSidePower;
 private _eastBefore = _eastStats get "units";
@@ -89,7 +95,10 @@ if (_decisive) then {
 
 private _eastLosses = [_groups, _eastRefs, _eastLossPct] call FLO_fnc_gtnCombatApplyAttrition;
 private _westLosses = [_groups, _westRefs, _westLossPct] call FLO_fnc_gtnCombatApplyAttrition;
-if (_decisive) then { _engagements deleteAt _zoneId; };
+if (_decisive) then {
+    _engagement set ["roundCount", 0];
+    _engagement set ["momentum", 0];
+};
 
 createHashMapFromArray [
     ["winner", _winner],

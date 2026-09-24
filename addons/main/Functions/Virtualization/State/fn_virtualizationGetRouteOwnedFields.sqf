@@ -3,15 +3,10 @@
     "waypoints",
     "currentWaypointIndex",
     "autoPatrol",
+    "autoPatrolRetry",
     "patrolConfig",
     "virtualSpeed",
     "lastMoveTime",
     "virtualMoveCarryMeters",
-    "loiterStartTime",
-    "pathToken",
-    "pathTargetPos",
-    "pathAllowTrails",
-    "pathStartedAt",
-    "pathSource",
-    "pathWaypointSettings"
+    "pathSource"
 ]

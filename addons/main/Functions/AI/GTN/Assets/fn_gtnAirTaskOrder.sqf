@@ -59,7 +59,8 @@ if (isNil "FLO_GTNAirTaskOrder") then {
                 private _hasPlayerSupportMeta = ("playerSupport" in _meta) && {_meta get "playerSupport"};
                 private _targetLabel = if ("targetLabel" in _meta) then { _meta get "targetLabel" } else { mapGridPosition _pos };
 
-                private _asset = _mgr call ["_requestAirAsset", [_pos, _mission, _requestSide, _meta]];
+                private _requestResult = createHashMap;
+                private _asset = _mgr call ["_requestAirAsset", [_pos, _mission, _requestSide, _meta, _requestResult]];
                 private _air = objNull;
                 private _gid = "";
                 private _mode = "";
@@ -82,21 +83,24 @@ if (isNil "FLO_GTNAirTaskOrder") then {
                         _air flyInHeight _alt;
                         ["GTN ATO", 3, format["Aircraft assigned: %1 (type: %2), group ID: %3", _air, typeOf _air, _gid]] call FLO_fnc_log;
                         
-                        // Reveal intel to aircraft crew so they can engage targets
-                        // Uses knowsAbout 4 for immediate engagement capability
-                        if (!isNil "FLO_GTN_CapabilityAnalyzer") then {
-                            private _enemySide = if (_requestSide isEqualTo east) then { west } else { east };
-                            private _revealed = FLO_GTN_CapabilityAnalyzer call ["_revealIntelToUnits", [_pos, 1500, crew _air, _enemySide]];
-                            ["GTN ATO", 3, format["Revealed %1 targets to CAS aircraft crew", _revealed]] call FLO_fnc_log;
-                        };
+                        private _commander = [_requestSide] call FLO_fnc_gtnGetCommanderBySide;
+                        [_pos, 1500, crew _air, _commander get "_worldState"] call FLO_fnc_gtnRevealIntelToUnits;
                     } else {
-                        ["GTN ATO", 3, format["Virtual-only %1 mission assigned to %2 at %3 (no unvirtualize)", _mission, _gid, _pos]] call FLO_fnc_log;
+                        private _outcome = _requestResult get "outcome";
+                        ["GTN ATO", 3, format["Virtual %1 attempt by %2 at %3 resolved: %4", _mission, _gid, _pos, _outcome]] call FLO_fnc_log;
                         if (_hasPlayerSupportMeta) then {
-                            [_requestSide, "HQ", format ["%1 active over %2.", toUpper _mission, _targetLabel]] call FLO_fnc_gtnBroadcastCommanderRadioMessage;
+                            private _report = switch (_outcome) do {
+                                case "ABORTED": { "aborted under air-defense fire" };
+                                case "DESTROYED": { "aircraft lost to air defenses" };
+                                case "NO_TARGET_EFFECT": { "no confirmed target damage" };
+                                case "EFFECT_APPLIED": { "strike completed with confirmed target losses" };
+                                default { "mission completed" };
+                            };
+                            [_requestSide, "HQ", format ["%1 over %2: %3.", toUpper _mission, _targetLabel, _report]] call FLO_fnc_gtnBroadcastCommanderRadioMessage;
                         };
                     };
                 } else {
-                    ["GTN ATO", 2, "No available virtual air asset for task - skipping"] call FLO_fnc_log;
+                    ["GTN ATO", 2, format ["%1 %2 task rejected at %3: %4", _requestSide, _mission, _pos, _requestResult get "reason"]] call FLO_fnc_log;
                 };
 
                 if (_mode isEqualTo "VIRTUAL") then { continue };
@@ -238,15 +242,8 @@ if (isNil "FLO_GTNAirTaskOrder") then {
                             [_requestSide, "HQ", format ["%1 on station over %2.", toUpper _missionType, _targetLabel]] call FLO_fnc_gtnBroadcastCommanderRadioMessage;
                         };
 
-                        // Refresh intel reveal now that aircraft is on station
-                        // Targets may have moved since initial reveal
-                        if (!isNil "FLO_GTN_CapabilityAnalyzer" && alive _a) then {
-                            private _gData = (call FLO_fnc_virtualizationGetGroupMap) get _gid;
-                            private _airSide = _gData get "side";
-                            private _enemySide = if (_airSide isEqualTo east) then { west } else { east };
-                            private _revealed = FLO_GTN_CapabilityAnalyzer call ["_revealIntelToUnits", [_targetPos, 1500, crew _a, _enemySide]];
-                            ["GTN ATO", 4, format["Refreshed intel on station: %1 targets revealed", _revealed]] call FLO_fnc_log;
-                        };
+                        private _commander = [_requestSide] call FLO_fnc_gtnGetCommanderBySide;
+                        [_targetPos, 1500, crew _a, _commander get "_worldState"] call FLO_fnc_gtnRevealIntelToUnits;
 
                         // Now run the actual mission duration
                         private _missionStart = time;

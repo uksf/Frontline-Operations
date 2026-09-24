@@ -8,6 +8,7 @@
  * Arguments:
  *   0: Infantry Group ID <STRING>
  *   1: Offset direction (degrees) <NUMBER> - Optional, default random
+ *   2: Release empty carrier <BOOLEAN> - False when the caller owns finalization
  *
  * Return Value:
  *   Success <BOOLEAN>
@@ -19,19 +20,28 @@
 
 params [
     ["_infantryGroupId", "", [""]],
-    ["_offsetDir", -1, [0]]
+    ["_offsetDir", -1, [0]],
+    ["_releaseCarrier", true, [true]]
 ];
 
 if (_infantryGroupId == "") exitWith { false };
 
-private _infData = [_infantryGroupId] call FLO_fnc_transportGetTrackedGroup;
+private _infData = [_infantryGroupId] call FLO_fnc_virtualizationGetGroup;
 
 private _transportId = [_infData] call FLO_fnc_virtualizationGetTransportAttachment;
 if (_transportId == "") exitWith { false };
 
-private _transData = [_transportId] call FLO_fnc_transportGetTrackedGroup;
+private _transData = [_transportId] call FLO_fnc_virtualizationGetGroup;
 private _infRealGroup = _infData get "realGroup";
 private _transRealGroup = _transData get "realGroup";
+// A passenger's last update can lag its carrier. The carrier owns the current
+// virtual position until detachment commits.
+private _basePos = if (_infData get "isActive") then {
+    _infData get "position"
+} else {
+    _transData get "position"
+};
+if (!(_infData get "isActive") && {surfaceIsWater _basePos}) exitWith { false };
 private _transportVehicles = if (!isNull _transRealGroup) then {
     [_transRealGroup] call FLO_fnc_virtualizationCollectRealGroupVehicles
 } else {
@@ -40,13 +50,13 @@ private _transportVehicles = if (!isNull _transRealGroup) then {
 [_infantryGroupId] call FLO_fnc_virtualizationUnlinkTransportGroups;
 
 if ((_infData get "missionLock") in ["ORGANIC_PACKAGE", "TRANSPORT"]) then {
+    private _reinforcing = (_infData get "replacementState") == "REINFORCE";
     [_infantryGroupId, createHashMapFromArray [
-        ["missionLock", ""],
-        ["missionType", ""]
+        ["missionLock", ["", "LOGISTICS"] select _reinforcing],
+        ["missionType", ["", "REINFORCE"] select _reinforcing]
     ]] call FLO_fnc_virtualizationPatchGroup;
 };
 
-private _basePos = _infData get "position";
 if (!isNull _infRealGroup) then {
     {
         private _veh = vehicle _x;
@@ -67,7 +77,19 @@ if (!isNull _infRealGroup) then {
 // Offset position from transport
 if (_offsetDir < 0) then { _offsetDir = random 360; };
 private _newPos = _basePos getPos [30, _offsetDir];
+// A stacking offset must not move a passenger off a valid coastal landing.
+if (surfaceIsWater _newPos && {!surfaceIsWater _basePos}) then {
+    _newPos = +_basePos;
+};
+if !(_infData get "isActive") then { _newPos set [2, 0]; };
 [_infantryGroupId, _newPos] call FLO_fnc_virtualizationUpdateGroupPosition;
+
+if (_releaseCarrier) then {
+    private _carrierData = [_transportId] call FLO_fnc_virtualizationGetGroup;
+    if ((_carrierData get "attachedGroups") isEqualTo []) then {
+        [_transportId] call FLO_fnc_transportPoolRelease;
+    };
+};
 
 ["TRANSPORT", 3, format["Detached %1 from transport %2", _infantryGroupId, _transportId]] call FLO_fnc_log;
 

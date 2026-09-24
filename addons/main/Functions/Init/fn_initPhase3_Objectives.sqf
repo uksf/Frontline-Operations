@@ -43,7 +43,6 @@ if (FLO_IsLoadedSave) then {
         ["linkedObjectives", []], ["mergedCount", 0], ["revenueLevel", 0],
         ["developmentLevel", 0], ["developmentProject", createHashMap]
     ];
-    private _requiredObjectiveFields = _requiredObjectiveTypes apply { _x # 0 };
     {
         private _objId = _x;
         if !(_objId isEqualType "" && {_objId != ""}) then {
@@ -52,16 +51,6 @@ if (FLO_IsLoadedSave) then {
         private _objData = _savedObjectives get _objId;
         if !(_objData isEqualType createHashMap) then {
             throw format ["Saved objective %1 has invalid record type %2", _objId, typeName _objData];
-        };
-        private _unexpectedObjectiveFields = (keys _objData) select {
-            !(_x in _requiredObjectiveFields)
-        };
-        if (_unexpectedObjectiveFields isNotEqualTo []) then {
-            throw format [
-                "Saved objective %1 has unexpected fields %2",
-                _objId,
-                _unexpectedObjectiveFields
-            ];
         };
         {
             _x params ["_field", "_prototype"];
@@ -108,6 +97,7 @@ if (FLO_IsLoadedSave) then {
         if !((_objData get "campaignCapturedBySideKey") in ["", "EAST", "WEST"]) then {
             throw format ["Saved objective %1 has invalid captured-by side key", _objId];
         };
+        [_objId, _objData] call FLO_fnc_objectiveRestoreCaptureTimers;
         _savedObjectives set [
             _objId,
             [_objId, _objData] call FLO_fnc_objectiveDevelopmentInitializeObjective
@@ -122,7 +112,7 @@ if (FLO_IsLoadedSave) then {
     private _runtimeMs = (diag_tickTime - _runtimeT0) * 1000;
     private _restoreMs = (_runtimeT0 - _restoreT0) * 1000;
 
-    ["INIT", 3, format ["Restored %1 current-version objectives", count FLO_Objectives]] call FLO_fnc_log;
+    ["INIT", 3, format ["Restored %1 objectives with anchored capture clocks", count FLO_Objectives]] call FLO_fnc_log;
     diag_log format [
         "[FLO][PERF] Phase3 save restore objectives=%1 restore=%2 ms runtime=%3 ms",
         count FLO_Objectives,

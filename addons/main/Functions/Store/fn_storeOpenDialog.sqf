@@ -29,9 +29,13 @@ if (isNull _control) exitWith {
     ["The Store browser control is unavailable.", "error"] call FLO_fnc_displayNotification;
     false
 };
+// Create local scene objects after native display construction has returned.
+[_display] call FLO_fnc_storePreviewOpen;
 uiNamespace setVariable ["FLO_StoreControl", _control];
 
-[_control] call FLO_fnc_storeAddWebEventHandler;
-[_control, ["LoadFile", "\z\flo\addons\main\UI\Store\index.html"]] call FLO_fnc_storeWebAction;
+// Arma browser control event (not yet listed in HEMTT event metadata).
+private _webDialogEvent = "JSDialog";
+_control ctrlAddEventHandler [_webDialogEvent, FLO_fnc_storeHandleUiEvent];
+[_control, ["LoadFile", "\z\flo\addons\main\UI\Store\index.html"]] call FLO_fnc_uiWebAction;
 
 true

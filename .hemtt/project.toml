@@ -3,9 +3,9 @@ prefix = "flo"
 mainprefix = "z"
 
 [version]
-major = 0
+major = 3
 minor = 1
-patch = 0
+patch = 5
 git_hash = 0
 
 [hemtt.launch.default]

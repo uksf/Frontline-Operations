@@ -1,10 +1,14 @@
 /* Builds the current side-neutral commander treasury posture from authoritative state. */
+if (canSuspend) exitWith { [_this, FLO_fnc_commanderSpendingGetState] call FLO_fnc_economyRunAtomic };
+
 params ["_treasury"];
 
 private _policy = _treasury get "COMMANDER_SPENDING_POLICY";
 private _balance = _treasury get "_balance";
 private _committed = [_treasury] call FLO_fnc_sideResourcesGetCommitted;
-private _available = [_treasury] call FLO_fnc_sideResourcesGetAvailable;
+private _available = _balance - _committed;
+if (_available < -0.001) then { throw format ["ECONOMY %1 treasury has overcommitted funds", _treasury get "_sideKey"]; };
+_available = _available max 0;
 private _incomeCycle = _treasury get "_lastIncome";
 private _incomeInterval = _treasury get "UPDATE_INTERVAL";
 if !(_incomeInterval isEqualType 0 && {_incomeInterval > 0}) then {
@@ -12,16 +16,18 @@ if !(_incomeInterval isEqualType 0 && {_incomeInterval > 0}) then {
 };
 private _incomePerMinute = (_incomeCycle * 60) / _incomeInterval;
 
-private _reserveFloor = (_policy get "reserveMinimum")
-    max (round (_balance * (_policy get "reserveBalanceFraction")))
-    max (round (_incomePerMinute * ((_policy get "reserveIncomeSeconds") / 60)));
+private _reserveFloor = ((_policy get "reserveMinimum")
+    max (round (_incomePerMinute * ((_policy get "reserveIncomeSeconds") / 60))))
+    min (_policy get "reserveMaximum");
+private _replacementNeed = _treasury get "_replacementFundingNeed";
+private _developmentFloor = _reserveFloor + _replacementNeed;
 private _emergencyReserve = _policy get "emergencyReserve";
 private _developmentIncomeBasis = (
     _incomePerMinute * ((_policy get "developmentIncomeHorizonSeconds") / 60)
 ) max (_policy get "developmentBootstrapIncome");
 private _balancedRunway = (_policy get "balancedRunwayMinimum")
     max (_incomePerMinute * ((_policy get "balancedRunwaySeconds") / 60));
-private _surplusFloor = _reserveFloor + _balancedRunway;
+private _surplusFloor = _developmentFloor + _balancedRunway;
 private _posture = "SURPLUS";
 if (_available <= _emergencyReserve) then {
     _posture = "EMERGENCY";
@@ -46,5 +52,8 @@ createHashMapFromArray [
     ["reserveFloor", _reserveFloor],
     ["emergencyReserve", _emergencyReserve],
     ["surplusFloor", _surplusFloor],
-    ["developmentIncomeBasis", _developmentIncomeBasis]
+    ["developmentIncomeBasis", _developmentIncomeBasis],
+    ["replacementFundingNeed", _replacementNeed],
+    ["developmentFloor", _developmentFloor],
+    ["developmentAvailable", (_available - _developmentFloor) max 0]
 ]

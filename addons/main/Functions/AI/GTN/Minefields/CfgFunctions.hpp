@@ -14,9 +14,10 @@ class GTNMinefields {
     class minefieldBuildObjectivePackets {};
     class minefieldBuildPacketMineSpecsStep {};
     class minefieldBuildPacketSlotPlan {};
-    class minefieldBuildPacketMineSpecs {};
+
     class minefieldCanPlaceWithSpacing {};
     class gtnManageFrontlineMinefields {};
+    class gtnRequestObjectiveMinefield {};
     class gtnMinefieldSystemInit {};
     class minefieldCalculateFieldGeometry {};
     class minefieldCleanupDestroyedMines {};

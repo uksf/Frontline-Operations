@@ -20,7 +20,7 @@ params [
 
 if (_infantryGroupId == "") exitWith { false };
 
-private _infData = [_infantryGroupId] call FLO_fnc_transportGetTrackedGroup;
+private _infData = [_infantryGroupId] call FLO_fnc_virtualizationGetGroup;
 private _postWp = _infData get "postDismountWaypoint";
 if (_postWp isEqualTo []) exitWith { false };
 
@@ -52,8 +52,9 @@ if !([_infantryGroupId, _waypoints, true, _sourceTag] call FLO_fnc_updateVirtual
 };
 private _changes = createHashMapFromArray [["postDismountWaypoint", []]];
 if ((_infData get "missionLock") == "TRANSPORT") then {
-    _changes set ["missionLock", ""];
-    _changes set ["missionType", ""];
+    private _reinforcing = (_infData get "replacementState") == "REINFORCE";
+    _changes set ["missionLock", ["", "LOGISTICS"] select _reinforcing];
+    _changes set ["missionType", ["", "REINFORCE"] select _reinforcing];
 };
 [_infantryGroupId, _changes] call FLO_fnc_virtualizationPatchGroup;
 

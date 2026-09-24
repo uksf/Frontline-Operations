@@ -4,6 +4,7 @@ class ForceGeneration {
     class buildObjectiveTemplateSpawnPlan {};
     class initializeObjectiveGroups {};
     class initializeTransportReserveGroups {};
-    class backfillObjectiveTemplateGroups {};
+
     class distributeVirtualGroups {};
+    class resolveObjectiveLandPlacement {};
 };

@@ -1,4 +1,4 @@
-/* Validates an explicitly requested save against the exact current universe version and shape. */
+/* Validates an explicitly requested save before publishing current campaign state. */
 if (!isServer) exitWith { [false, nil] };
 
 ["SAVE_DETECT", 3, "Checking for saved game data"] call FLO_fnc_log;
@@ -21,78 +21,12 @@ if (isNil "_saveData") exitWith {
     ["SAVE_DETECT", 3, "No saved game data found"] call FLO_fnc_log;
     [false, nil]
 };
-if !(_saveData isEqualType createHashMap) exitWith {
-    ["SAVE_DETECT", 2, "Saved campaign has an invalid payload type and was not loaded"] call FLO_fnc_log;
-    [false, nil]
+try {
+    [_saveData] call FLO_fnc_saveValidateCampaignRoot;
+} catch {
+    ["SAVE_DETECT", 1, format ["Current campaign validation failed; Continue aborted: %1", _exception]] call FLO_fnc_log;
+    throw _exception;
 };
-
-if !("saveVersion" in _saveData) exitWith {
-    ["SAVE_DETECT", 2, "Saved campaign has no universal save version and was not loaded"] call FLO_fnc_log;
-    [false, nil]
-};
-private _saveVersion = _saveData get "saveVersion";
-if !(_saveVersion isEqualType 0) exitWith {
-    ["SAVE_DETECT", 2, format [
-        "Saved campaign version has invalid type %1 and was not loaded",
-        typeName _saveVersion
-    ]] call FLO_fnc_log;
-    [false, nil]
-};
-private _currentSaveVersion = FLO_MissionSaveVersion;
-if (_saveVersion != _currentSaveVersion) exitWith {
-    ["SAVE_DETECT", 2, format [
-        "Saved campaign version %1 is incompatible with current version %2 and was not loaded",
-        _saveVersion,
-        _currentSaveVersion
-    ]] call FLO_fnc_log;
-    [false, nil]
-};
-
-private _requiredRootTypes = [
-    ["time", []],
-    ["markers", createHashMap],
-    ["vehicles", createHashMap],
-    ["objects", createHashMap],
-    ["crates", createHashMap],
-    ["minefields", []],
-    ["minefieldObjectiveCooldowns", createHashMap],
-    ["fobs", []],
-    ["ops", []],
-    ["config", createHashMap],
-    ["objectives", createHashMap],
-    ["virtualGroups", createHashMap],
-    ["aiCommanders", createHashMap],
-    ["sideResources", createHashMap],
-    ["logisticsNetworkBySide", createHashMap],
-    ["baseDeploymentState", createHashMap],
-    ["idsLogisticsEntities", []]
-];
-{
-    _x params ["_key", "_prototype"];
-    if !(_key in _saveData) then {
-        private _error = format ["Current mission save is missing required root field %1", _key];
-        ["SAVE_DETECT", 1, _error] call FLO_fnc_log;
-        throw _error;
-    };
-    private _value = _saveData get _key;
-    if !(_value isEqualType _prototype) then {
-        private _error = format [
-            "Current mission save root field %1 has invalid type %2",
-            _key,
-            typeName _value
-        ];
-        ["SAVE_DETECT", 1, _error] call FLO_fnc_log;
-        throw _error;
-    };
-} forEach _requiredRootTypes;
-private _requiredRootKeys = ["saveVersion"] + (_requiredRootTypes apply {_x # 0});
-private _unexpectedRootKeys = (keys _saveData) select {!(_x in _requiredRootKeys)};
-if (_unexpectedRootKeys isNotEqualTo []) then {
-    private _error = format ["Current mission save has unexpected root fields %1", _unexpectedRootKeys];
-    ["SAVE_DETECT", 1, _error] call FLO_fnc_log;
-    throw _error;
-};
-
 private _configData = _saveData get "config";
 private _requiredConfigTypes = [
     ["bluforHandle", createHashMap],
@@ -139,13 +73,6 @@ private _requiredConfigTypes = [
         throw _error;
     };
 } forEach _requiredConfigTypes;
-private _requiredConfigKeys = _requiredConfigTypes apply {_x # 0};
-private _unexpectedConfigKeys = (keys _configData) select {!(_x in _requiredConfigKeys)};
-if (_unexpectedConfigKeys isNotEqualTo []) then {
-    private _error = format ["Current mission configuration has unexpected fields %1", _unexpectedConfigKeys];
-    ["SAVE_DETECT", 1, _error] call FLO_fnc_log;
-    throw _error;
-};
 if ((count (_configData get "startPosition")) < 2) then {
     private _error = "Current mission configuration startPosition is malformed";
     ["SAVE_DETECT", 1, _error] call FLO_fnc_log;
@@ -175,6 +102,17 @@ if (_configError != "") then {
     throw _error;
 };
 
+private _savedCommanders = _saveData get "aiCommanders";
+{
+    if !(_x in _savedCommanders) then { throw format ["Saved campaign is missing GTN side %1", _x] };
+    try {
+        [_savedCommanders get _x, _x, _saveData get "virtualGroups", _saveData get "objectives"] call FLO_fnc_gtnValidateSavedIntents;
+    } catch {
+        ["SAVE_DETECT", 1, format ["Current GTN campaign required; Continue aborted: %1", _exception]] call FLO_fnc_log;
+        throw _exception;
+    };
+} forEach ["EAST", "WEST"];
+
 FLO_SavedGameData = _saveData;
 publicVariable "FLO_SavedGameData";
 private _missionConfig = createHashMap;
@@ -183,8 +121,7 @@ private _missionConfig = createHashMap;
 } forEach (keys _configData);
 
 ["SAVE_DETECT", 3, format [
-    "Validated current mission save version %1 for player side %2",
-    _saveVersion,
+    "Validated current mission save for player side %1",
     _configData get "playerSideKey"
 ]] call FLO_fnc_log;
 [true, _missionConfig]
