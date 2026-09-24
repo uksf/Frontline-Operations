@@ -61,9 +61,7 @@ If the setting or file is absent, FLO does not start. Set `FLO > Campaign > Camp
 | `Continue saved progress` | Loads a valid FLO save; otherwise starts fresh. |
 | `Reset saved progress` | Deletes the current FLO save and starts fresh. |
 
-Fresh setup configures factions, commander posture, player start, starting territory, enemy presence, objective filtering, virtualization limits, reputation, and resources. Starting money defaults to `5000`.
-
-The setup dialog opens only for a hosted server or a client logged in as admin. Once initialization completes, no player commander or occupied slot is required to keep server-owned campaign systems running. Clients remain on the deployment screen until the server publishes `FLO_MissionReady`, then receive one cleanup respawn at the campaign start.
+This fork has no setup dialog. A fresh campaign loads the mission-owned [`flops/settings.sqf`](missions/FLO_Test.Altis/flops/settings.sqf), which must set every value the upstream setup dialog offers: factions, player side, commander posture, force composition for both sides, starting territory, start position, objective size, virtualization limits, reputation, and resources. A missing or invalid value stops Phase 1 with an RPT and client error; no default is used. The file's `artilleryHandle` (side cooldown, battery rearm time, treasury and Local Supplies cost per round) is read on every start, including Continue. Once initialization completes, no player commander or occupied slot is required to keep server-owned campaign systems running. Clients remain on the deployment screen until the server publishes `FLO_MissionReady`, then receive one cleanup respawn at the campaign start.
 
 ## Player Controls
 
@@ -91,14 +89,14 @@ Custom definitions provide the fallback unit, vehicle, air, support, and Store p
 - [`opf_custom.sqf`](addons/main/Factions/Custom/opf_custom.sqf)
 - [`civ_custom.sqf`](addons/main/Factions/Custom/civ_custom.sqf)
 
-The setup UI also discovers compatible loaded `CfgFactionClasses` entries. Bundled curated presets have been removed; use custom definitions for deliberate class selection and pricing, or select auto-discovered factions for loaded-mod compatibility. Numeric force composition is configured in the setup UI rather than duplicated in faction files.
+The setup UI also discovers compatible loaded `CfgFactionClasses` entries. Bundled curated presets have been removed; use custom definitions for deliberate class selection and pricing, or select auto-discovered factions for loaded-mod compatibility. Numeric force composition is configured in `flops/settings.sqf` rather than duplicated in faction files.
 
 ## Initialization
 
 [`fn_addonPostInit.sqf`](addons/main/Functions/Init/fn_addonPostInit.sqf) starts the addon on server and clients. The server then runs [`fn_initPhaseManager.sqf`](addons/main/Functions/Init/fn_initPhaseManager.sqf) in this order:
 
 1. Detect or reset saved progress.
-2. Load saved configuration or wait for fresh setup.
+2. Load saved configuration or `flops/settings.sqf`.
 3. Build faction catalogs.
 4. Index or restore objectives.
 5. Seed or restore virtual forces.

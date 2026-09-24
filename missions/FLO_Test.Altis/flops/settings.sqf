@@ -46,8 +46,54 @@ createHashMapFromArray [
         ["priorityBonusGroups", 0],
         ["hotBonusGroups", 1]
     ]],
-    ["westFactionTuningHandle", createHashMap],
-    ["eastFactionTuningHandle", createHashMap],
+    // Force composition tab. Every value is required; 999 means uncapped.
+    ["westFactionTuningHandle", createHashMapFromArray [
+        ["transportReserveGroundCount", 20],
+        ["transportReserveAirCount", 10],
+        ["objectiveGroupTypeCaps", [
+            ["infantry", 999], ["motorized", 999], ["mechanized", 999], ["armor", 999], ["helicopter", 10],
+            ["jet", 10], ["air", 5], ["artillery", 5], ["mobile_aa", 20], ["static_aa", 3]
+        ]],
+        ["groupCounts", [
+            ["infantry", 10], ["motorized", 1], ["mechanized", 1], ["armor", 1], ["helicopter", 1],
+            ["jet", 1], ["air", 1], ["artillery", 3], ["mobile_aa", 1], ["static_aa", 1]
+        ]],
+        ["objectiveGroups", [
+            ["capital", [["infantry", 12], ["motorized", 2], ["mechanized", 1], ["armor", 1], ["air", 1], ["artillery", 1], ["mobile_aa", 1], ["static_aa", 1]]],
+            ["city",    [["infantry", 12], ["motorized", 2], ["mechanized", 1], ["armor", 1], ["air", 1], ["artillery", 1], ["mobile_aa", 1], ["static_aa", 1]]],
+            ["village", [["infantry", 3], ["motorized", 0], ["mechanized", 0], ["armor", 0], ["air", 0], ["artillery", 0], ["mobile_aa", 0], ["static_aa", 0]]],
+            ["local",   [["infantry", 6], ["motorized", 2], ["mechanized", 1], ["armor", 0], ["air", 0], ["artillery", 0], ["mobile_aa", 1], ["static_aa", 0]]],
+            ["marine",  [["infantry", 3], ["motorized", 1], ["mechanized", 0], ["armor", 0], ["air", 0], ["artillery", 0], ["mobile_aa", 0], ["static_aa", 0]]],
+            ["cluster", [["infantry", 2], ["motorized", 0], ["mechanized", 0], ["armor", 0], ["air", 0], ["artillery", 0], ["mobile_aa", 0], ["static_aa", 0]]]
+        ]]
+    ]],
+    ["eastFactionTuningHandle", createHashMapFromArray [
+        ["transportReserveGroundCount", 20],
+        ["transportReserveAirCount", 10],
+        ["objectiveGroupTypeCaps", [
+            ["infantry", 999], ["motorized", 999], ["mechanized", 999], ["armor", 999], ["helicopter", 10],
+            ["jet", 10], ["air", 5], ["artillery", 5], ["mobile_aa", 20], ["static_aa", 3]
+        ]],
+        ["groupCounts", [
+            ["infantry", 10], ["motorized", 1], ["mechanized", 1], ["armor", 1], ["helicopter", 1],
+            ["jet", 1], ["air", 1], ["artillery", 3], ["mobile_aa", 1], ["static_aa", 1]
+        ]],
+        ["objectiveGroups", [
+            ["capital", [["infantry", 12], ["motorized", 2], ["mechanized", 1], ["armor", 1], ["air", 1], ["artillery", 1], ["mobile_aa", 1], ["static_aa", 1]]],
+            ["city",    [["infantry", 12], ["motorized", 2], ["mechanized", 1], ["armor", 1], ["air", 1], ["artillery", 1], ["mobile_aa", 1], ["static_aa", 1]]],
+            ["village", [["infantry", 3], ["motorized", 0], ["mechanized", 0], ["armor", 0], ["air", 0], ["artillery", 0], ["mobile_aa", 0], ["static_aa", 0]]],
+            ["local",   [["infantry", 6], ["motorized", 2], ["mechanized", 1], ["armor", 0], ["air", 0], ["artillery", 0], ["mobile_aa", 1], ["static_aa", 0]]],
+            ["marine",  [["infantry", 3], ["motorized", 1], ["mechanized", 0], ["armor", 0], ["air", 0], ["artillery", 0], ["mobile_aa", 0], ["static_aa", 0]]],
+            ["cluster", [["infantry", 2], ["motorized", 0], ["mechanized", 0], ["armor", 0], ["air", 0], ["artillery", 0], ["mobile_aa", 0], ["static_aa", 0]]]
+        ]]
+    ]],
+    // Artillery balance. Read on every start, including Continue.
+    ["artilleryHandle", createHashMapFromArray [
+        ["sideCooldownSeconds", 300],
+        ["batteryCooldownSeconds", 600],
+        ["treasuryCostPerRound", 100],
+        ["localSupplyCostPerRound", 150]
+    ]],
     ["startingResources", 5000],
     ["objectiveSizeThreshold", 8],
     ["virtualizationDistance", 1500],

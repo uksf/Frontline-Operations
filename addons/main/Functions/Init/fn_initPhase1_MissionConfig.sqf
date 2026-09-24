@@ -10,19 +10,22 @@ FLO_VirtualizationUnitCap = 200;
 
 private _loadedSave = !isNil "FLO_IsLoadedSave" && {FLO_IsLoadedSave};
 private _loadError = "";
-if (!_loadedSave) then {
-    try {
-        FLO_MissionConfig = [] call FLO_fnc_loadMissionConfigFile;
-    } catch {
-        _loadError = _exception;
-    };
+private _fileConfig = createHashMap;
+// The file is read on Continue too: its artillery settings are live balance, not saved state.
+try {
+    _fileConfig = [] call FLO_fnc_loadMissionConfigFile;
+} catch {
+    _loadError = _exception;
+};
 
-    if (_loadError == "") then {
+if (_loadError == "") then {
+    if (!_loadedSave) then {
+        FLO_MissionConfig = _fileConfig;
         publicVariable "FLO_MissionConfig";
         ["INIT", 3, "Phase 1 loaded flops\\settings.sqf"] call FLO_fnc_log;
+    } else {
+        ["INIT", 3, "Phase 1 using validated current saved mission configuration"] call FLO_fnc_log;
     };
-} else {
-    ["INIT", 3, "Phase 1 using validated current saved mission configuration"] call FLO_fnc_log;
 };
 
 if (_loadError != "") exitWith {
@@ -167,6 +170,17 @@ try {
     if ((_startPosition select 0) < 0 || {(_startPosition select 0) > worldSize || {(_startPosition select 1) < 0 || {(_startPosition select 1) > worldSize}}}) then {
         throw format ["Mission config startPosition is outside the terrain: %1", _startPosition];
     };
+
+    // Saved campaigns keep the composition they started with.
+    if (!_loadedSave) then {
+        {
+            _x params ["_field", "_sideLabel"];
+            FLO_MissionConfig set [_field, [FLO_MissionConfig get _field, _sideLabel] call FLO_fnc_validateMissionTuningHandle];
+        } forEach [["westFactionTuningHandle", "BLUFOR"], ["eastFactionTuningHandle", "OPFOR"]];
+        publicVariable "FLO_MissionConfig";
+    };
+
+    [_fileConfig] call FLO_fnc_applyArtillerySettings;
 } catch {
     _configError = _exception;
 };
