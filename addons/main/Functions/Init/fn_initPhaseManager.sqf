@@ -53,7 +53,19 @@ diag_log "[FLO_INIT] ========================================";
 // ============================================================================
 
 diag_log "[FLO_INIT] === PHASE 0: Save Detection ===";
-private _saveResult = [] call FLO_fnc_detectSavedGame;
+private _saveResult = [];
+try {
+    _saveResult = [] call FLO_fnc_detectSavedGame;
+} catch {
+    FLO_InitError = format ["Saved campaign cannot be continued: %1. Select Reset saved progress to start from flops\settings.sqf.", _exception];
+};
+if (FLO_InitError != "") exitWith {
+    diag_log format ["[FLO_INIT] Phase 0 failed: %1", FLO_InitError];
+    FLO_InitPhase = -1;
+    publicVariable "FLO_InitError";
+    publicVariable "FLO_InitPhase";
+    false
+};
 _saveResult params ["_hasSave", "_savedConfig"];
 
 if (_hasSave) then {

@@ -178,6 +178,12 @@ try {
             FLO_MissionConfig set [_field, [FLO_MissionConfig get _field, _sideLabel] call FLO_fnc_validateMissionTuningHandle];
         } forEach [["westFactionTuningHandle", "BLUFOR"], ["eastFactionTuningHandle", "OPFOR"]];
         publicVariable "FLO_MissionConfig";
+    } else {
+        {
+            if ((keys (FLO_MissionConfig get _x)) isEqualTo []) then {
+                throw format ["Saved campaign has an empty %1 from before explicit force composition. Select Reset saved progress to start from flops\settings.sqf", _x];
+            };
+        } forEach ["westFactionTuningHandle", "eastFactionTuningHandle"];
     };
 
     [_fileConfig] call FLO_fnc_applyArtillerySettings;

@@ -20,7 +20,8 @@ private _enemyLogisticsIntel = [_viewerSide] call FLO_fnc_gtnBuildEnemyLogistics
 
 private _commander = [_viewerSide] call FLO_fnc_gtnGetCommanderBySide;
 private _observedObjectives = (_commander get "_worldState") get "_objectives";
-private _operationRows = [_commander] call FLO_fnc_campaignBuildOperationRows;
+// DEFEND intents exist only after the commander senses an attack; publishing them leaks under-attack intel.
+private _operationRows = ([_commander] call FLO_fnc_campaignBuildOperationRows) select { (_x get "kind") != "DEFEND" };
 private _attackRows = _operationRows select { (_x get "kind") == "CAPTURE" };
 private _viewerAttackCounts = createHashMap;
 {
