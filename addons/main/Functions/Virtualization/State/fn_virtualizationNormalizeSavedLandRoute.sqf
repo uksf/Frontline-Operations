@@ -2,7 +2,8 @@
  * Function: FLO_fnc_virtualizationNormalizeSavedLandRoute
  * Description:
  *   Enforces the same LAND terrain contract at save and restore boundaries,
- *   rebuilding geometry when exact validation rejects the continuation. The record
+ *   rebuilding geometry when exact validation rejects the continuation, and
+ *   clearing an unowned route that stays unsafe. The record
  *   shape must already be current and structurally valid; this only rebases
  *   canonical route waypoints from the validated movement origin. Attached
  *   passengers retain their carrier position and defer ingress until dismount.
@@ -51,16 +52,8 @@ private _routeResult = [
 ] call FLO_fnc_virtualizationResolveLandRouteContinuation;
 _routeResult params ["_resolved", "_resolvedWaypoints", "_resolverReason", "_metrics", "_endpointIndexes"];
 
-if (!_resolved || {_resolvedWaypoints isEqualTo []}) then {
-    private _message = format [
-        "Unsafe saved LAND route group=%1 originalReason=%2 resolverReason=%3 waypoints=%4",
-        _groupId,
-        _failureReason,
-        _resolverReason,
-        count _waypoints
-    ];
-    ["VIRTUALIZATION", 1, _message] call FLO_fnc_log;
-    throw _message;
+if (!_resolved || {_resolvedWaypoints isEqualTo []}) exitWith {
+    [_savedData, _groupId, _routeStartPos, format ["%1 resolver=%2", _failureReason, _resolverReason]] call FLO_fnc_virtualizationClearUnsafeSavedLandRoute
 };
 
 private _dismountIndex = _savedData get "dismountAtWaypoint";
@@ -104,14 +97,8 @@ _routeValidation = [
     _savedData get "patrolConfig"
 ] call FLO_fnc_virtualizationValidateLandRoute;
 
-if !(_routeValidation select 0) then {
-    private _message = format [
-        "Normalized saved LAND route for %1 failed exact validation: %2",
-        _groupId,
-        _routeValidation select 1
-    ];
-    ["VIRTUALIZATION", 1, _message] call FLO_fnc_log;
-    throw _message;
+if !(_routeValidation select 0) exitWith {
+    [_savedData, _groupId, _routeStartPos, format ["rebuilt route %1", _routeValidation select 1]] call FLO_fnc_virtualizationClearUnsafeSavedLandRoute
 };
 
 ["VIRTUALIZATION", 2, format [

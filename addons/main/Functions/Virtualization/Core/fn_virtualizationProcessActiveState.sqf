@@ -23,7 +23,8 @@ if (!isNull _leader && {alive _leader}) then {
     private _isBuildingGarrison = (_groupData get "commanderOrder") == "GARRISON"
         && {(_groupData get "orderMode") == "GARRISON_BUILDING"}
         && {(_groupData get "groupType") == "infantry"};
-    if (_isBuildingGarrison && {!(_realGroup getVariable ["FLO_buildingGarrisonAttempted", false])}) then {
+    // A player who joins or leads the group takes its locality; only the owning machine can garrison it.
+    if (_isBuildingGarrison && {local _realGroup} && {!(_realGroup getVariable ["FLO_buildingGarrisonAttempted", false])}) then {
         private _garrisonAnchor = _groupData get "garrisonPosition";
         private _applyDistance = ["buildingGarrisonApplyDistance"] call FLO_fnc_virtualizationGetConfigValue;
         if (_realPos distance2D _garrisonAnchor <= _applyDistance) then {
