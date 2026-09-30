@@ -37,4 +37,5 @@ if ((FLO_VirtUpdate get "lastPlayerCacheTime") <= 0) then {
     call FLO_fnc_virtualizationCachePlayers;
 };
 
-([_candidate] call FLO_fnc_virtualizationGetNearestCachedPlayerDistance) >= _playerClearance
+// Players in an exclusion area do not activate AI, but nothing may spawn on top of them.
+([_candidate, false, true] call FLO_fnc_virtualizationGetNearestCachedPlayerDistance) >= _playerClearance

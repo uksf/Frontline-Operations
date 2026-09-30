@@ -1,7 +1,8 @@
 /*
  * Function: FLO_fnc_moduleObjectiveExclusion
  * Description:
- *   Registers one Eden objective-exclusion area before fresh indexing.
+ *   Registers one Eden exclusion area at mission start. Fresh indexing places no objectives
+ *   inside it, and players inside it do not cause AI to spawn.
  */
 
 (_this select 1) params ["_logic"];

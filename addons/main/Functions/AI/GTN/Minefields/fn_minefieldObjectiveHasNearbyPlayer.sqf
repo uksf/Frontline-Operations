@@ -25,7 +25,7 @@ params [
 if (_objectiveId == "" || {!(_playerSide in [east, west])}) exitWith { false };
 if (_playerPositions isEqualTo []) then {
     {
-        if (alive _x && {(side group _x) isEqualTo _playerSide}) then {
+        if (alive _x && {(side group _x) isEqualTo _playerSide} && {!([getPosATL _x] call FLO_fnc_objectivePositionExcluded)}) then {
             _playerPositions pushBack (getPosATL _x);
         };
     } forEach ([] call FLO_fnc_getConnectedHumanPlayers);

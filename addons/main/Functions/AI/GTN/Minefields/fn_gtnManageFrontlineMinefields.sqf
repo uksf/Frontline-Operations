@@ -78,7 +78,7 @@ private _playerProximityMeters = (["activationDistance"] call FLO_fnc_virtualiza
 private _activePlayerPositions = [];
 if (_activePlayerSide in [east, west]) then {
     {
-        if (alive _x && {(side group _x) isEqualTo _activePlayerSide}) then {
+        if (alive _x && {(side group _x) isEqualTo _activePlayerSide} && {!([getPosATL _x] call FLO_fnc_objectivePositionExcluded)}) then {
             _activePlayerPositions pushBack (getPosATL _x);
         };
     } forEach ([] call FLO_fnc_getConnectedHumanPlayers);

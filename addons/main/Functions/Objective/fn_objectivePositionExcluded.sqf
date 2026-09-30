@@ -1,4 +1,5 @@
-/* Returns true when a position is inside any registered exclusion module. */
+/* Returns true when a position is inside any registered exclusion module. Objectives are never
+   generated there, and players there do not activate AI or minefield construction. */
 params [["_position", [0, 0, 0], [[]]]];
 
 private _excluded = false;

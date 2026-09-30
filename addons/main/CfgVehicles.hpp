@@ -17,7 +17,7 @@ class CfgVehicles {
         scope = 2;
         scopeCurator = 0;
         is3DEN = 1;
-        displayName = "Objective Exclusion Area";
+        displayName = "Exclusion Area";
         icon = "A3\Modules_F\Data\portraitsector_ca.paa";
         portrait = "A3\Modules_F\Data\portraitsector_ca.paa";
         category = "FLO_Modules";
