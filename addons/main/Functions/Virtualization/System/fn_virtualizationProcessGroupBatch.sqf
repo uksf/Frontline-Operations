@@ -49,7 +49,19 @@ for "_i" from _batchStart to _batchEnd do {
     };
 
     private _groupStart = diag_tickTime;
-    [_groupId, _groupData, _activationDist, _now, _samplePhases] call FLO_fnc_virtualizationProcessGroup;
+    // Active groups are due every frame, so an exception that escaped here aborted the same batch
+    // every frame and stalled every later batch, including all activation. Contain it to the group.
+    try {
+        [_groupId, _groupData, _activationDist, _now, _samplePhases] call FLO_fnc_virtualizationProcessGroup;
+    } catch {
+        private _errors = FLO_VirtUpdate getOrDefault ["groupErrors", createHashMap, true];
+        private _last = _errors getOrDefault [_groupId, ["", -1e10]];
+        if (_exception isNotEqualTo (_last select 0) || {_now - (_last select 1) >= 60}) then {
+            _errors set [_groupId, [_exception, _now]];
+            ["VIRTUALIZATION", 1, format ["Group %1 processing failed, continuing batch: %2", _groupId, _exception]] call FLO_fnc_log;
+        };
+        _stats set ["groupErrorsTotal", (_stats getOrDefault ["groupErrorsTotal", 0]) + 1];
+    };
     private _groupMs = (diag_tickTime - _groupStart) * 1000;
 
     if (_samplePhases) then {
