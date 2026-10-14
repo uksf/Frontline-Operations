@@ -84,22 +84,6 @@ if (_missingFields isNotEqualTo []) exitWith {
 private _configError = "";
 private _playerSideKey = FLO_MissionConfig get "playerSideKey";
 try {
-    private _handleFields = [
-        "bluforHandle", "opforHandle", "civilianHandle", "reputationHandle",
-        "westDifficultyHandle", "eastDifficultyHandle",
-        "westGTNAttackCoverageHandle", "eastGTNAttackCoverageHandle",
-        "westGTNDefenseCoverageHandle", "eastGTNDefenseCoverageHandle",
-        "westGTNTempoHandle", "eastGTNTempoHandle",
-        "westGTNForceGrowthHandle", "eastGTNForceGrowthHandle",
-        "westGTNGarrisonHandle", "eastGTNGarrisonHandle",
-        "westFactionTuningHandle", "eastFactionTuningHandle"
-    ];
-    {
-        if !((FLO_MissionConfig get _x) isEqualType createHashMap) then {
-            throw format ["Mission config %1 must be a HASHMAP", _x];
-        };
-    } forEach _handleFields;
-
     if (([FLO_MissionConfig get "bluforHandle"] call FLO_fnc_factionHandleSide) != 1) then {
         throw "BLUFOR faction handle is not config side 1";
     };
@@ -109,84 +93,20 @@ try {
     if (([FLO_MissionConfig get "civilianHandle"] call FLO_fnc_factionHandleSide) != 3) then {
         throw "Civilian faction handle is not config side 3";
     };
-    if !(_playerSideKey isEqualType "" && {_playerSideKey in ["WEST", "EAST"]}) then {
+    if !(_playerSideKey in ["WEST", "EAST"]) then {
         throw format ["Unsupported player side key %1", _playerSideKey];
     };
-
-    private _valueSpecs = [
-        ["reputationHandle", [2, 9, 16]],
-        ["westDifficultyHandle", [0.5, 1, 1.5]],
-        ["eastDifficultyHandle", [0.5, 1, 1.5]],
-        ["westGTNAttackCoverageHandle", [0.5, 0.75, 1, 1.25]],
-        ["eastGTNAttackCoverageHandle", [0.5, 0.75, 1, 1.25]],
-        ["westGTNDefenseCoverageHandle", [0.5, 0.75, 1, 1.25]],
-        ["eastGTNDefenseCoverageHandle", [0.5, 0.75, 1, 1.25]],
-        ["westGTNTempoHandle", [10, 14, 20, 28]],
-        ["eastGTNTempoHandle", [10, 14, 20, 28]],
-        ["westGTNForceGrowthHandle", [1, 2, 3]],
-        ["eastGTNForceGrowthHandle", [1, 2, 3]]
-    ];
     {
-        _x params ["_field", "_allowedValues"];
-        private _value = (FLO_MissionConfig get _field) get "value";
-        if !(_value in _allowedValues) then {
-            throw format ["Mission config %1 has unsupported value %2", _field, _value];
+        private _growthValue = (FLO_MissionConfig get _x) get "value";
+        if !(_growthValue in [1, 2, 3]) then {
+            throw format ["Mission config %1 must select 1, 2, or 3 growth groups, got %2", _x, _growthValue];
         };
-    } forEach _valueSpecs;
+    } forEach ["westGTNForceGrowthHandle", "eastGTNForceGrowthHandle"];
 
-    {
-        private _handle = FLO_MissionConfig get _x;
-        {
-            if !(_x in _handle && {(_handle get _x) isEqualType 0 && {(_handle get _x) >= 0}}) then {
-                throw format ["Mission config garrison field %1 is missing or invalid", _x];
-            };
-        } forEach ["rearBaseGroups", "frontlineBaseGroups", "priorityBonusGroups", "hotBonusGroups"];
-    } forEach ["westGTNGarrisonHandle", "eastGTNGarrisonHandle"];
-
-    private _startingResources = FLO_MissionConfig get "startingResources";
-    if !(_startingResources isEqualType 0 && {_startingResources >= 0}) then {
-        throw format ["Mission config startingResources must be non-negative, got %1", _startingResources];
-    };
     private _objectiveSizeThreshold = FLO_MissionConfig get "objectiveSizeThreshold";
     if !(_objectiveSizeThreshold in [4, 8, 12, 24]) then {
         throw format ["Mission config objectiveSizeThreshold must be one of 4, 8, 12, or 24, got %1", _objectiveSizeThreshold];
     };
-    private _virtualizationDistance = FLO_MissionConfig get "virtualizationDistance";
-    if !(_virtualizationDistance in [1000, 1500, 2000, 2500, 3000]) then {
-        throw format ["Mission config virtualizationDistance is unsupported: %1", _virtualizationDistance];
-    };
-    private _virtualizationUnitCap = FLO_MissionConfig get "virtualizationUnitCap";
-    if !(_virtualizationUnitCap in [100, 150, 200, 250, 300, 350, 400]) then {
-        throw format ["Mission config virtualizationUnitCap is unsupported: %1", _virtualizationUnitCap];
-    };
-    private _territoryRatio = FLO_MissionConfig get "startingTerritoryWestRatio";
-    if !(_territoryRatio isEqualType 0 && {_territoryRatio >= 0.1 && {_territoryRatio <= 0.9}}) then {
-        throw format ["Mission config startingTerritoryWestRatio must be between 0.1 and 0.9, got %1", _territoryRatio];
-    };
-    private _startPosition = FLO_MissionConfig get "startPosition";
-    if !(_startPosition isEqualType [] && {(count _startPosition) >= 2} && {{_x isEqualType 0} count _startPosition == count _startPosition}) then {
-        throw format ["Mission config startPosition is invalid: %1", _startPosition];
-    };
-    if ((_startPosition select 0) < 0 || {(_startPosition select 0) > worldSize || {(_startPosition select 1) < 0 || {(_startPosition select 1) > worldSize}}}) then {
-        throw format ["Mission config startPosition is outside the terrain: %1", _startPosition];
-    };
-
-    // Saved campaigns keep the composition they started with.
-    if (!_loadedSave) then {
-        {
-            _x params ["_field", "_sideLabel"];
-            FLO_MissionConfig set [_field, [FLO_MissionConfig get _field, _sideLabel] call FLO_fnc_validateMissionTuningHandle];
-        } forEach [["westFactionTuningHandle", "BLUFOR"], ["eastFactionTuningHandle", "OPFOR"]];
-        publicVariable "FLO_MissionConfig";
-    } else {
-        {
-            if ((keys (FLO_MissionConfig get _x)) isEqualTo []) then {
-                throw format ["Saved campaign has an empty %1 from before explicit force composition. Select Reset saved progress to start from flops\settings.sqf", _x];
-            };
-        } forEach ["westFactionTuningHandle", "eastFactionTuningHandle"];
-    };
-
-    [_fileConfig] call FLO_fnc_applyArtillerySettings;
 } catch {
     _configError = _exception;
 };
@@ -196,6 +116,8 @@ if (_configError != "") exitWith {
     ["INIT", 1, FLO_InitError] call FLO_fnc_log;
     false
 };
+
+[_fileConfig] call FLO_fnc_applyArtillerySettings;
 
 FLO_BluforHandle = FLO_MissionConfig get "bluforHandle";
 FLO_OpforHandle = FLO_MissionConfig get "opforHandle";

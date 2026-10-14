@@ -9,7 +9,6 @@ class Init {
     class initLoadFactionSelection {};
     class initMissionConfigEvents {};
     class loadMissionConfigFile {};
-    class validateMissionTuningHandle {};
     class applyArtillerySettings {};
     class initPhaseManager      {};
     class initPhase1_MissionConfig {};

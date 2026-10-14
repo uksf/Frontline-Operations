@@ -1,4 +1,4 @@
-// FLO fresh-campaign settings. Every field is required; Phase 1 rejects a missing or out-of-range value.
+// FLO fresh-campaign settings. Phase 1 loads this file in place of the setup dialog. Use the values the dialog offers.
 // "name" fields are display labels only. "value" fields drive behaviour.
 createHashMapFromArray [
     // Factions. source: "auto" (factionClass from CfgFactionClasses) | "custom" (Factions\Custom file)
@@ -65,7 +65,7 @@ createHashMapFromArray [
     // transportReserve*: standby ground / air transport groups.
     // objectiveGroupTypeCaps: side-wide maximum objective garrison groups per type, filled by objective priority (999 = uncapped).
     // groupCounts: units per group of each type.
-    // objectiveGroups: garrison groups spawned at each objective type. Every objective type needs all 8 group types.
+    // objectiveGroups: garrison groups spawned at each objective type.
     ["westFactionTuningHandle", createHashMapFromArray [
         ["transportReserveGroundCount", 20],
         ["transportReserveAirCount", 10],
