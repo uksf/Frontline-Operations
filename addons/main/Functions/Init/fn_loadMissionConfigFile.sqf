@@ -20,6 +20,10 @@ try {
     throw format ["Mission configuration file %1 failed to execute: %2", _path, _exception];
 };
 
+if (isNil "_config") then {
+    throw format ["Mission configuration file %1 returned nothing instead of HASHMAP", _path];
+};
+
 if !(_config isEqualType createHashMap) then {
     throw format ["Mission configuration file %1 returned %2 instead of HASHMAP", _path, typeName _config];
 };
