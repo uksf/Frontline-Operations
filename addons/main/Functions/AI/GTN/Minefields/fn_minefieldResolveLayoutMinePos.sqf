@@ -62,7 +62,7 @@ private _validationReason = _validation select 0;
 private _safePos = _validation select 1;
 
 if (_validationReason != "") then {
-    _safePos = [_candidatePos, 0, _safeResolveRadius, 1, 0, 0.35, 0] call BIS_fnc_findSafePos;
+    _safePos = [_candidatePos, 0, _safeResolveRadius, 1, 0, 0.35, 0, [], [[0, 0, 0], [0, 0, 0]]] call BIS_fnc_findSafePos;
     if (_safePos isEqualTo [0, 0, 0]) exitWith {
         _layoutStats set ["rejectedNoSafePos", (_layoutStats get "rejectedNoSafePos") + 1];
         []

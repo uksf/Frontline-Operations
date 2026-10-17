@@ -60,22 +60,14 @@ private _fieldGeometry = [(_context get "anchorPos"), (_context get "facingDir")
 private _fieldCenterPos = _fieldGeometry get "fieldCenterPos";
 private _depthHalfWidth = _fieldGeometry get "depthHalfWidth";
 private _frontageHalfWidth = _fieldGeometry get "frontageHalfWidth";
-private _markerName = format ["FLO_MINEFIELD_%1", _fieldId];
-private _markerColor = ["ColorWEST", "ColorEAST"] select ((_job get "sideKey") isEqualTo "EAST");
-
-if (getMarkerColor _markerName != "") then {
-    deleteMarker _markerName;
-};
-
-private _marker = createMarker [_markerName, _fieldCenterPos];
-_marker setMarkerShapeLocal "RECTANGLE";
-_marker setMarkerBrushLocal "SolidBorder";
-_marker setMarkerColorLocal _markerColor;
-_marker setMarkerAlphaLocal (FLO_MinefieldConfig get "markerAlpha");
-_marker setMarkerDirLocal ((_context get "facingDir") + 90);
-_marker setMarkerPosLocal _fieldCenterPos;
-_marker setMarkerSizeLocal [_frontageHalfWidth, _depthHalfWidth];
-_marker setMarkerText "Minefield";
+private _markerName = [
+    format ["FLO_MINEFIELD_%1", _fieldId],
+    _job get "side",
+    _fieldCenterPos,
+    _context get "facingDir",
+    _frontageHalfWidth,
+    _depthHalfWidth
+] call FLO_fnc_minefieldCreateFieldMarker;
 
 private _field = createHashMapFromArray [
     ["id", _fieldId],

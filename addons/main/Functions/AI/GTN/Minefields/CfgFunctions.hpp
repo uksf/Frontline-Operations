@@ -6,6 +6,7 @@ class GTNMinefields {
     class minefieldBuildQueueRun {};
     class minefieldCancelObjectiveBuild {};
     class minefieldCommitBuiltField {};
+    class minefieldCreateFieldMarker {};
     class minefieldFinalizeBuildJob {};
     class minefieldBuildObjectiveCandidateSeed {};
     class minefieldBuildObjectiveAreaCache {};

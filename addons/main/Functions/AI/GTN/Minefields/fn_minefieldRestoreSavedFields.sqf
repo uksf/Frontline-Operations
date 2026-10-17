@@ -77,6 +77,11 @@ private _stagedObjectiveIndex = createHashMap;
 private _createdMines = [];
 private _createdMarkers = [];
 private _buildError = "";
+private _safePosFallbacks = [
+    getArray (configFile >> "CfgWorlds" >> worldName >> "Armory" >> "positionStart"),
+    getArray (configFile >> "CfgWorlds" >> worldName >> "centerPosition")
+] select { (count _x) >= 2 };
+private _droppedFallbackMines = 0;
 try {
     {
         private _savedField = _x;
@@ -89,6 +94,10 @@ try {
         {
             private _mineType = _x get "type";
             private _minePos = ASLToATL (_x get "posASL");
+            if (_safePosFallbacks findIf { (_x distance2D _minePos) < 1 } >= 0) then {
+                _droppedFallbackMines = _droppedFallbackMines + 1;
+                continue;
+            };
             private _mine = createMine [_mineType, _minePos, [], 0];
             if (isNull _mine) then {
                 throw format ["Minefield %1 could not create mine %2", _fieldId, _forEachIndex];
@@ -99,10 +108,10 @@ try {
             _mineObjects pushBack _mine;
             _createdMines pushBack _mine;
         } forEach (_savedField get "mineSpecs");
+        if (_mineObjects isEqualTo []) then { continue };
 
-        private _markerName = format ["FLO_MINEFIELD_%1", _fieldId];
-        if (getMarkerColor _markerName != "") then {
-            throw format ["Minefield %1 marker %2 already exists", _fieldId, _markerName];
+        if (getMarkerColor (format ["FLO_MINEFIELD_%1", _fieldId]) != "") then {
+            throw format ["Minefield %1 marker already exists", _fieldId];
         };
 
         private _minePositions = [];
@@ -119,19 +128,16 @@ try {
         };
         private _fieldCenterPos = _fieldGeometry get "fieldCenterPos";
         private _depthHalfWidth = _fieldGeometry get "depthHalfWidth";
-        private _frontageHalfWidth = _savedField get "frontageHalfWidth";
-        private _markerColor = ["ColorEAST", "ColorWEST"] select (_sideKey isEqualTo "WEST");
-
-        private _marker = createMarker [_markerName, _fieldCenterPos];
-        _createdMarkers pushBack _marker;
-        _marker setMarkerShapeLocal "RECTANGLE";
-        _marker setMarkerBrushLocal "SolidBorder";
-        _marker setMarkerColorLocal _markerColor;
-        _marker setMarkerAlphaLocal (FLO_MinefieldConfig get "markerAlpha");
-        _marker setMarkerDirLocal ((_savedField get "facingDir") + 90);
-        _marker setMarkerPosLocal _fieldCenterPos;
-        _marker setMarkerSizeLocal [_frontageHalfWidth, _depthHalfWidth];
-        _marker setMarkerText "Minefield";
+        private _frontageHalfWidth = _fieldGeometry get "frontageHalfWidth";
+        private _markerName = [
+            format ["FLO_MINEFIELD_%1", _fieldId],
+            _side,
+            _fieldCenterPos,
+            _savedField get "facingDir",
+            _frontageHalfWidth,
+            _depthHalfWidth
+        ] call FLO_fnc_minefieldCreateFieldMarker;
+        if (_markerName != "") then { _createdMarkers pushBack _markerName };
 
         private _field = createHashMapFromArray [
             ["id", _fieldId],
@@ -173,5 +179,5 @@ FLO_Minefields = _stagedFields;
 FLO_MinefieldObjectiveIndex = _stagedObjectiveIndex;
 FLO_MinefieldObjectiveCooldowns = _validatedCooldowns;
 
-["MINEFIELD", 3, format ["Restored minefields fields=%1 mines=%2", count _validatedFields, count _createdMines]] call FLO_fnc_log;
+["MINEFIELD", 3, format ["Restored minefields fields=%1 mines=%2 droppedFallbackMines=%3", count _validatedFields, count _createdMines, _droppedFallbackMines]] call FLO_fnc_log;
 count _validatedFields
