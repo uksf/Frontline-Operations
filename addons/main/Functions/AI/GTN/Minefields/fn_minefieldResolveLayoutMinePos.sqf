@@ -63,14 +63,13 @@ private _safePos = _validation select 1;
 
 if (_validationReason != "") then {
     _safePos = [_candidatePos, 0, _safeResolveRadius, 1, 0, 0.35, 0, [], [[0, 0, 0], [0, 0, 0]]] call BIS_fnc_findSafePos;
-    if (_safePos isEqualTo [0, 0, 0]) exitWith {
-        _layoutStats set ["rejectedNoSafePos", (_layoutStats get "rejectedNoSafePos") + 1];
-        []
+    if (_safePos isEqualTo [0, 0, 0]) then {
+        _validationReason = "noSafePos";
+    } else {
+        _validation = [_context, _safePos] call FLO_fnc_minefieldValidateSlotCandidate;
+        _validationReason = _validation select 0;
+        _safePos = _validation select 1;
     };
-
-    _validation = [_context, _safePos] call FLO_fnc_minefieldValidateSlotCandidate;
-    _validationReason = _validation select 0;
-    _safePos = _validation select 1;
 };
 
 if (_validationReason != "") exitWith {

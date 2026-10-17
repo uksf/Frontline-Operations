@@ -79,7 +79,8 @@ private _createdMarkers = [];
 private _buildError = "";
 private _safePosFallbacks = [
     getArray (configFile >> "CfgWorlds" >> worldName >> "Armory" >> "positionStart"),
-    getArray (configFile >> "CfgWorlds" >> worldName >> "centerPosition")
+    getArray (configFile >> "CfgWorlds" >> worldName >> "centerPosition"),
+    [worldSize / 2, worldSize / 2, 0]
 ] select { (count _x) >= 2 };
 private _droppedFallbackMines = 0;
 try {
@@ -179,5 +180,5 @@ FLO_Minefields = _stagedFields;
 FLO_MinefieldObjectiveIndex = _stagedObjectiveIndex;
 FLO_MinefieldObjectiveCooldowns = _validatedCooldowns;
 
-["MINEFIELD", 3, format ["Restored minefields fields=%1 mines=%2 droppedFallbackMines=%3", count _validatedFields, count _createdMines, _droppedFallbackMines]] call FLO_fnc_log;
-count _validatedFields
+["MINEFIELD", 3, format ["Restored minefields fields=%1 mines=%2 droppedFallbackMines=%3", count _stagedFields, count _createdMines, _droppedFallbackMines]] call FLO_fnc_log;
+count _stagedFields
