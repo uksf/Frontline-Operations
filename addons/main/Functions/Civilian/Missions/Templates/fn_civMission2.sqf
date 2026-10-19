@@ -38,8 +38,7 @@ if ((FLO_ReputationHandle get "value") < 7) then {
         _grp1 createUnit [selectRandom _hostileUnits, _ambushPos, [], 0, "NONE"];
     };
     if !([_grp1, _deliveryPos, 200] call FLO_fnc_taskPatrol) then {
-        { deleteVehicle _x; } forEach units _grp1;
-        deleteGroup _grp1;
+        [_grp1] call FLO_fnc_virtualizationDiscardRealGroupUnits;
     };
 
     private _grp2 = createGroup [_hostileSide, true];
@@ -48,8 +47,7 @@ if ((FLO_ReputationHandle get "value") < 7) then {
         _grp2 createUnit [selectRandom _hostileUnits, _ambushPos2, [], 0, "NONE"];
     };
     if !([_grp2, _deliveryPos, 100] call FLO_fnc_taskPatrol) then {
-        { deleteVehicle _x; } forEach units _grp2;
-        deleteGroup _grp2;
+        [_grp2] call FLO_fnc_virtualizationDiscardRealGroupUnits;
     };
 };
 

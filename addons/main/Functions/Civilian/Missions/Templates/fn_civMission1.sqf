@@ -55,8 +55,7 @@ if ((FLO_ReputationHandle get "value") < 7) then {
     };
 
     if !([_grp, _pos, 100] call FLO_fnc_taskPatrol) then {
-        { deleteVehicle _x; } forEach units _grp;
-        deleteGroup _grp;
+        [_grp] call FLO_fnc_virtualizationDiscardRealGroupUnits;
     };
 };
 

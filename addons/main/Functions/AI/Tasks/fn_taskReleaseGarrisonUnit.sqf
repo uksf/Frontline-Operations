@@ -1,11 +1,9 @@
-/* Releases one live unit from FLO-owned physical building-garrison state. */
+/* Releases one live unit from FLO-owned physical building-garrison state.
+   Handlers stay on the machine that assigned the garrison; the AI state is
+   restored where the unit is local, which differs after an HC transfer. */
 params [["_unit", objNull, [objNull]]];
 
 if (isNull _unit) exitWith { true };
-if !(local _unit) then {
-    ["VIRTUALIZATION", 1, format ["Cannot release non-local garrison unit %1", _unit]] call FLO_fnc_log;
-    throw format ["FLO_fnc_taskReleaseGarrisonUnit: unit %1 is not local", _unit];
-};
 
 {
     _x params ["_eventType", "_eventId"];
@@ -14,6 +12,12 @@ if !(local _unit) then {
 
 _unit setVariable ["FLO_garrisonEventHandlers", nil];
 _unit setVariable ["FLO_garrisonPosition", nil];
+
+if !(local _unit) exitWith {
+    [_unit] remoteExecCall ["FLO_fnc_taskReleaseGarrisonUnit", _unit];
+    true
+};
+
 _unit enableAI "PATH";
 _unit setUnitPos "AUTO";
 

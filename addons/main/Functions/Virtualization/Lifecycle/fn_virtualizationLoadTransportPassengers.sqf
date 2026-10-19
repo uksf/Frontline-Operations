@@ -75,8 +75,7 @@ private _poolUnits = _pools get "units";
             _groupId,
             _attachedId
         ]] call FLO_fnc_log;
-        { deleteVehicle _x; } forEach units _infGroup;
-        deleteGroup _infGroup;
+        [_infGroup] call FLO_fnc_virtualizationDiscardRealGroupUnits;
         continue;
     };
 

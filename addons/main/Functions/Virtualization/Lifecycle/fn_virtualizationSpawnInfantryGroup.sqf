@@ -44,8 +44,7 @@ if (count units _realGroup < _unitCount) then {
     };
 
     if (_spawnFailed) exitWith {
-        { deleteVehicle _x; } forEach units _realGroup;
-        deleteGroup _realGroup;
+        [_realGroup] call FLO_fnc_virtualizationDiscardRealGroupUnits;
         _realGroup = grpNull;
     };
 };

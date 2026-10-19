@@ -146,8 +146,7 @@ switch (_modeKey) do {
                     true
                 ] call FLO_fnc_taskApplyRoute;
                 if (!_routeInstalled) then {
-                    { deleteVehicle _x; } forEach units _grp;
-                    deleteGroup _grp;
+                    [_grp] call FLO_fnc_virtualizationDiscardRealGroupUnits;
                     continue;
                 };
                 { _x setUnitPos "MIDDLE"; } forEach units _grp;

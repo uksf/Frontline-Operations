@@ -151,7 +151,6 @@ if !([_groupId] call FLO_fnc_virtualizationRemoveGroup) then {
 
 if (!isNull _realGroup) then {
     ["", _realGroup] call FLO_fnc_virtualizationBindRealGroup;
-    deleteGroup _realGroup;
 };
 
 ["VIRTUALIZATION", 3, format [

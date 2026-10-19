@@ -183,7 +183,9 @@ if (_savedWaypoints isNotEqualTo []) exitWith {
     if (_dismountIndex >= 0) then {
         private _insertPos = _groupData get "transportInsertPos";
         if (count _insertPos < 2) then { _insertPos = _groupData get "reinforcementTargetPos"; };
-        private _semanticInsertIndex = _savedWaypoints findIf { ((_x select 0) distance2D _insertPos) < 1 };
+        private _semanticInsertIndex = if (count _insertPos < 2) then { -1 } else {
+            _savedWaypoints findIf { ((_x select 0) distance2D _insertPos) < 1 }
+        };
         if (_semanticInsertIndex < 0) then {
             throw format ["Physical route capture for %1 lost its transport insert endpoint", _groupId];
         };

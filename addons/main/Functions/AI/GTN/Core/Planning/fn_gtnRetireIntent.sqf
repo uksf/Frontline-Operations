@@ -14,7 +14,11 @@ private _released = [];
     private _group = _groups get _x;
     if ((_group get "commanderIntent") != _id) then { continue };
     _group set ["commanderIntent", ""];
-    if (!_success) then {
+    private _transportOwned = (_group get "missionLock") == "TRANSPORT";
+    if (!_success && {_transportOwned}) then {
+        _released pushBack _x;
+    };
+    if (!_success && {!_transportOwned}) then {
         private _withdrawn = false;
         if ((_intent get "kind") == "CAPTURE") then {
             _withdrawn = [_commander, _x, _group, _intent get "targetPos"] call FLO_fnc_gtnCombatWithdrawGroup;

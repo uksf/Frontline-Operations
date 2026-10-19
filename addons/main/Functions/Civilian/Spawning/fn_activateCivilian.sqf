@@ -106,9 +106,8 @@ switch (_groupType) do {
 };
 
 if (_spawnFailed) exitWith {
-    { deleteVehicle _x; } forEach _spawnedUnits;
+    [_realGroup] call FLO_fnc_virtualizationDiscardRealGroupUnits;
     { deleteVehicle _x; } forEach _spawnedVehicles;
-    deleteGroup _realGroup;
     grpNull
 };
 

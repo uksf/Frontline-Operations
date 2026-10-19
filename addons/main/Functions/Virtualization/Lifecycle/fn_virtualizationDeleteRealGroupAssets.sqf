@@ -13,6 +13,7 @@ if !([_groupData, _realGroup, false] call FLO_fnc_virtualizationCanDeactivateGro
     throw "Virtualization entity deletion crossed group ownership";
 };
 
+private _deleteEmptyGroup = !isNull _realGroup && {(units _realGroup) isEqualTo []} && {local _realGroup};
 private _vehiclesToDelete = +(_groupData get "realVehicles");
 if (!isNull _realGroup) then {
     // Deliberate virtualization owns removal; Empty must not retire its record.
@@ -63,6 +64,6 @@ _vehiclesToDelete = _vehiclesToDelete arrayIntersect _vehiclesToDelete;
     deleteVehicle _x;
 } forEach units _realGroup;
 
-deleteGroup _realGroup;
+if (_deleteEmptyGroup) then { deleteGroup _realGroup };
 
 true

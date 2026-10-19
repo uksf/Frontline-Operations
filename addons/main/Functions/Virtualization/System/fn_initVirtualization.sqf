@@ -28,17 +28,19 @@ params [
 // ============================================================================
 // CREATE AUTHORITATIVE REGISTRY
 // ============================================================================
-FLO_VirtualForceRegistry = [
-    _activationDistance,
-    _activationUnitCap
-] call FLO_fnc_virtualizationCreateRegistry;
+// Registry and spatial index publish in one unscheduled step: a consumer that
+// sees the registry must also see its spatial state.
+isNil {
+    FLO_VirtualForceRegistry = [
+        _activationDistance,
+        _activationUnitCap
+    ] call FLO_fnc_virtualizationCreateRegistry;
+    [500] call FLO_fnc_virtualizationSpatialInit;
+};
 
 // ============================================================================
 // INITIALIZE SUB-SYSTEMS
 // ============================================================================
-
-// Initialize spatial index for fast proximity queries
-[500] call FLO_fnc_virtualizationSpatialInit;
 
 // Rebuild ephemeral update state for each mission init
 [25, 1, true] call FLO_fnc_virtualizationEnsureUpdateState;

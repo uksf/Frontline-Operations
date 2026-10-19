@@ -27,5 +27,5 @@ if !(_exact) exitWith { _result };
 private _groups = call FLO_fnc_virtualizationGetGroupMap;
 _result select {
     private _gData = _groups get _x;
-    (_gData get "position") distance2D _position <= _radius
+    !isNil "_gData" && {(_gData get "position") distance2D _position <= _radius}
 }
