@@ -33,6 +33,7 @@ private _groupIds = [_now, _stats, _groups] call FLO_fnc_virtualizationRefreshCa
 private _activationDist = ["activationDistance"] call FLO_fnc_virtualizationGetConfigValue;
 private _batchResult = [_groupIds, _groups, _activationDist, _now, _stats, _perf] call FLO_fnc_virtualizationProcessGroupBatch;
 _batchResult params ["_processed", "_batchStart", "_batchEnd", "_totalGroups"];
+call FLO_fnc_virtualizationProcessCombatActivations;
 call FLO_fnc_virtualizationSweepStagedGroups;
 
 private _batchMs = (diag_tickTime - _batchStartTime) * 1000;

@@ -109,14 +109,14 @@ private _pfhId = [{
             } forEach (_eastRefs + _westRefs);
 
             if ((_activationDemand + (FLO_VirtUpdate get "activeUnitCount")) <= (["activationUnitCap"] call FLO_fnc_virtualizationGetConfigValue)) then {
+                private _combatActivations = FLO_VirtUpdate get "combatActivations";
                 {
                     _x params ["_groupId", "_gData"];
-                    if !(_gData get "isActive") then {
-                        if !([_groupId] call FLO_fnc_virtualizationTryActivateGroup) then {
-                            continue;
-                        };
+                    if (_gData get "isActive") then {
+                        [_gData] call FLO_fnc_gtnCombatPrepareRealGroupForCombat;
+                    } else {
+                        _combatActivations set [_groupId, true];
                     };
-                    [_gData] call FLO_fnc_gtnCombatPrepareRealGroupForCombat;
                 } forEach (_eastRefs + _westRefs);
 
                 ["GTN_COMBAT", 4, format [
