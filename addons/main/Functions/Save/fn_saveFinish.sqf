@@ -15,11 +15,9 @@ if (_saved) then {
 } else {
     FLO_SaveStatus set ["failures", (FLO_SaveStatus get "failures") + 1];
     ["SAVE", 1, format ["Campaign save failed duration=%1s reason=%2", _duration, _reason]] call FLO_fnc_log;
-    private _message = "Campaign save failed. The last complete save remains available. Check the server RPT.";
-    if (FLO_AutosaveIntervalMinutes > 0) then {
-        _message = _message + " Autosave will try again at the next interval.";
+    if (FLO_SaveRequester >= 0) then {
+        ["Campaign save failed. The last complete save remains available. Check the server RPT.", "error", false, FLO_SaveRequester] call FLO_fnc_sendNotification;
     };
-    [_message, "error", false, 0] call FLO_fnc_sendNotification;
 };
 FLO_SaveRequester = -1;
 ["flo_mission_save_completed", [_saved]] call CBA_fnc_globalEvent;
