@@ -11,6 +11,9 @@ private _spawnParkedHelicopters = _groupType == "helicopter"
     && { ([_groupData] call FLO_fnc_virtualizationGetTransportPassengers) isEqualTo [] }
     && { (_groupData get "state") == "idle" || { _groupData get "transportRole" } };
 
+private _stagedGroup = [_groupId, _comp + (_groupData get "supportComp")] call FLO_fnc_virtualizationAdoptStagedGroup;
+if (!isNull _stagedGroup) exitWith { _stagedGroup };
+
 private _realGroup = [_side, _groupId, _groupType] call FLO_fnc_virtualizationCreateRealGroup;
 if (isNull _realGroup) exitWith { grpNull };
 

@@ -17,6 +17,8 @@ createHashMapFromArray [
     ["cachedPlayerPositions", []],
     ["cachedGroupIds", []],
     ["activeUnitCount", 0],
+    ["lastActivationFrame", -1],
+    ["stagedGroups", createHashMap],
     ["currentBatchIndex", 0],
     ["batchSize", _batchSize],
     ["playerCacheInterval", _playerCacheInterval],

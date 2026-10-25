@@ -39,8 +39,13 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
         };
     };
 
-    if (!_blockActivation && {(FLO_VirtUpdate getOrDefault ["lastActivationFrame", -1]) == diag_frameNo}) exitWith {
-        _virtStats set ["activationFrameSkipsTotal", (_virtStats getOrDefault ["activationFrameSkipsTotal", 0]) + 1];
+    if (!_blockActivation && {(FLO_VirtUpdate get "lastActivationFrame") == diag_frameNo}) exitWith {
+        _virtStats set ["activationFrameSkipsTotal", (_virtStats get "activationFrameSkipsTotal") + 1];
+        true
+    };
+
+    if (!_blockActivation && {[_groupId, _groupData] call FLO_fnc_virtualizationStageActivation}) exitWith {
+        FLO_VirtUpdate set ["lastActivationFrame", diag_frameNo];
         true
     };
 

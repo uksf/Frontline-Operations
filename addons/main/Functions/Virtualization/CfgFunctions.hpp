@@ -111,6 +111,10 @@ class VirtualizationLifecycle {
     class virtualizationParkIdleHelicopter {};
     class virtualizationResolveIdleHelicopterParkPos {};
     class virtualizationSpawnFromComposition {};
+    class virtualizationStageActivation {};
+    class virtualizationAdoptStagedGroup {};
+    class virtualizationDiscardStagedGroup {};
+    class virtualizationSweepStagedGroups {};
     class virtualizationSpawnInfantryGroup {};
     class virtualizationSpawnGroundCombatGroup {};
     class virtualizationSpawnAirGroup      {};
