@@ -40,8 +40,9 @@ for "_i" from 0 to (count _legs - 2) do {
 };
 
 private _detail = format [
-    "group=%1 reason=%2 start=%3 index=%4 loop=%5 waypoints=%6 firstWetLeg=%7",
-    _groupId, _reason, _startPos, _index, _isLoop, count _waypoints, _badLeg
+    "group=%1 reason=%2 start=%3 index=%4 loop=%5 waypoints=%6 firstWetLeg=%7 order=%8 mode=%9 type=%10 pathSource=%11",
+    _groupId, _reason, _startPos, _index, _isLoop, count _waypoints, _badLeg,
+    _savedData get "commanderOrder", _savedData get "orderMode", _savedData get "groupType", _savedData get "pathSource"
 ];
 
 private _routeIsOwned = (_savedData get "commanderOrder") != ""

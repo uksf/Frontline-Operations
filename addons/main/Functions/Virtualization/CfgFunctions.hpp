@@ -184,6 +184,7 @@ class VirtualizationState {
     class virtualizationValidateTransportGraph {};
     class virtualizationNormalizeSavedTransport {};
     class virtualizationResolveSavedLandStart {};
+    class virtualizationAnchorSavedLoopRoute {};
     class virtualizationClearUnsafeSavedLandRoute {};
     class virtualizationNormalizeSavedLandRoute {};
     class virtualizationSerializeRegistry {};

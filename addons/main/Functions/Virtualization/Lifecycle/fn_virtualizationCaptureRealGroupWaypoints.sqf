@@ -6,6 +6,7 @@
  */
 
 params ["_groupId", "_groupData", "_realGroup"];
+if (({alive _x} count units _realGroup) == 0) exitWith { false };
 
 private _existingWaypoints = _groupData get "waypoints";
 private _existingCycle = _existingWaypoints findIf { toUpper (_x select 1) == "CYCLE" };
@@ -56,12 +57,22 @@ if (_isLoopRoute) exitWith {
                 _routeIndex = _matchingIndexes select 0;
             } else {
                 if (_realCurrentIndex != 0) then {
-                    ["VIRTUALIZATION", 1, format [
-                        "Physical LAND loop target no longer matches authoritative route group=%1 target=%2",
+                    private _leader = leader _realGroup;
+                    private _origin = if (!isNull _leader && {alive _leader}) then { getPosATL vehicle _leader } else { _groupData get "position" };
+                    private _nearestDistance = 1e10;
+                    {
+                        private _distance = (_x select 0) distance2D _origin;
+                        if (_distance < _nearestDistance) then {
+                            _nearestDistance = _distance;
+                            _routeIndex = _forEachIndex;
+                        };
+                    } forEach _movementWaypoints;
+                    ["VIRTUALIZATION", 2, format [
+                        "Physical LAND loop target left the authoritative route group=%1 target=%2; resuming at nearest waypoint %3",
                         _groupId,
-                        _realTargetPos
+                        _realTargetPos,
+                        _routeIndex
                     ]] call FLO_fnc_log;
-                    throw format ["Physical LAND loop target mismatch for %1", _groupId];
                 };
             };
         };
@@ -200,6 +211,18 @@ if (_savedWaypoints isNotEqualTo []) exitWith {
     _groupData set ["waypoints", _capturedRoute];
     _groupData set ["currentWaypointIndex", 0];
     ["VIRTUALIZATION", 4, format ["Captured %1 remaining waypoints from real group %2", count _capturedRoute, _groupId]] call FLO_fnc_log;
+    true
+};
+
+private _pendingDismountIndex = _groupData get "dismountAtWaypoint";
+if (_realWaypoints isNotEqualTo [] && {_currentWpIndex >= count _realWaypoints}
+    && {(_groupData get "attachedGroups") isNotEqualTo []}
+    && {(_groupData get "executionState") == "TRANSPORT"}
+    && {_pendingDismountIndex >= 0 && {_pendingDismountIndex < count _existingWaypoints}}) exitWith {
+    _groupData set ["waypoints", _existingWaypoints select [_pendingDismountIndex]];
+    _groupData set ["currentWaypointIndex", 0];
+    _groupData set ["dismountAtWaypoint", 0];
+    ["VIRTUALIZATION", 2, format ["Carrier %1 finished its physical route before unloading - keeping its insert endpoint", _groupId]] call FLO_fnc_log;
     true
 };
 

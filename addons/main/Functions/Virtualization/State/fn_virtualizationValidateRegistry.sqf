@@ -26,6 +26,22 @@ if (_orphanedActiveGroups isNotEqualTo []) then {
     _groups = call FLO_fnc_virtualizationGetGroupMap;
 };
 
+{
+    if ((_y get "commanderOrder") == "ATTACK" && {(_y get "waypoints") isEqualTo []} && {(_y get "state") != "holding"}) then {
+        ["VIRTUALIZATION", 2, format [
+            "Holding ATTACK group %1 that lost its route: state=%2 active=%3 type=%4 replacement=%5 pathSource=%6 execution=%7",
+            _x,
+            _y get "state",
+            _y get "isActive",
+            _y get "groupType",
+            _y get "replacementState",
+            _y get "pathSource",
+            _y get "executionState"
+        ]] call FLO_fnc_log;
+        [_y, "holding"] call FLO_fnc_virtualizationSetRuntimeState;
+    };
+} forEach _groups;
+
 private _realGroups = createHashMap;
 private _spatial = call FLO_fnc_virtualizationGetSpatialState;
 private _spatialGrid = _spatial get "grid";

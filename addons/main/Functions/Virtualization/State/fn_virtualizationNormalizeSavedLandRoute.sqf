@@ -53,6 +53,10 @@ private _routeResult = [
 _routeResult params ["_resolved", "_resolvedWaypoints", "_resolverReason", "_metrics", "_endpointIndexes"];
 
 if (!_resolved || {_resolvedWaypoints isEqualTo []}) exitWith {
+    if ([_savedData, _groupId] call FLO_fnc_virtualizationAnchorSavedLoopRoute) exitWith {
+        [_savedData, _groupId] call FLO_fnc_virtualizationValidateSavedGroup;
+        true
+    };
     [_savedData, _groupId, _routeStartPos, format ["%1 resolver=%2", _failureReason, _resolverReason]] call FLO_fnc_virtualizationClearUnsafeSavedLandRoute
 };
 
@@ -98,6 +102,10 @@ _routeValidation = [
 ] call FLO_fnc_virtualizationValidateLandRoute;
 
 if !(_routeValidation select 0) exitWith {
+    if ([_savedData, _groupId] call FLO_fnc_virtualizationAnchorSavedLoopRoute) exitWith {
+        [_savedData, _groupId] call FLO_fnc_virtualizationValidateSavedGroup;
+        true
+    };
     [_savedData, _groupId, _routeStartPos, format ["rebuilt route %1", _routeValidation select 1]] call FLO_fnc_virtualizationClearUnsafeSavedLandRoute
 };
 
