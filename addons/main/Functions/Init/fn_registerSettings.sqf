@@ -110,5 +110,16 @@ private _airActivationMultiplier = [
 
 _airActivationMultiplier call _settingsFn;
 
+private _activationInterval = [
+    "FLO_ActivationInterval",
+    "SLIDER",
+    ["Group activation interval", "Seconds between the start of one virtual group's physical spawn and the next. Spreads spawn work when many groups enter activation range at once. 0 allows one group per frame."],
+    ["FLO", "Virtualization"],
+    [0, 5, 0.5, 2],
+    1
+];
+
+_activationInterval call _settingsFn;
+
 missionNamespace setVariable ["FLO_SettingsRegistered", true];
 diag_log "[FLO_SETTINGS] Registered CBA settings";

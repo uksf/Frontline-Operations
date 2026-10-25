@@ -111,6 +111,7 @@ class VirtualizationLifecycle {
     class virtualizationParkIdleHelicopter {};
     class virtualizationResolveIdleHelicopterParkPos {};
     class virtualizationSpawnFromComposition {};
+    class virtualizationClaimActivationSlot {};
     class virtualizationStageActivation {};
     class virtualizationAdoptStagedGroup {};
     class virtualizationDiscardStagedGroup {};

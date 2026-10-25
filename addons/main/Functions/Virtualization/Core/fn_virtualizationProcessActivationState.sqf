@@ -39,15 +39,12 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
         };
     };
 
-    if (!_blockActivation && {(FLO_VirtUpdate get "lastActivationFrame") == diag_frameNo}) exitWith {
+    if (!_blockActivation && {!([_groupId] call FLO_fnc_virtualizationClaimActivationSlot)}) exitWith {
         _virtStats set ["activationFrameSkipsTotal", (_virtStats get "activationFrameSkipsTotal") + 1];
         true
     };
 
-    if (!_blockActivation && {[_groupId, _groupData] call FLO_fnc_virtualizationStageActivation}) exitWith {
-        FLO_VirtUpdate set ["lastActivationFrame", diag_frameNo];
-        true
-    };
+    if (!_blockActivation && {[_groupId, _groupData] call FLO_fnc_virtualizationStageActivation}) exitWith { true };
 
     if (_blockActivation) then {
         if (!_activationDeferred) then {
@@ -60,7 +57,6 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
         _virtStats set ["activeUnitsLast", _activeUnitCount];
     } else {
         ["VIRTUALIZATION", 3, format["Activating %1 (dist: %2m)", _groupId, round _nearestDist]] call FLO_fnc_log;
-        FLO_VirtUpdate set ["lastActivationFrame", diag_frameNo];
         if ([_groupId, _bypassBudget] call FLO_fnc_virtualizationTryActivateGroup) then {
             _groupData set ["activationDeferred", false];
             _groupData set ["activationDeferredAt", -1];

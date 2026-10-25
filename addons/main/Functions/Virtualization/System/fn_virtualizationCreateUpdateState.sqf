@@ -18,6 +18,7 @@ createHashMapFromArray [
     ["cachedGroupIds", []],
     ["activeUnitCount", 0],
     ["lastActivationFrame", -1],
+    ["nextActivationAt", 0],
     ["stagedGroups", createHashMap],
     ["combatActivations", createHashMap],
     ["currentBatchIndex", 0],

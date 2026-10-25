@@ -2,7 +2,8 @@
  * Function: FLO_fnc_virtualizationProcessCombatActivations
  * Description:
  *   Activates groups that the virtual combat resolver handed to the engine,
- *   one activation per frame, staging infantry units within the frame budget.
+ *   at the FLO_ActivationInterval cadence, staging infantry units within the
+ *   frame budget.
  *   A group is prepared for combat once it is physical, then leaves the queue.
  *
  * Return Value:
@@ -25,8 +26,7 @@ private _groups = call FLO_fnc_virtualizationGetGroupMap;
         [_groupData] call FLO_fnc_gtnCombatPrepareRealGroupForCombat;
         continue;
     };
-    if ((FLO_VirtUpdate get "lastActivationFrame") == diag_frameNo) exitWith {};
-    FLO_VirtUpdate set ["lastActivationFrame", diag_frameNo];
+    if !([_groupId] call FLO_fnc_virtualizationClaimActivationSlot) exitWith {};
     if ([_groupId, _groupData] call FLO_fnc_virtualizationStageActivation) exitWith {};
 
     _queue deleteAt _groupId;
