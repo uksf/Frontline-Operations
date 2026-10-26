@@ -118,7 +118,7 @@ private _pfhId = [{
                     [_x select 1] call FLO_fnc_gtnCombatPrepareRealGroupForCombat;
                 } forEach _activeRefs;
                 {
-                    _combatActivations set [_x select 0, true];
+                    _combatActivations set [_x select 0, diag_tickTime];
                 } forEach _inRangeRefs;
 
                 ["GTN_COMBAT", 4, format [
