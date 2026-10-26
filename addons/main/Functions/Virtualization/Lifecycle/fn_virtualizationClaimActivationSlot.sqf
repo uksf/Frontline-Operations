@@ -20,7 +20,7 @@ private _isStaging = _groupId in (FLO_VirtUpdate get "stagedGroups");
 if (!_isStaging && {diag_tickTime < (FLO_VirtUpdate get "nextActivationAt")}) exitWith { false };
 
 if (!_isStaging) then {
-    FLO_VirtUpdate set ["nextActivationAt", diag_tickTime + (missionNamespace getVariable ["FLO_ActivationInterval", 0.5])];
+    FLO_VirtUpdate set ["nextActivationAt", diag_tickTime + (missionNamespace getVariable ["FLO_ActivationInterval", 0.25])];
 };
 FLO_VirtUpdate set ["lastActivationFrame", diag_frameNo];
 true

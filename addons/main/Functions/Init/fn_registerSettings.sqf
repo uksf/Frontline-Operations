@@ -115,7 +115,7 @@ private _activationInterval = [
     "SLIDER",
     ["Group activation interval", "Seconds between the start of one virtual group's physical spawn and the next. Spreads spawn work when many groups enter activation range at once. 0 allows one group per frame."],
     ["FLO", "Virtualization"],
-    [0, 5, 0.5, 2],
+    [0, 5, 0.25, 2],
     1
 ];
 
