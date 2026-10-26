@@ -91,7 +91,9 @@ if (!_routeAllowed) exitWith {
 };
 _waypoints = _remainingWaypoints;
 
+FLO_VirtUpdate set ["crewHolder", [_groupId, "CREW"] call FLO_fnc_virtualizationAdoptStagedGroup];
 _realGroup = [_groupId, _groupData, _position, _spawnPools] call FLO_fnc_virtualizationSpawnRealGroup;
+[FLO_VirtUpdate deleteAt "crewHolder"] call FLO_fnc_virtualizationDiscardRealGroupUnits;
 if (isNull _realGroup) exitWith {
     ["VIRTUALIZATION", 2, format [
         "Failed to spawn real group for %1 (%2) at %3",

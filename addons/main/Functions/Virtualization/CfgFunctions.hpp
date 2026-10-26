@@ -113,6 +113,8 @@ class VirtualizationLifecycle {
     class virtualizationSpawnFromComposition {};
     class virtualizationClaimActivationSlot {};
     class virtualizationStageActivation {};
+    class virtualizationGetStagingPlan {};
+    class virtualizationTakeStagedUnit {};
     class virtualizationAdoptStagedGroup {};
     class virtualizationDiscardStagedGroup {};
     class virtualizationSweepStagedGroups {};
