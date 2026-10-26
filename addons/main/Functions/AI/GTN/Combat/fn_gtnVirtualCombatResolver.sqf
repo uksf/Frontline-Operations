@@ -99,25 +99,27 @@ private _pfhId = [{
         if (_liveArea) then {
             private _activationDemand = 0;
             private _activeRefs = [];
+            private _inRangeRefs = [];
             {
                 _x params ["_groupId", "_gData"];
                 if (_gData get "isActive") then {
                     _activeRefs pushBack _x;
                 } else {
-                    _activationDemand = _activationDemand + ([_gData, true] call FLO_fnc_virtualizationGetGroupUnitLoad);
+                    if ([_gData get "position", _liveAreaRadius] call FLO_fnc_gtnCombatIsLiveArea) then {
+                        _inRangeRefs pushBack _x;
+                        _activationDemand = _activationDemand + ([_gData, true] call FLO_fnc_virtualizationGetGroupUnitLoad);
+                    };
                 };
             } forEach (_eastRefs + _westRefs);
 
             if ((_activationDemand + (FLO_VirtUpdate get "activeUnitCount")) <= (["activationUnitCap"] call FLO_fnc_virtualizationGetConfigValue)) then {
                 private _combatActivations = FLO_VirtUpdate get "combatActivations";
                 {
-                    _x params ["_groupId", "_gData"];
-                    if (_gData get "isActive") then {
-                        [_gData] call FLO_fnc_gtnCombatPrepareRealGroupForCombat;
-                    } else {
-                        _combatActivations set [_groupId, true];
-                    };
-                } forEach (_eastRefs + _westRefs);
+                    [_x select 1] call FLO_fnc_gtnCombatPrepareRealGroupForCombat;
+                } forEach _activeRefs;
+                {
+                    _combatActivations set [_x select 0, true];
+                } forEach _inRangeRefs;
 
                 ["GTN_COMBAT", 4, format [
                     "Live combat handoff near %1m for %2 EAST groups vs %3 WEST groups",
