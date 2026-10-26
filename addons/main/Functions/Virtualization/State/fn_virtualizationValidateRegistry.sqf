@@ -2,7 +2,13 @@
  * Function: FLO_fnc_virtualizationValidateRegistry
  * Description:
  *   Validates cross-record ownership and transport relationships.
+ *
+ * Arguments:
+ *   0: Validate inactive records <BOOL> - Default true. A campaign save passes
+ *      false and validates its inactive snapshot copies outside the boundary.
  */
+
+params [["_validateInactive", true, [true]]];
 
 private _groups = call FLO_fnc_virtualizationGetGroupMap;
 private _orphanedActiveGroups = [];
@@ -59,7 +65,9 @@ if ((count _spatialMeta) != (count _groups)) then {
 {
     private _groupId = _x;
     private _groupData = _y;
-    [_groupData, _groupId] call FLO_fnc_virtualizationValidateGroup;
+    if (_validateInactive || {_groupData get "isActive"}) then {
+        [_groupData, _groupId] call FLO_fnc_virtualizationValidateGroup;
+    };
 
     if (_groupData get "isActive") then {
         private _realGroupKey = str (_groupData get "realGroup");

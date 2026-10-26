@@ -8,7 +8,7 @@ isNil {
 try {
     // Funding/deployment ticks are unscheduled. Capture their linked state and
     // physical/virtual vehicle ownership together before scheduled encoding.
-    call FLO_fnc_virtualizationValidateRegistry;
+    [false] call FLO_fnc_virtualizationValidateRegistry;
     private _sideResources = createHashMap;
     { _sideResources set [_x, [_y] call FLO_fnc_sideResourcesSerialize]; } forEach FLO_SideResources;
     private _logistics = createHashMap;
@@ -130,6 +130,15 @@ if (_captureError != "") then {
     throw _captureError;
 };
 private _captureMs = (diag_tickTime - _captureStart) * 1000;
+
+try {
+    {
+        if !(_y get "isActive") then { [_y, _x] call FLO_fnc_virtualizationValidateGroup };
+    } forEach (_campaignState get "virtualGroups");
+} catch {
+    ["SAVE", 1, format ["Campaign snapshot rejected: %1", _exception]] call FLO_fnc_log;
+    throw _exception;
+};
 if (_captureMs > 20) then {
     ["SAVE", 4, format ["[PERF] Coherent snapshot groups=%1 objectives=%2 vehicles=%3 sides=%4 captureMs=%5", count (_campaignState get "virtualGroups"), count (_campaignState get "objectives"), count (_campaignState get "vehicles"), count (_campaignState get "sideResources"), _captureMs]] call FLO_fnc_log;
 };
