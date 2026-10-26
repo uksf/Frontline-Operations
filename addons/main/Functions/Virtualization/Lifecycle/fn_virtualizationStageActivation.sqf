@@ -2,8 +2,10 @@
  * Function: FLO_fnc_virtualizationStageActivation
  * Description:
  *   Creates the units of a due group across frames, within a per-frame time
- *   budget, before the group activates. An infantry composition stages its
- *   soldiers. A vehicle group stages hidden crew in a holding group, which
+ *   budget, before the group activates. Staged units are hidden and frozen.
+ *   An infantry composition stages its soldiers, which
+ *   FLO_fnc_virtualizationSpawnFromComposition reveals on adoption. A vehicle
+ *   group stages crew in a holding group, which
  *   FLO_fnc_virtualizationTakeStagedUnit seats when the vehicles spawn. The
  *   record stays virtual while staging, so saves and outcome syncs never see
  *   a partial group.
@@ -55,10 +57,8 @@ while { (_stage get "nextIndex") < count _types && {!_staged || {diag_tickTime <
         [_groupId] call FLO_fnc_virtualizationDiscardStagedGroup;
         _staged = false;
     };
-    if (_kind == "CREW") then {
-        _unit enableSimulationGlobal false;
-        _unit hideObjectGlobal true;
-    };
+    _unit enableSimulationGlobal false;
+    _unit hideObjectGlobal true;
     _stage set ["nextIndex", (_stage get "nextIndex") + 1];
     _stage set ["progressAt", diag_tickTime];
     _stats set ["stagedUnitsTotal", (_stats get "stagedUnitsTotal") + 1];

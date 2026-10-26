@@ -29,7 +29,7 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
     // Explicit strategic missions retain their existing activation exception.
     private _bypassBudget = _missionLock != "" || {_replacementState != ""};
     private _activationLoad = [_groupData, true] call FLO_fnc_virtualizationGetGroupUnitLoad;
-    private _projectedUnitCount = _activeUnitCount + _activationLoad;
+    private _projectedUnitCount = _activeUnitCount + _activationLoad + ([_groupId] call FLO_fnc_virtualizationGetStagedUnitLoad);
     private _blockActivation = false;
 
     if (!_bypassBudget) then {

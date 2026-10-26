@@ -12,6 +12,8 @@ FLO_VirtUpdate set ["lastUpdateTime", _now];
 [_stats] call FLO_fnc_virtualizationResetBatchStats;
 [ _now, _stats ] call FLO_fnc_virtualizationRefreshPlayerCache;
 
+call FLO_fnc_virtualizationSweepStagedGroups;
+
 private _groups = call FLO_fnc_virtualizationGetGroupMap;
 if (count _groups == 0) exitWith {
     FLO_VirtUpdate set ["cachedGroupIds", []];
@@ -34,7 +36,6 @@ private _activationDist = ["activationDistance"] call FLO_fnc_virtualizationGetC
 private _batchResult = [_groupIds, _groups, _activationDist, _now, _stats, _perf] call FLO_fnc_virtualizationProcessGroupBatch;
 _batchResult params ["_processed", "_batchStart", "_batchEnd", "_totalGroups"];
 call FLO_fnc_virtualizationProcessCombatActivations;
-call FLO_fnc_virtualizationSweepStagedGroups;
 
 private _batchMs = (diag_tickTime - _batchStartTime) * 1000;
 _stats set ["lastBatchMs", _batchMs];

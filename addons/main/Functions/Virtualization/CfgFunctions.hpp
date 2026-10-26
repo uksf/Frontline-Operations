@@ -118,6 +118,7 @@ class VirtualizationLifecycle {
     class virtualizationAdoptStagedGroup {};
     class virtualizationDiscardStagedGroup {};
     class virtualizationSweepStagedGroups {};
+    class virtualizationGetStagedUnitLoad {};
     class virtualizationProcessCombatActivations {};
     class virtualizationSpawnInfantryGroup {};
     class virtualizationSpawnGroundCombatGroup {};

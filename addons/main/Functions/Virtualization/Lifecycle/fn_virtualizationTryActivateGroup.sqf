@@ -37,12 +37,13 @@ private _activeUnitCount = FLO_VirtUpdate get "activeUnitCount";
 private _activationLoad = [_groupData, true] call FLO_fnc_virtualizationGetGroupUnitLoad;
 private _activationUnitCap = ["activationUnitCap"] call FLO_fnc_virtualizationGetConfigValue;
 
-if (!_bypassUnitCap && {(_activeUnitCount + _activationLoad) > _activationUnitCap}) exitWith {
+private _projectedUnitCount = _activeUnitCount + _activationLoad + ([_groupId] call FLO_fnc_virtualizationGetStagedUnitLoad);
+if (!_bypassUnitCap && {_projectedUnitCount > _activationUnitCap}) exitWith {
     ["VIRTUALIZATION", 3, format [
         "Activation blocked for %1 (%2): projected %3/%4",
         _groupId,
         _groupData get "groupType",
-        _activeUnitCount + _activationLoad,
+        _projectedUnitCount,
         _activationUnitCap
     ]] call FLO_fnc_log;
     false
