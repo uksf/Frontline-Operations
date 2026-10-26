@@ -79,9 +79,9 @@ private _builtGroups = createHashMap;
 } forEach _builtGroups;
 
 // Reject malformed cross-record state before derived-state reconciliation.
-call FLO_fnc_virtualizationValidateRegistry;
+[] call FLO_fnc_virtualizationValidateRegistry;
 call FLO_fnc_virtualizationRebuildDerivedState;
-call FLO_fnc_virtualizationValidateRegistry;
+[] call FLO_fnc_virtualizationValidateRegistry;
 
 ["VIRTUALIZATION", 3, format ["Restored virtual-force registry groups=%1", count _validatedGroups]] call FLO_fnc_log;
 count _validatedGroups

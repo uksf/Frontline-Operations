@@ -11,7 +11,7 @@ params [["_snapshot", false, [false, createHashMap]], ["_capturedAtTick", diag_t
 // A detach between two live record reads must never enter the persisted graph.
 private _captureStart = diag_tickTime;
 if (_snapshot isEqualType false) then {
-    call FLO_fnc_virtualizationValidateRegistry;
+    [] call FLO_fnc_virtualizationValidateRegistry;
     private _captureFailure = [];
     isNil {
         try {
