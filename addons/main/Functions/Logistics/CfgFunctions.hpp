@@ -24,6 +24,7 @@ class LogisticsNetwork {
     class logisticsNetworkEnsureSupplyChainFresh {};
     class logisticsNetworkGetCachedSpawnPosition {};
     class logisticsNetworkFindSupplySourceObjective {};
+    class logisticsNetworkGetSuppliedObjectives {};
     class logisticsNetworkCreate {};
     class logisticsNetworkCreateNode {};
     class logisticsNetworkCreateReplacement {};

@@ -12,6 +12,7 @@ private _network = FLO_Logistics_Networks get _sideKey;
 [_network] call FLO_fnc_logisticsNetworkEnsureSupplyChainFresh;
 private _routeInfo = _network get "_supplyRouteInfo";
 private _supplyPerTick = FLO_ObjectiveDevelopmentConfig get "commanderSupplyPerTick";
+private _suppliedObjectives = [_network, _supplyPerTick] call FLO_fnc_logisticsNetworkGetSuppliedObjectives;
 private _enemyCountKey = ["opforCount", "bluforCount"] select (_side isEqualTo east);
 private _totalDevelopmentLevels = [_side] call FLO_fnc_objectiveDevelopmentGetTotalDevelopmentLevels;
 private _incomeBasis = _spendingState get "developmentIncomeBasis";
@@ -27,7 +28,7 @@ private _ranked = [];
     if !(_objectiveId in _routeInfo) then { continue };
     if ((keys (_objective get "developmentProject")) isNotEqualTo []) then { continue };
     if ((_objective get "contested") || {_objective get "underAttack"} || {(_objective get _enemyCountKey) > 0}) then { continue };
-    if (([_network, _objectiveId, [], _supplyPerTick] call FLO_fnc_logisticsNetworkFindSupplySourceObjective) == "") then { continue };
+    if !(_objectiveId in _suppliedObjectives) then { continue };
 
     private _priority = _objective get "priority";
     private _revenueQuote = [_side, _objectiveId, _objective, "REVENUE"] call FLO_fnc_objectiveDevelopmentBuildProjectQuote;
