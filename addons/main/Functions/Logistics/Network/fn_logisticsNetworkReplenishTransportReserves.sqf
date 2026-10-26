@@ -27,6 +27,9 @@ private _catalog = FLO_FactionCatalog get _sideKey;
 
 private _desiredGround = _catalog get "transportReserveGroundCount";
 private _desiredAir = _catalog get "transportReserveAirCount";
+if (((_catalog get "airTransport") findIf { (_x isKindOf "Helicopter") && {([_x] call FLO_fnc_transportGetCapacity) > 0} }) < 0) then {
+    _desiredAir = 0;
+};
 if (_desiredGround <= 0 && {_desiredAir <= 0}) exitWith { _stats };
 
 private _groups = call FLO_fnc_virtualizationGetGroupMap;
