@@ -77,7 +77,7 @@ private _autosaveInterval = [
     "LIST",
     ["Automatic save interval", "How often the server saves campaign progress after initialization. Disabled leaves saving manual."],
     ["FLO", "Campaign"],
-    [[0, 5, 10, 15, 30, 60], ["Disabled", "Every 5 minutes", "Every 10 minutes", "Every 15 minutes", "Every 30 minutes", "Every 60 minutes"], 1],
+    [[0, 5, 10, 15, 30, 60], ["Disabled", "Every 5 minutes", "Every 10 minutes", "Every 15 minutes", "Every 30 minutes", "Every 60 minutes"], 2],
     1,
     {
         if (isServer && {!isNil "FLO_MissionReady"} && {FLO_MissionReady}) then {
