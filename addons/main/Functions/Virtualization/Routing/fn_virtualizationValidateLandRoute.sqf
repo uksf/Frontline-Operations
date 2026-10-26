@@ -18,7 +18,7 @@ params [
 ];
 
 if (_waypoints isEqualTo []) exitWith { [true, "", 0] };
-if (surfaceIsWater _startPos) exitWith { [false, "START_IN_WATER", 1] };
+if ([_startPos] call FLO_fnc_isRouteWater) exitWith { [false, "START_IN_WATER", 1] };
 
 private _positions = _waypoints apply { +(_x select 0) };
 private _hasCycle = (_waypoints findIf { toUpper (_x select 1) == "CYCLE" }) >= 0;

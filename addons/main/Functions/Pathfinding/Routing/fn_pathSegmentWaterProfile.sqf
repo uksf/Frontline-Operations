@@ -45,7 +45,7 @@ for "_i" from 0 to _segments do {
     ];
     _sampleCount = _sampleCount + 1;
 
-    if (surfaceIsWater _sample) then {
+    if ([_sample] call FLO_fnc_isRouteWater) then {
         if (!_crossesWater) then {
             _crossesWater = true;
             _firstWater = +_sample;

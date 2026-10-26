@@ -114,7 +114,7 @@ if (_trails) then {
 private _tResolve = diag_tickTime;
 private _resolvedPath = [];
 private _sampleChecks = 0;
-private _resolved = !(surfaceIsWater _startPos) && {!(surfaceIsWater _endPos)};
+private _resolved = !([_startPos] call FLO_fnc_isRouteWater) && {!([_endPos] call FLO_fnc_isRouteWater)};
 
 if (_resolved) then {
     private _routeResult = [_startPos, _endPos, _sampleStep, 0] call FLO_fnc_buildWaterAwarePath;
@@ -129,7 +129,7 @@ if (_resolved) then {
     _resolved = _validation select 0;
 };
 
-if (!_resolved && {_sampleStep > FLO_PF_WaterValidationStep} && {!(surfaceIsWater _startPos)} && {!(surfaceIsWater _endPos)}) then {
+if (!_resolved && {_sampleStep > FLO_PF_WaterValidationStep} && {!([_startPos] call FLO_fnc_isRouteWater)} && {!([_endPos] call FLO_fnc_isRouteWater)}) then {
     private _fineResult = [_startPos, _endPos, FLO_PF_WaterValidationStep, 0] call FLO_fnc_buildWaterAwarePath;
     _resolvedPath = _fineResult select 0;
     _sampleChecks = _sampleChecks + (_fineResult select 1);

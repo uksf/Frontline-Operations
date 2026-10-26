@@ -34,7 +34,7 @@ private _badLeg = "none found";
 for "_i" from 0 to (count _legs - 2) do {
     private _from = _legs select _i;
     private _to = _legs select (_i + 1);
-    if (surfaceIsWater _to || {([_from, _to, FLO_PF_WaterValidationStep] call FLO_fnc_pathSegmentWaterProfile) select 0}) exitWith {
+    if (([_to] call FLO_fnc_isRouteWater) || {([_from, _to, FLO_PF_WaterValidationStep] call FLO_fnc_pathSegmentWaterProfile) select 0}) exitWith {
         _badLeg = format ["%1 %2 -> %3 (%4 m)", _i, _from, _to, round (_from distance2D _to)];
     };
 };

@@ -17,7 +17,7 @@ params [
     ["_closeLoop", false, [true]]
 ];
 
-if (surfaceIsWater _startPos) exitWith {
+if ([_startPos] call FLO_fnc_isRouteWater) exitWith {
     [false, [], "START_IN_WATER", createHashMapFromArray [["segments", 0], ["emitted", 0]], []]
 };
 

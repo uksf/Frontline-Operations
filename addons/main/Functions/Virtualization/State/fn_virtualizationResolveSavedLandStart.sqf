@@ -10,12 +10,12 @@ if ((_savedData get "attachedTo") != "") exitWith {
     // transportApplyPostDismountWaypoint resolves its ingress after detachment.
     +((_waypoints select (_savedData get "currentWaypointIndex")) select 0)
 };
-if !(surfaceIsWater _position) exitWith { +_position };
+if !([_position] call FLO_fnc_isRouteWater) exitWith { +_position };
 
 // Physical movement and old coastal dismount offsets can leave a LAND group
 // just offshore. Recover only to nearby terrain; never to a distant objective.
 private _safePosition = [_position, 500] call FLO_fnc_getSafeLandPos;
-if (surfaceIsWater _safePosition || {_safePosition distance2D _position > 500}) then {
+if (([_safePosition] call FLO_fnc_isRouteWater) || {_safePosition distance2D _position > 500}) then {
     private _error = format ["Saved LAND group %1 has no shore within 500m of %2", _groupId, _position];
     ["VIRTUALIZATION", 1, _error] call FLO_fnc_log;
     throw _error;

@@ -36,7 +36,7 @@ if (_movementDomain == "LAND" && {_sanitizedWaypoints isNotEqualTo []}) then {
         _groupData get "landRouteStartBlocked"
         && {diag_tickTime < (_groupData get "landRouteRetryAt")}
     );
-    if (_retryPending && {surfaceIsWater _currentPos}) then {
+    if (_retryPending && {([_currentPos] call FLO_fnc_isRouteWater)}) then {
         _routeDeferred = true;
     } else {
         private _routeResult = [_currentPos, _sanitizedWaypoints, _allowTrails, _sourceTag, _closeLoop] call FLO_fnc_virtualizationResolveLandWaypoints;

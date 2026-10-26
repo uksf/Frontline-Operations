@@ -175,9 +175,9 @@ if (_savedWaypoints isNotEqualTo []) exitWith {
     private _endpointIndexes = [];
     if ((_archetype get "movementDomain") == "LAND") then {
         private _routeStart = _groupData get "position";
-        if (surfaceIsWater _routeStart) then {
+        if ([_routeStart] call FLO_fnc_isRouteWater) then {
             private _shore = [_routeStart, 500] call FLO_fnc_getSafeLandPos;
-            if (!surfaceIsWater _shore && {(_shore distance2D _routeStart) <= 500}) then {
+            if (!([_shore] call FLO_fnc_isRouteWater) && {(_shore distance2D _routeStart) <= 500}) then {
                 _routeStart = [_shore select 0, _shore select 1, 0];
             };
         };

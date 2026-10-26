@@ -12,6 +12,7 @@ class PathfindingRouting {
     class findRoadPath {};
     class pathSegmentWaterProfile {};
     class validateWaterAwarePath {};
+    class isRouteWater {};
 };
 
 class PathfindingDebug {

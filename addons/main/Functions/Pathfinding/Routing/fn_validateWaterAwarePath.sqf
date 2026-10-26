@@ -14,14 +14,14 @@ params [
     ["_sampleStep", 40, [0]]
 ];
 
-if (surfaceIsWater _startPos) exitWith { [false, 1] };
+if ([_startPos] call FLO_fnc_isRouteWater) exitWith { [false, 1] };
 
 private _cursor = +_startPos;
 private _sampleCount = 0;
 private _valid = true;
 
 {
-    if (surfaceIsWater _x) then {
+    if ([_x] call FLO_fnc_isRouteWater) then {
         _valid = false;
         _sampleCount = _sampleCount + 1;
         continue;
