@@ -80,7 +80,10 @@ private _initialAssetComposition = if (_selectedComposition isNotEqualTo []) the
     [_groupType, _resolvedUnitCount, _side] call FLO_fnc_virtualizationSelectInitialAssetComposition
 };
 if (_groupType == "infantry" && {_initialAssetComposition isEqualTo []}) then {
-    private _catalog = FLO_FactionCatalog get ([_side] call FLO_fnc_sideKey);
+    private _catalog = FLO_FactionCatalog getOrDefault [[_side] call FLO_fnc_sideKey, createHashMap];
+    if (count _catalog == 0) then {
+        ["VIRTUALIZATION", 2, format ["Infantry group %1 has no faction catalog for side %2; using its template", _groupId, _side]] call FLO_fnc_log;
+    };
     // Auto catalogs opt into config-derived roles; custom definitions keep their
     // authored spawning contract. An explicit caller composition always wins.
     if ("infantryRoles" in _catalog) then {
