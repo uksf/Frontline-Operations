@@ -6,7 +6,9 @@
  *   budget. Each entry holds the time the resolver last confirmed it. An
  *   entry the resolver has not confirmed within one tick and a margin, or
  *   whose group left player range or boarded a carrier, leaves the queue and
- *   discards any units staged for it.
+ *   discards any units staged for it. An entry that would take the active
+ *   and staged units over the activation cap waits in the queue without a
+ *   stage.
  *   A group is prepared for combat once it is physical, then leaves the queue.
  *
  * Return Value:
@@ -18,6 +20,7 @@ if (count _queue == 0) exitWith {};
 private _groups = call FLO_fnc_virtualizationGetGroupMap;
 private _confirmedAfter = diag_tickTime - 30;
 private _liveAreaRadius = ["activationDistance"] call FLO_fnc_virtualizationGetConfigValue;
+private _activationUnitCap = ["activationUnitCap"] call FLO_fnc_virtualizationGetConfigValue;
 {
     private _groupId = _x;
     private _groupData = _groups getOrDefault [_groupId, createHashMap];
@@ -36,6 +39,13 @@ private _liveAreaRadius = ["activationDistance"] call FLO_fnc_virtualizationGetC
     if (_groupData get "isActive") then {
         _queue deleteAt _groupId;
         [_groupData] call FLO_fnc_gtnCombatPrepareRealGroupForCombat;
+        continue;
+    };
+    private _projectedUnitCount = (FLO_VirtUpdate get "activeUnitCount")
+        + ([_groupData, true] call FLO_fnc_virtualizationGetGroupUnitLoad)
+        + ([_groupId] call FLO_fnc_virtualizationGetStagedUnitLoad);
+    if (_projectedUnitCount > _activationUnitCap) then {
+        [_groupId] call FLO_fnc_virtualizationDiscardStagedGroup;
         continue;
     };
     if !([_groupId] call FLO_fnc_virtualizationClaimActivationSlot) exitWith {};
