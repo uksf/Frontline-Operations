@@ -94,6 +94,7 @@ class VirtualizationLifecycle {
     class virtualizationCaptureRealGroupPosition {};
     class virtualizationCaptureRealGroupRuntimeState {};
     class virtualizationCaptureRealGroupWaypoints {};
+    class virtualizationResolveLandRouteStart {};
     class virtualizationDeleteRealGroupAssets {};
     class virtualizationDiscardRealGroupUnits {};
     class virtualizationForceActivateGroup {};

@@ -79,7 +79,7 @@ if (_isLoopRoute) exitWith {
     };
 
     private _routeResult = [
-        _groupData get "position",
+        [_groupData get "position"] call FLO_fnc_virtualizationResolveLandRouteStart,
         _existingWaypoints,
         _routeIndex,
         true,
@@ -174,15 +174,8 @@ if (_savedWaypoints isNotEqualTo []) exitWith {
     private _capturedRoute = _savedWaypoints;
     private _endpointIndexes = [];
     if ((_archetype get "movementDomain") == "LAND") then {
-        private _routeStart = _groupData get "position";
-        if ([_routeStart] call FLO_fnc_isRouteWater) then {
-            private _shore = [_routeStart, 500] call FLO_fnc_getSafeLandPos;
-            if (!([_shore] call FLO_fnc_isRouteWater) && {(_shore distance2D _routeStart) <= 500}) then {
-                _routeStart = [_shore select 0, _shore select 1, 0];
-            };
-        };
         private _routeResult = [
-            _routeStart,
+            [_groupData get "position"] call FLO_fnc_virtualizationResolveLandRouteStart,
             _savedWaypoints,
             true,
             "PHYSICAL_CAPTURE",
