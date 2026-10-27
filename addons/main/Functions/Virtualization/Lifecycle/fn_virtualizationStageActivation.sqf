@@ -2,7 +2,8 @@
  * Function: FLO_fnc_virtualizationStageActivation
  * Description:
  *   Creates the units of a due group across frames, within a per-frame time
- *   budget, before the group activates. Staged units are hidden and frozen.
+ *   budget, before the group activates. Staged units are hidden and frozen,
+ *   and ACE does not move a staging group to a headless client.
  *   An infantry composition stages its soldiers, which
  *   FLO_fnc_virtualizationSpawnFromComposition reveals on adoption. A vehicle
  *   group stages crew in a holding group, which
@@ -30,6 +31,7 @@ _plan params ["_kind", "_types"];
 if !(_groupId in _stagedGroups) then {
     private _group = [_groupData get "side", _groupId, _groupData get "groupType"] call FLO_fnc_virtualizationCreateRealGroup;
     if (isNull _group) exitWith {};
+    _group setVariable ["acex_headless_blacklist", true];
     _stagedGroups set [_groupId, createHashMapFromArray [
         ["group", _group],
         ["plan", +_plan],

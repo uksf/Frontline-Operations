@@ -13,6 +13,7 @@ private _spawnParkedHelicopters = _groupType == "helicopter"
 
 private _stagedGroup = [_groupId, "INFANTRY", _comp + (_groupData get "supportComp"), _position] call FLO_fnc_virtualizationAdoptStagedGroup;
 if (!isNull _stagedGroup) exitWith {
+    _stagedGroup setVariable ["acex_headless_blacklist", false];
     {
         _x enableSimulationGlobal true;
         _x hideObjectGlobal false;
