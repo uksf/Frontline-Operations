@@ -17,6 +17,12 @@ if (!isNull _leader && {alive _leader}) then {
         _virtStats set ["activePositionSyncsThisBatch", (_virtStats get "activePositionSyncsThisBatch") + 1];
     };
 
+    if (
+        !(_realGroup getVariable ["acex_headless_blacklist", false])
+        && {(_groupData get "transportRole") || {(_groupData get "attachedGroups") isNotEqualTo []} || {(_groupData get "attachedTo") != ""}}
+    ) then {
+        _realGroup setVariable ["acex_headless_blacklist", true];
+    };
     [_groupId, _groupData, _realGroup] call FLO_fnc_transportProcessActiveCarrier;
     [_groupId, _groupData, _realGroup] call FLO_fnc_virtualizationParkIdleHelicopter;
 

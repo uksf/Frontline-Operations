@@ -20,6 +20,7 @@ FLO_Transport_MinDistance = 500;
 
 // Minimum reassignment distance for foot infantry to request pickup
 FLO_Transport_ReassignmentPickupMinDistance = 1500;
+FLO_Transport_LocalitySettle = 3;
 
 // Maximum search radius (meters) for finding transports
 FLO_Transport_SearchRadius = 5000;

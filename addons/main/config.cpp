@@ -53,6 +53,7 @@ class CfgRemoteExec {
         class SpawnScript { allowedTargets = 0; jip = 1; };
         class FLO_fnc_displayNotification { allowedTargets = 1; jip = 0; };
         class FLO_fnc_taskReleaseGarrisonUnit { allowedTargets = 1; jip = 0; };
+        class FLO_fnc_vehicleCommandWhereLocal { allowedTargets = 1; jip = 0; };
         class FLO_fnc_sendNotification { allowedTargets = 2; jip = 0; };
         class FLO_fnc_showDynamicText { allowedTargets = 0; jip = 0; };
         class FLO_fnc_addIntelServer { allowedTargets = 2; jip = 0; };

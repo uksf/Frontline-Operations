@@ -53,6 +53,24 @@ if (_transportVehicles isEqualTo []) exitWith {
     false
 };
 
+if !(local _transportRealGroup) exitWith {
+    ["TRANSPORT", 2, format [
+        "Active mount failed for %1 into %2 because a headless client owns the crewed carrier",
+        _passengerGroupId,
+        _transportGroupId
+    ]] call FLO_fnc_log;
+    false
+};
+
+if !([[_passengerRealGroup, _transportRealGroup]] call FLO_fnc_transportKeepOnServer) exitWith {
+    ["TRANSPORT", 3, format [
+        "Active mount of %1 into %2 waits until both groups are local to the server",
+        _passengerGroupId,
+        _transportGroupId
+    ]] call FLO_fnc_log;
+    false
+};
+
 private _aliveUnits = units _passengerRealGroup select { alive _x };
 if (_aliveUnits isEqualTo []) exitWith { true };
 

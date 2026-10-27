@@ -18,6 +18,7 @@ class Transport {
     class transportCommitMissionPlan {};
     class transportClearInsertState {};
     class transportResetActiveCarrierMotion {};
+    class transportKeepOnServer {};
     class transportCarrierBlocksDeactivation {};
     class transportPool {};
     class transportPoolClaim {};

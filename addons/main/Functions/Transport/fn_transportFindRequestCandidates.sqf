@@ -104,6 +104,8 @@ private _updateCandidate = {
     if ((_groupData get "side") != _side) then { continue };
     if ((_groupData get "attachedGroups") isNotEqualTo []) then { continue };
     if ((_groupData get "missionLock") != "") then { continue };
+    private _candidateRealGroup = _groupData get "realGroup";
+    if (!isNull _candidateRealGroup && {!local _candidateRealGroup}) then { continue };
 
     private _commanderOrder = _groupData get "commanderOrder";
     if !(_commanderOrder in ["", "DEFEND"]) then { continue };

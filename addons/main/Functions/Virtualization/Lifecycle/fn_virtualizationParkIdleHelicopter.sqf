@@ -104,25 +104,27 @@ private _needsParking = (_helicopters findIf {
 
 [_groupData, "idle"] call FLO_fnc_virtualizationSetRuntimeState;
 [_groupId, getPosATL (_helicopters select 0)] call FLO_fnc_virtualizationUpdateGroupPosition;
-_groupData set ["idleHelicopterParked", true];
+private _parksRemotely = (_helicopters findIf { !local _x }) != -1;
+if (!_needsParking || {!_parksRemotely}) then {
+    _groupData set ["idleHelicopterParked", true];
+};
 
 if (!_needsParking) exitWith { true };
+if (_parksRemotely && {time < (_realGroup getVariable ["FLO_parkDispatchedAt", -1e9]) + 5}) exitWith { true };
+if (_parksRemotely) then {
+    _realGroup setVariable ["FLO_parkDispatchedAt", time];
+};
 
-private _parkedVehicles = [];
+private _parkPositions = [];
 {
     private _parkPos = [_basePos, typeOf _x, _forEachIndex, 600] call FLO_fnc_virtualizationResolveIdleHelicopterParkPos;
-    private _heliDir = getDir _x;
-    _x setPosATL _parkPos;
-    _x setDir _heliDir;
-    _x setVectorUp [0, 0, 1];
-    _x setVelocity [0, 0, 0];
-    _x engineOn false;
-    _parkedVehicles pushBack _x;
+    [[_x], "PARK", [_parkPos, getDir _x]] call FLO_fnc_vehicleCommandWhereLocal;
+    _parkPositions pushBack _parkPos;
 } forEach _helicopters;
 
-if (_parkedVehicles isNotEqualTo []) then {
+if (_parkPositions isNotEqualTo []) then {
     [_groupData, [_realGroup] call FLO_fnc_virtualizationCollectRealGroupVehicles] call FLO_fnc_virtualizationSetRealVehicles;
-    [_groupId, getPosATL (_parkedVehicles select 0)] call FLO_fnc_virtualizationUpdateGroupPosition;
+    [_groupId, _parkPositions select 0] call FLO_fnc_virtualizationUpdateGroupPosition;
 };
 
 true

@@ -60,6 +60,7 @@ class UtilitiesVehicle {
     file = "\z\flo\addons\main\Functions\Utilities\Vehicle";
 
     class vehicleConfigureRequestedVehicle {};
+    class vehicleCommandWhereLocal {};
 };
 
 class UtilitiesAftermath {

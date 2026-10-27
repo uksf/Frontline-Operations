@@ -16,10 +16,7 @@ if (_realGroup getVariable ["FLO_buildingGarrisonAttempted", false]) then {
 
 private _homeObjective = _groupData get "homeObjective";
 if (_homeObjective isEqualTo "civ_building") then {
-    {
-        _x disableAI "PATH";
-        _x disableAI "MOVE";
-    } forEach units _realGroup;
+    [units _realGroup, "DISABLE_MOVE"] call FLO_fnc_vehicleCommandWhereLocal;
 };
 
 private _patrolConfig = _groupData get "patrolConfig";
@@ -112,9 +109,7 @@ if ((_groupData get "groupType") == "helicopter" && {([_groupData] call FLO_fnc_
         default { 60 };
     };
 
-    {
-        _x flyInHeight _targetAltitude;
-    } forEach _transportVehicles;
+    [_transportVehicles, "FLY_IN_HEIGHT", _targetAltitude] call FLO_fnc_vehicleCommandWhereLocal;
 };
 
 true
