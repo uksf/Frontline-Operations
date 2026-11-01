@@ -43,7 +43,7 @@ private _supportPicture = _commander get "_frontlineSupportPicture";
                 if ((_contact get "confidence") >= ((_commander get "_config") get "frontlineSupportMinimumConfidence")) then {
                     private _supportScore = (_strategic get "attackScore") + (_contact get "score");
                     private _attackers = (_cache get "attackCounts") getOrDefault [_id, 0];
-                    if ((_contact get "score") + 3 * _attackers >= (_config get "frontlineArtilleryMinScore") && {_now >= ((_commander get "_frontlineArtilleryLocks") getOrDefault [_id, -1])} && {_world call ["_isAssetAvailable", ["artillery"]]}) then { _candidates pushBack ["ARTILLERY", _supportScore] };
+                    if ((_contact get "score") + 3 * _attackers >= (_config get "frontlineArtilleryMinScore") && {_now >= ((_commander get "_frontlineArtilleryLocks") getOrDefault [_id, -1])} && {(_contact get "reportCount") > 0} && {_world call ["_isAssetAvailable", ["artillery"]]} && {([_commander get "_artilleryManager", _side, _id] call FLO_fnc_gtnArtilleryCanRequestMission) select 0}) then { _candidates pushBack ["ARTILLERY", _supportScore] };
                     if (_attackers >= (_config get "frontlineCASMinAttackers") && {(_contact get "score") + 5 * _attackers >= (_config get "frontlineCASMinScore")} && {_now >= ((_commander get "_frontlineCASLocks") getOrDefault [_id, -1])} && {_world call ["_isAssetAvailable", ["cas"]]}) then { _candidates pushBack ["CAS", _supportScore] };
                 };
             };
