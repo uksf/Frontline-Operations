@@ -8,11 +8,12 @@
 params ["_groupId", "_groupData", "_realGroup"];
 if (({alive _x} count units _realGroup) == 0) exitWith { false };
 
+private _isBuildingGarrison = (_groupData get "commanderOrder") == "GARRISON" && {(_groupData get "orderMode") == "GARRISON_BUILDING"};
 private _restoreBuildingHold = {
-    if ((_groupData get "commanderOrder") != "GARRISON" || {(_groupData get "orderMode") != "GARRISON_BUILDING"}) exitWith {};
     private _captured = _groupData get "waypoints";
     if (_captured isNotEqualTo [] && {toUpper ((_captured select -1) select 1) == "HOLD"}) exitWith {};
     private _targetPos = _groupData get "garrisonPosition";
+    private _formation = if (_captured isEqualTo []) then { "WEDGE" } else { (_captured select -1) select 4 };
     ["VIRTUALIZATION", 2, format [
         "Building garrison %1 lost its HOLD endpoint during capture captured=%2 real=%3 current=%4 - restoring the canonical route",
         _groupId,
@@ -23,247 +24,258 @@ private _restoreBuildingHold = {
     private _routeResult = [
         [_groupData get "position"] call FLO_fnc_virtualizationResolveLandRouteStart,
         [
-            [_targetPos, "MOVE", "SAFE", "LIMITED", "WEDGE", "GREEN", 12],
-            [_targetPos, "HOLD", "AWARE", "LIMITED", "WEDGE", "YELLOW", 8]
+            [_targetPos, "MOVE", "SAFE", "LIMITED", _formation, "GREEN", 12],
+            [_targetPos, "HOLD", "AWARE", "LIMITED", _formation, "YELLOW", 8]
         ],
         true,
         "PHYSICAL_GARRISON_CAPTURE",
         false
     ] call FLO_fnc_virtualizationResolveLandWaypoints;
-    if !(_routeResult select 0) then {
-        throw format ["Building garrison %1 has no land route back to its building: %2", _groupId, _routeResult select 2];
+    if !(_routeResult select 0) exitWith {
+        ["VIRTUALIZATION", 1, format ["Building garrison %1 has no land route back to its building: %2", _groupId, _routeResult select 2]] call FLO_fnc_log;
     };
     _groupData set ["waypoints", _routeResult select 1];
     _groupData set ["currentWaypointIndex", 0];
+    _groupData set ["dismountAtWaypoint", -1];
     [_groupData, "moving"] call FLO_fnc_virtualizationSetRuntimeState;
 };
 
-private _existingWaypoints = _groupData get "waypoints";
-private _existingCycle = _existingWaypoints findIf { toUpper (_x select 1) == "CYCLE" };
-private _isLoopRoute = (_groupData get "autoPatrol") || {(_groupData get "patrolConfig") isNotEqualTo []} || {_existingCycle >= 0};
-private _archetype = [_groupData get "groupType"] call FLO_fnc_virtualizationGetArchetype;
-// Arma may finish MOVE before landing or unloading finishes. Transport still
-// owns the insertion endpoint until its passenger manifest has detached.
-if ((_archetype get "movementDomain") == "AIR"
-    && {(_groupData get "attachedGroups") isNotEqualTo []}
-    && {(_groupData get "transportInsertMode") in ["AIR_LAND", "AIR_DROP"]}) exitWith {
-    private _insertIndex = _groupData get "dismountAtWaypoint";
-    private _insertPos = _groupData get "transportInsertPos";
-    if (_insertIndex < 0 || {_insertIndex >= count _existingWaypoints}
-        || {count _insertPos < 2}
-        || {((_existingWaypoints select _insertIndex select 0) distance2D _insertPos) >= 1}) then {
-        private _message = format ["Pending AIR transport %1 has an invalid canonical insert endpoint", _groupId];
-        ["VIRTUALIZATION", 1, _message] call FLO_fnc_log;
-        throw _message;
-    };
-    true
-};
-if (_isLoopRoute) exitWith {
-    if ((_archetype get "movementDomain") != "LAND") exitWith { true };
-
-    private _movementWaypoints = _existingWaypoints select { toUpper (_x select 1) != "CYCLE" };
-    if (_movementWaypoints isEqualTo []) then {
-        throw format ["Physical LAND loop for %1 has no movement waypoints", _groupId];
-    };
-
-    private _realWaypoints = waypoints _realGroup;
-    private _realCurrentIndex = currentWaypoint _realGroup;
-    private _routeIndex = 0;
-    if (_realWaypoints isNotEqualTo [] && {_realCurrentIndex < count _realWaypoints}) then {
-        private _realTargetPos = waypointPosition [_realGroup, _realCurrentIndex];
-        private _matchingIndexes = [];
-        {
-            if (((_x select 0) distance2D _realTargetPos) < 1) then {
-                _matchingIndexes pushBack _forEachIndex;
+private _captureResult = false;
+try {
+    _captureResult = call {
+        private _existingWaypoints = _groupData get "waypoints";
+        private _existingCycle = _existingWaypoints findIf { toUpper (_x select 1) == "CYCLE" };
+        private _isLoopRoute = (_groupData get "autoPatrol") || {(_groupData get "patrolConfig") isNotEqualTo []} || {_existingCycle >= 0};
+        private _archetype = [_groupData get "groupType"] call FLO_fnc_virtualizationGetArchetype;
+        // Arma may finish MOVE before landing or unloading finishes. Transport still
+        // owns the insertion endpoint until its passenger manifest has detached.
+        if ((_archetype get "movementDomain") == "AIR"
+            && {(_groupData get "attachedGroups") isNotEqualTo []}
+            && {(_groupData get "transportInsertMode") in ["AIR_LAND", "AIR_DROP"]}) exitWith {
+            private _insertIndex = _groupData get "dismountAtWaypoint";
+            private _insertPos = _groupData get "transportInsertPos";
+            if (_insertIndex < 0 || {_insertIndex >= count _existingWaypoints}
+                || {count _insertPos < 2}
+                || {((_existingWaypoints select _insertIndex select 0) distance2D _insertPos) >= 1}) then {
+                private _message = format ["Pending AIR transport %1 has an invalid canonical insert endpoint", _groupId];
+                ["VIRTUALIZATION", 1, _message] call FLO_fnc_log;
+                throw _message;
             };
-        } forEach _movementWaypoints;
-
-        private _expectedOffset = (count _realWaypoints) - (count _movementWaypoints);
-        private _expectedIndex = _realCurrentIndex - _expectedOffset;
-        if (_expectedIndex in _matchingIndexes) then {
-            _routeIndex = _expectedIndex;
-        } else {
-            if (_matchingIndexes isNotEqualTo []) then {
-                _routeIndex = _matchingIndexes select 0;
-            } else {
-                if (_realCurrentIndex != 0) then {
-                    private _leader = leader _realGroup;
-                    private _origin = if (!isNull _leader && {alive _leader}) then { getPosATL vehicle _leader } else { _groupData get "position" };
-                    private _nearestDistance = 1e10;
-                    {
-                        private _distance = (_x select 0) distance2D _origin;
-                        if (_distance < _nearestDistance) then {
-                            _nearestDistance = _distance;
-                            _routeIndex = _forEachIndex;
-                        };
-                    } forEach _movementWaypoints;
-                    ["VIRTUALIZATION", 2, format [
-                        "Physical LAND loop target left the authoritative route group=%1 target=%2; resuming at nearest waypoint %3",
-                        _groupId,
-                        _realTargetPos,
-                        _routeIndex
-                    ]] call FLO_fnc_log;
-                };
-            };
+            true
         };
-    };
+        if (_isLoopRoute) exitWith {
+            if ((_archetype get "movementDomain") != "LAND") exitWith { true };
 
-    private _routeResult = [
-        [_groupData get "position"] call FLO_fnc_virtualizationResolveLandRouteStart,
-        _existingWaypoints,
-        _routeIndex,
-        true,
-        "PHYSICAL_LOOP_CAPTURE"
-    ] call FLO_fnc_virtualizationResolveLandRouteContinuation;
-    _routeResult params ["_resolved", "_resolvedWaypoints", "_reason"];
-    if (!_resolved) then {
-        ["VIRTUALIZATION", 1, format ["Could not rebase physical LAND loop for %1: %2", _groupId, _reason]] call FLO_fnc_log;
-        throw format ["Physical LAND loop rebase failed for %1", _groupId];
-    };
-
-    _groupData set ["waypoints", _resolvedWaypoints];
-    _groupData set ["currentWaypointIndex", 0];
-    _groupData set ["pathSource", "PHYSICAL_LOOP_CAPTURE"];
-    _groupData set ["lastMoveTime", diag_tickTime];
-    _groupData set ["virtualMoveCarryMeters", 0];
-    [_groupData] call FLO_fnc_virtualizationRefreshCurrentWaypointSpeed;
-    true
-};
-
-private _realWaypoints = waypoints _realGroup;
-private _currentWpIndex = currentWaypoint _realGroup;
-private _savedWaypoints = [];
-private _authoritativeWaypoints = _existingWaypoints select { toUpper (_x select 1) != "CYCLE" };
-private _authoritativeCursor = 0;
-
-if (_realWaypoints isNotEqualTo [] && {_currentWpIndex < count _realWaypoints}) then {
-    for "_i" from _currentWpIndex to (count _realWaypoints - 1) do {
-        private _wp = [_realGroup, _i];
-        private _wpPos = waypointPosition _wp;
-
-        if ([_wpPos] call FLO_fnc_validateGroupPosition) then {
-            private _realWaypointType = toUpper (waypointType _wp);
-            private _savedWaypoint = [
-                _wpPos,
-                _realWaypointType,
-                waypointBehaviour _wp,
-                waypointSpeed _wp,
-                waypointFormation _wp,
-                waypointCombatMode _wp,
-                waypointCompletionRadius _wp
-            ];
-
-            private _matchedIndex = -1;
-            private _positionMatches = [];
-            private _typeMatches = [];
-            if (_authoritativeCursor < count _authoritativeWaypoints) then {
-                for "_candidateIndex" from _authoritativeCursor to (count _authoritativeWaypoints - 1) do {
-                    private _candidate = _authoritativeWaypoints select _candidateIndex;
-                    if (((_candidate select 0) distance2D _wpPos) < 1) then {
-                        _positionMatches pushBack _candidateIndex;
-                        private _candidateType = toUpper (_candidate select 1);
-                        if (_candidateType == _realWaypointType) then {
-                            _typeMatches pushBack _candidateIndex;
-                        };
-                    };
-                };
+            private _movementWaypoints = _existingWaypoints select { toUpper (_x select 1) != "CYCLE" };
+            if (_movementWaypoints isEqualTo []) then {
+                throw format ["Physical LAND loop for %1 has no movement waypoints", _groupId];
             };
 
-            if (_typeMatches isNotEqualTo []) then {
-                _matchedIndex = _typeMatches select 0;
-            } else {
-                if ((count _positionMatches) == 1) then {
-                    _matchedIndex = _positionMatches select 0;
+            private _realWaypoints = waypoints _realGroup;
+            private _realCurrentIndex = currentWaypoint _realGroup;
+            private _routeIndex = 0;
+            if (_realWaypoints isNotEqualTo [] && {_realCurrentIndex < count _realWaypoints}) then {
+                private _realTargetPos = waypointPosition [_realGroup, _realCurrentIndex];
+                private _matchingIndexes = [];
+                {
+                    if (((_x select 0) distance2D _realTargetPos) < 1) then {
+                        _matchingIndexes pushBack _forEachIndex;
+                    };
+                } forEach _movementWaypoints;
+
+                private _expectedOffset = (count _realWaypoints) - (count _movementWaypoints);
+                private _expectedIndex = _realCurrentIndex - _expectedOffset;
+                if (_expectedIndex in _matchingIndexes) then {
+                    _routeIndex = _expectedIndex;
                 } else {
-                    if ((count _positionMatches) > 1) then {
-                        _matchedIndex = _positionMatches select 0;
-                        ["VIRTUALIZATION", 2, format [
-                            "Collapsed duplicate physical waypoint capture group=%1 position=%2 type=%3 candidates=%4 selected=%5",
-                            _groupId,
-                            _wpPos,
-                            _realWaypointType,
-                            _positionMatches,
-                            _matchedIndex
-                        ]] call FLO_fnc_log;
+                    if (_matchingIndexes isNotEqualTo []) then {
+                        _routeIndex = _matchingIndexes select 0;
+                    } else {
+                        if (_realCurrentIndex != 0) then {
+                            private _leader = leader _realGroup;
+                            private _origin = if (!isNull _leader && {alive _leader}) then { getPosATL vehicle _leader } else { _groupData get "position" };
+                            private _nearestDistance = 1e10;
+                            {
+                                private _distance = (_x select 0) distance2D _origin;
+                                if (_distance < _nearestDistance) then {
+                                    _nearestDistance = _distance;
+                                    _routeIndex = _forEachIndex;
+                                };
+                            } forEach _movementWaypoints;
+                            ["VIRTUALIZATION", 2, format [
+                                "Physical LAND loop target left the authoritative route group=%1 target=%2; resuming at nearest waypoint %3",
+                                _groupId,
+                                _realTargetPos,
+                                _routeIndex
+                            ]] call FLO_fnc_log;
+                        };
                     };
                 };
             };
 
-            if (_matchedIndex >= 0) then {
-                _savedWaypoint = +(_authoritativeWaypoints select _matchedIndex);
-                _savedWaypoint set [0, +_wpPos];
-                _authoritativeCursor = _matchedIndex + 1;
+            private _routeResult = [
+                [_groupData get "position"] call FLO_fnc_virtualizationResolveLandRouteStart,
+                _existingWaypoints,
+                _routeIndex,
+                true,
+                "PHYSICAL_LOOP_CAPTURE"
+            ] call FLO_fnc_virtualizationResolveLandRouteContinuation;
+            _routeResult params ["_resolved", "_resolvedWaypoints", "_reason"];
+            if (!_resolved) then {
+                ["VIRTUALIZATION", 1, format ["Could not rebase physical LAND loop for %1: %2", _groupId, _reason]] call FLO_fnc_log;
+                throw format ["Physical LAND loop rebase failed for %1", _groupId];
             };
 
-            _savedWaypoints pushBack _savedWaypoint;
+            _groupData set ["waypoints", _resolvedWaypoints];
+            _groupData set ["currentWaypointIndex", 0];
+            _groupData set ["pathSource", "PHYSICAL_LOOP_CAPTURE"];
+            _groupData set ["lastMoveTime", diag_tickTime];
+            _groupData set ["virtualMoveCarryMeters", 0];
+            [_groupData] call FLO_fnc_virtualizationRefreshCurrentWaypointSpeed;
+            true
         };
+
+        private _realWaypoints = waypoints _realGroup;
+        private _currentWpIndex = currentWaypoint _realGroup;
+        private _savedWaypoints = [];
+        private _authoritativeWaypoints = _existingWaypoints select { toUpper (_x select 1) != "CYCLE" };
+        private _authoritativeCursor = 0;
+
+        if (_realWaypoints isNotEqualTo [] && {_currentWpIndex < count _realWaypoints}) then {
+            for "_i" from _currentWpIndex to (count _realWaypoints - 1) do {
+                private _wp = [_realGroup, _i];
+                private _wpPos = waypointPosition _wp;
+
+                if ([_wpPos] call FLO_fnc_validateGroupPosition) then {
+                    private _realWaypointType = toUpper (waypointType _wp);
+                    private _savedWaypoint = [
+                        _wpPos,
+                        _realWaypointType,
+                        waypointBehaviour _wp,
+                        waypointSpeed _wp,
+                        waypointFormation _wp,
+                        waypointCombatMode _wp,
+                        waypointCompletionRadius _wp
+                    ];
+
+                    private _matchedIndex = -1;
+                    private _positionMatches = [];
+                    private _typeMatches = [];
+                    if (_authoritativeCursor < count _authoritativeWaypoints) then {
+                        for "_candidateIndex" from _authoritativeCursor to (count _authoritativeWaypoints - 1) do {
+                            private _candidate = _authoritativeWaypoints select _candidateIndex;
+                            if (((_candidate select 0) distance2D _wpPos) < 1) then {
+                                _positionMatches pushBack _candidateIndex;
+                                private _candidateType = toUpper (_candidate select 1);
+                                if (_candidateType == _realWaypointType) then {
+                                    _typeMatches pushBack _candidateIndex;
+                                };
+                            };
+                        };
+                    };
+
+                    if (_typeMatches isNotEqualTo []) then {
+                        _matchedIndex = _typeMatches select 0;
+                    } else {
+                        if ((count _positionMatches) == 1) then {
+                            _matchedIndex = _positionMatches select 0;
+                        } else {
+                            if ((count _positionMatches) > 1) then {
+                                _matchedIndex = _positionMatches select 0;
+                                ["VIRTUALIZATION", 2, format [
+                                    "Collapsed duplicate physical waypoint capture group=%1 position=%2 type=%3 candidates=%4 selected=%5",
+                                    _groupId,
+                                    _wpPos,
+                                    _realWaypointType,
+                                    _positionMatches,
+                                    _matchedIndex
+                                ]] call FLO_fnc_log;
+                            };
+                        };
+                    };
+
+                    if (_matchedIndex >= 0) then {
+                        _savedWaypoint = +(_authoritativeWaypoints select _matchedIndex);
+                        _savedWaypoint set [0, +_wpPos];
+                        _authoritativeCursor = _matchedIndex + 1;
+                    };
+
+                    _savedWaypoints pushBack _savedWaypoint;
+                };
+            };
+        };
+
+        if (_savedWaypoints isNotEqualTo []) exitWith {
+            private _capturedRoute = _savedWaypoints;
+            private _endpointIndexes = [];
+            if ((_archetype get "movementDomain") == "LAND") then {
+                private _routeResult = [
+                    [_groupData get "position"] call FLO_fnc_virtualizationResolveLandRouteStart,
+                    _savedWaypoints,
+                    true,
+                    "PHYSICAL_CAPTURE",
+                    false
+                ] call FLO_fnc_virtualizationResolveLandWaypoints;
+                _routeResult params ["_resolved", "_resolvedWaypoints", "_reason", "_metrics", "_resolvedEndpointIndexes"];
+                if (!_resolved) then {
+                    ["VIRTUALIZATION", 1, format ["Could not capture a water-safe route for %1: %2", _groupId, _reason]] call FLO_fnc_log;
+                    throw format ["FLO_fnc_virtualizationCaptureRealGroupWaypoints: no land route for %1", _groupId];
+                };
+                _capturedRoute = _resolvedWaypoints;
+                _endpointIndexes = _resolvedEndpointIndexes;
+            };
+
+            private _dismountIndex = _groupData get "dismountAtWaypoint";
+            if (_dismountIndex >= 0) then {
+                private _insertPos = _groupData get "transportInsertPos";
+                if (count _insertPos < 2) then { _insertPos = _groupData get "reinforcementTargetPos"; };
+                private _semanticInsertIndex = if (count _insertPos < 2) then { -1 } else {
+                    _savedWaypoints findIf { ((_x select 0) distance2D _insertPos) < 1 }
+                };
+                if (_semanticInsertIndex < 0) then {
+                    throw format ["Physical route capture for %1 lost its transport insert endpoint", _groupId];
+                };
+                _dismountIndex = if (_endpointIndexes isEqualTo []) then {
+                    _semanticInsertIndex
+                } else {
+                    _endpointIndexes select _semanticInsertIndex
+                };
+                _groupData set ["dismountAtWaypoint", _dismountIndex];
+            };
+
+            _groupData set ["waypoints", _capturedRoute];
+            _groupData set ["currentWaypointIndex", 0];
+            ["VIRTUALIZATION", 4, format ["Captured %1 remaining waypoints from real group %2", count _capturedRoute, _groupId]] call FLO_fnc_log;
+            true
+        };
+
+        private _pendingDismountIndex = _groupData get "dismountAtWaypoint";
+        if (_realWaypoints isNotEqualTo [] && {_currentWpIndex >= count _realWaypoints}
+            && {(_groupData get "attachedGroups") isNotEqualTo []}
+            && {(_groupData get "executionState") == "TRANSPORT"}
+            && {_pendingDismountIndex >= 0 && {_pendingDismountIndex < count _existingWaypoints}}) exitWith {
+            _groupData set ["waypoints", _existingWaypoints select [_pendingDismountIndex]];
+            _groupData set ["currentWaypointIndex", 0];
+            _groupData set ["dismountAtWaypoint", 0];
+            ["VIRTUALIZATION", 2, format ["Carrier %1 finished its physical route before unloading - keeping its insert endpoint", _groupId]] call FLO_fnc_log;
+            true
+        };
+
+        if (_realWaypoints isNotEqualTo [] && {_currentWpIndex >= count _realWaypoints}) then {
+            _groupData set ["waypoints", []];
+            _groupData set ["currentWaypointIndex", 0];
+            _groupData set ["dismountAtWaypoint", -1];
+            [_groupData, [_groupData] call FLO_fnc_virtualizationResolveRouteCompletionState] call FLO_fnc_virtualizationSetRuntimeState;
+            ["VIRTUALIZATION", 4, format ["Group %1 completed all waypoints - clearing virtual waypoints", _groupId]] call FLO_fnc_log;
+        };
+
+        false
     };
-};
-
-if (_savedWaypoints isNotEqualTo []) exitWith {
-    private _capturedRoute = _savedWaypoints;
-    private _endpointIndexes = [];
-    if ((_archetype get "movementDomain") == "LAND") then {
-        private _routeResult = [
-            [_groupData get "position"] call FLO_fnc_virtualizationResolveLandRouteStart,
-            _savedWaypoints,
-            true,
-            "PHYSICAL_CAPTURE",
-            false
-        ] call FLO_fnc_virtualizationResolveLandWaypoints;
-        _routeResult params ["_resolved", "_resolvedWaypoints", "_reason", "_metrics", "_resolvedEndpointIndexes"];
-        if (!_resolved) then {
-            ["VIRTUALIZATION", 1, format ["Could not capture a water-safe route for %1: %2", _groupId, _reason]] call FLO_fnc_log;
-            throw format ["FLO_fnc_virtualizationCaptureRealGroupWaypoints: no land route for %1", _groupId];
-        };
-        _capturedRoute = _resolvedWaypoints;
-        _endpointIndexes = _resolvedEndpointIndexes;
-    };
-
-    private _dismountIndex = _groupData get "dismountAtWaypoint";
-    if (_dismountIndex >= 0) then {
-        private _insertPos = _groupData get "transportInsertPos";
-        if (count _insertPos < 2) then { _insertPos = _groupData get "reinforcementTargetPos"; };
-        private _semanticInsertIndex = if (count _insertPos < 2) then { -1 } else {
-            _savedWaypoints findIf { ((_x select 0) distance2D _insertPos) < 1 }
-        };
-        if (_semanticInsertIndex < 0) then {
-            throw format ["Physical route capture for %1 lost its transport insert endpoint", _groupId];
-        };
-        _dismountIndex = if (_endpointIndexes isEqualTo []) then {
-            _semanticInsertIndex
-        } else {
-            _endpointIndexes select _semanticInsertIndex
-        };
-        _groupData set ["dismountAtWaypoint", _dismountIndex];
-    };
-
-    _groupData set ["waypoints", _capturedRoute];
-    _groupData set ["currentWaypointIndex", 0];
-    call _restoreBuildingHold;
-    ["VIRTUALIZATION", 4, format ["Captured %1 remaining waypoints from real group %2", count _capturedRoute, _groupId]] call FLO_fnc_log;
-    true
-};
-
-private _pendingDismountIndex = _groupData get "dismountAtWaypoint";
-if (_realWaypoints isNotEqualTo [] && {_currentWpIndex >= count _realWaypoints}
-    && {(_groupData get "attachedGroups") isNotEqualTo []}
-    && {(_groupData get "executionState") == "TRANSPORT"}
-    && {_pendingDismountIndex >= 0 && {_pendingDismountIndex < count _existingWaypoints}}) exitWith {
-    _groupData set ["waypoints", _existingWaypoints select [_pendingDismountIndex]];
-    _groupData set ["currentWaypointIndex", 0];
-    _groupData set ["dismountAtWaypoint", 0];
-    ["VIRTUALIZATION", 2, format ["Carrier %1 finished its physical route before unloading - keeping its insert endpoint", _groupId]] call FLO_fnc_log;
-    true
-};
-
-if (_realWaypoints isNotEqualTo [] && {_currentWpIndex >= count _realWaypoints}) then {
+} catch {
+    if (!_isBuildingGarrison) then { throw _exception; };
+    ["VIRTUALIZATION", 2, format ["Building garrison %1 capture failed (%2) - rebuilding its canonical route", _groupId, _exception]] call FLO_fnc_log;
     _groupData set ["waypoints", []];
-    _groupData set ["currentWaypointIndex", 0];
-    _groupData set ["dismountAtWaypoint", -1];
-    [_groupData, [_groupData] call FLO_fnc_virtualizationResolveRouteCompletionState] call FLO_fnc_virtualizationSetRuntimeState;
-    ["VIRTUALIZATION", 4, format ["Group %1 completed all waypoints - clearing virtual waypoints", _groupId]] call FLO_fnc_log;
-    call _restoreBuildingHold;
+    _captureResult = true;
 };
-
-false
+if (_isBuildingGarrison) then { call _restoreBuildingHold; };
+_captureResult

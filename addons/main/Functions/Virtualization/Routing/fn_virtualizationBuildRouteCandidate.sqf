@@ -34,8 +34,8 @@ if (_movementDomain == "LAND" && {_sanitizedWaypoints isNotEqualTo []}) then {
     };
     if (!(_groupData get "isActive") && {[_currentPos] call FLO_fnc_isRouteWater}) then {
         private _shore = [_currentPos] call FLO_fnc_virtualizationResolveLandRouteStart;
-        if (_shore isNotEqualTo _currentPos && {[_groupId, _shore] call FLO_fnc_virtualizationUpdateGroupPosition}) then {
-            ["VIRTUALIZATION", 2, format ["Recovered stranded LAND group=%1 reason=START_IN_WATER distance=%2 source=%3", _groupId, round (_currentPos distance2D _shore), _requestSource]] call FLO_fnc_log;
+        if (_shore isNotEqualTo _currentPos) then {
+            _shore = [_shore] call FLO_fnc_virtualizationNormalizePosition;
             _groupData set ["position", +_shore];
             _currentPos = +_shore;
         };

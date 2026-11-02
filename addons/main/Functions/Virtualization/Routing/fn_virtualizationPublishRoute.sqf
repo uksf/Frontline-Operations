@@ -7,6 +7,15 @@ if (_candidate get "isActive") then {
 };
 if (!_physicalRouteAllowed) exitWith { false };
 
+private _oldPosition = _groupData get "position";
+private _newPosition = _candidate get "position";
+if (!(_candidate get "isActive") && {_newPosition isNotEqualTo _oldPosition}) then {
+    if !([_groupId, _groupData, _newPosition] call FLO_fnc_virtualizationUpdateOwnedGroupPosition) then {
+        throw format ["Route publication for %1 could not commit its recovered start %2", _groupId, _newPosition];
+    };
+    ["VIRTUALIZATION", 2, format ["Recovered stranded LAND group=%1 reason=START_IN_WATER distance=%2", _groupId, round (_oldPosition distance2D _newPosition)]] call FLO_fnc_log;
+};
+
 private _committedFields = call FLO_fnc_virtualizationGetRouteOwnedFields;
 _committedFields append _additionalFields;
 _committedFields append ["idleHelicopterParked", "nextProcessAt", "state", "landRouteStartBlocked", "landRouteRetryAt"];
