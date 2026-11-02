@@ -34,6 +34,7 @@ if (_vehicle getVariable ["FLO_NoVehicleCleanup", false]) exitWith { false };
 if (_vehicle getVariable ["IDS_Logistics_isPlacedEntity", false]) exitWith { false };
 
 if (_vehicle getVariable ["FLO_MobileRespawnVehicle", false]) exitWith { false };
+if ((_vehicle getVariable ["uksf_persistence_persistenceID", ""]) != "") exitWith { false };
 
 private _vehicleKey = str _vehicle;
 if !(isNil { _trackedVehicleKeys get _vehicleKey }) exitWith { false };
@@ -42,6 +43,7 @@ private _vehiclePos = getPosATL _vehicle;
 if ((_playerPositions findIf { _vehiclePos distance2D _x <= _playerSafeRadius }) > -1) exitWith { false };
 
 if ((_installationPositions findIf { _vehiclePos distance2D _x <= _installationSafeRadius }) > -1) exitWith { false };
+if ([_vehiclePos] call FLO_fnc_objectivePositionExcluded) exitWith { false };
 if ([_vehiclePos] call FLO_fnc_aftermathIsPositionInHotObjective) exitWith { false };
 
 private _combatVehicle = _vehicle isKindOf "Tank"
