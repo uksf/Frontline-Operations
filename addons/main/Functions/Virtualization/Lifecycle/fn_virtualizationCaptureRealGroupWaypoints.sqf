@@ -8,6 +8,36 @@
 params ["_groupId", "_groupData", "_realGroup"];
 if (({alive _x} count units _realGroup) == 0) exitWith { false };
 
+private _restoreBuildingHold = {
+    if ((_groupData get "commanderOrder") != "GARRISON" || {(_groupData get "orderMode") != "GARRISON_BUILDING"}) exitWith {};
+    private _captured = _groupData get "waypoints";
+    if (_captured isNotEqualTo [] && {toUpper ((_captured select -1) select 1) == "HOLD"}) exitWith {};
+    private _targetPos = _groupData get "garrisonPosition";
+    ["VIRTUALIZATION", 2, format [
+        "Building garrison %1 lost its HOLD endpoint during capture captured=%2 real=%3 current=%4 - restoring the canonical route",
+        _groupId,
+        _captured apply { _x select 1 },
+        (waypoints _realGroup) apply { waypointType _x },
+        currentWaypoint _realGroup
+    ]] call FLO_fnc_log;
+    private _routeResult = [
+        [_groupData get "position"] call FLO_fnc_virtualizationResolveLandRouteStart,
+        [
+            [_targetPos, "MOVE", "SAFE", "LIMITED", "WEDGE", "GREEN", 12],
+            [_targetPos, "HOLD", "AWARE", "LIMITED", "WEDGE", "YELLOW", 8]
+        ],
+        true,
+        "PHYSICAL_GARRISON_CAPTURE",
+        false
+    ] call FLO_fnc_virtualizationResolveLandWaypoints;
+    if !(_routeResult select 0) then {
+        throw format ["Building garrison %1 has no land route back to its building: %2", _groupId, _routeResult select 2];
+    };
+    _groupData set ["waypoints", _routeResult select 1];
+    _groupData set ["currentWaypointIndex", 0];
+    [_groupData, "moving"] call FLO_fnc_virtualizationSetRuntimeState;
+};
+
 private _existingWaypoints = _groupData get "waypoints";
 private _existingCycle = _existingWaypoints findIf { toUpper (_x select 1) == "CYCLE" };
 private _isLoopRoute = (_groupData get "autoPatrol") || {(_groupData get "patrolConfig") isNotEqualTo []} || {_existingCycle >= 0};
@@ -210,6 +240,7 @@ if (_savedWaypoints isNotEqualTo []) exitWith {
 
     _groupData set ["waypoints", _capturedRoute];
     _groupData set ["currentWaypointIndex", 0];
+    call _restoreBuildingHold;
     ["VIRTUALIZATION", 4, format ["Captured %1 remaining waypoints from real group %2", count _capturedRoute, _groupId]] call FLO_fnc_log;
     true
 };
@@ -232,6 +263,7 @@ if (_realWaypoints isNotEqualTo [] && {_currentWpIndex >= count _realWaypoints})
     _groupData set ["dismountAtWaypoint", -1];
     [_groupData, [_groupData] call FLO_fnc_virtualizationResolveRouteCompletionState] call FLO_fnc_virtualizationSetRuntimeState;
     ["VIRTUALIZATION", 4, format ["Group %1 completed all waypoints - clearing virtual waypoints", _groupId]] call FLO_fnc_log;
+    call _restoreBuildingHold;
 };
 
 false
