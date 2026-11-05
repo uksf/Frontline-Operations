@@ -57,15 +57,18 @@ private _poolUnits = _pools get "units";
     };
 
     private _spawnFailed = false;
+    private _uksf_createdUnits = 0;
     if (_infComp isNotEqualTo []) then {
         {
             private _unit = _infGroup createUnit [_x, _position, [], 0, "NONE"];
             if (isNull _unit) exitWith { _spawnFailed = true; };
+            _uksf_createdUnits = _uksf_createdUnits + 1;
         } forEach _infComp;
     } else {
         for "_i" from 1 to _infUnitCount do {
             private _unit = _infGroup createUnit [selectRandom _poolUnits, _position, [], 0, "NONE"];
             if (isNull _unit) exitWith { _spawnFailed = true; };
+            _uksf_createdUnits = _uksf_createdUnits + 1;
         };
     };
 
@@ -75,7 +78,7 @@ private _poolUnits = _pools get "units";
             _groupId,
             _attachedId
         ]] call FLO_fnc_log;
-        [_infGroup] call FLO_fnc_virtualizationDiscardRealGroupUnits;
+        [_infGroup, _uksf_createdUnits == 0] call FLO_fnc_virtualizationDiscardRealGroupUnits;
         continue;
     };
 

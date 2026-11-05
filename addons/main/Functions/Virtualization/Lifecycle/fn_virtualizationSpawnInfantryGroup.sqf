@@ -34,6 +34,7 @@ _realGroup deleteGroupWhenEmpty true;
 if (count units _realGroup < _unitCount) then {
     [_unitPool, "units", _sideKey, "infantry"] call FLO_fnc_virtualizationRequirePoolEntries;
     private _spawnFailed = false;
+    private _uksf_createdUnits = count units _realGroup;
     for "_i" from (count units _realGroup + 1) to _unitCount do {
         private _unitType = selectRandom _unitPool;
         private _spawnPos = [_position, 5, 20, 1, 0, 0.5, 0] call BIS_fnc_findSafePos;
@@ -41,10 +42,11 @@ if (count units _realGroup < _unitCount) then {
         if (isNull _unit) exitWith {
             _spawnFailed = true;
         };
+        _uksf_createdUnits = _uksf_createdUnits + 1;
     };
 
     if (_spawnFailed) exitWith {
-        [_realGroup] call FLO_fnc_virtualizationDiscardRealGroupUnits;
+        [_realGroup, _uksf_createdUnits == 0] call FLO_fnc_virtualizationDiscardRealGroupUnits;
         _realGroup = grpNull;
     };
 };

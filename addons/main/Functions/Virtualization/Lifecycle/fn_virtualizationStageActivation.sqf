@@ -37,6 +37,7 @@ if !(_groupId in _stagedGroups) then {
         ["plan", +_plan],
         ["comp", +(_groupData get "comp")],
         ["nextIndex", 0],
+        ["uksf_createdFrame", diag_frameNo],
         ["position", [_groupData get "position"] call FLO_fnc_getSafeUnvirtualizePos],
         ["progressAt", diag_tickTime]
     ]];
