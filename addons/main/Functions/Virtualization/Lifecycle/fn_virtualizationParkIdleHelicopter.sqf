@@ -121,7 +121,13 @@ private _uksf_waypoints = (waypoints _realGroup) apply { [waypointPosition _x, w
 private _uksf_parked = 0;
 {
     private _parkPos = [_basePos, typeOf _x, _forEachIndex, 600] call FLO_fnc_virtualizationResolveIdleHelicopterParkPos;
-    _uksf_parked = _uksf_parked + ([[_x], "PARK", [_parkPos, getDir _x, _realGroup, _uksf_token, _uksf_waypoints, isEngineOn _x]] call FLO_fnc_vehicleCommandWhereLocal);
+    if (_parkPos isNotEqualTo []) then {
+        private _uksf_until = serverTime + 5;
+        private _uksf_reservations = missionNamespace getVariable ["uksf_parkReservations", []];
+        _uksf_reservations pushBack [_x, _parkPos, _uksf_until, _realGroup, _uksf_token];
+        missionNamespace setVariable ["uksf_parkReservations", _uksf_reservations];
+        _uksf_parked = _uksf_parked + ([[_x], "PARK", [_parkPos, getDir _x, _realGroup, _uksf_token, _uksf_waypoints, isEngineOn _x, _uksf_until]] call FLO_fnc_vehicleCommandWhereLocal);
+    };
 } forEach _helicopters;
 
 if (!_parksRemotely && {_uksf_parked == count _helicopters}) then {

@@ -50,9 +50,9 @@ private _uksf_handled = 0;
             _object disableAI "MOVE";
         };
         case "PARK": {
-            _argument params ["_parkPos", "_parkDir", "_uksf_group", "_uksf_token", "_uksf_waypoints", "_uksf_engineOn"];
+            _argument params ["_parkPos", "_parkDir", "_uksf_group", "_uksf_token", "_uksf_waypoints", "_uksf_engineOn", "_uksf_until"];
             private _uksf_currentWaypoints = (waypoints _uksf_group) apply { [waypointPosition _x, waypointType _x] };
-            if (isNull _uksf_group || {(_uksf_group getVariable ["uksf_parkToken", -1]) != _uksf_token} || {_uksf_currentWaypoints isNotEqualTo _uksf_waypoints} || {((getPosATL _object) select 2) > 15} || {(vectorMagnitude (velocity _object)) > 2} || {isEngineOn _object != _uksf_engineOn}) then {
+            if (serverTime >= _uksf_until || {isNull _uksf_group} || {(_uksf_group getVariable ["uksf_parkToken", -1]) != _uksf_token} || {_uksf_currentWaypoints isNotEqualTo _uksf_waypoints} || {((getPosATL _object) select 2) > 15} || {(vectorMagnitude (velocity _object)) > 2} || {isEngineOn _object != _uksf_engineOn}) then {
                 _uksf_applied = false;
             } else {
                 _object setPosATL _parkPos;
