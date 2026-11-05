@@ -15,6 +15,11 @@
 
 params ["_groupData", "_owner", ["_type", ""]];
 
+private _uksf_realGroup = _groupData get "realGroup";
+if (!isNull _uksf_realGroup) then {
+    _uksf_realGroup setVariable ["uksf_parkToken", (_uksf_realGroup getVariable ["uksf_parkToken", 0]) + 1, true];
+};
+
 _groupData set ["missionLock", _owner];
 _groupData set ["missionType", _type];
 

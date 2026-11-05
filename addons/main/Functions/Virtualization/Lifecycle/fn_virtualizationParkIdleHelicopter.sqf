@@ -105,7 +105,7 @@ private _needsParking = (_helicopters findIf {
 [_groupData, "idle"] call FLO_fnc_virtualizationSetRuntimeState;
 [_groupId, getPosATL (_helicopters select 0)] call FLO_fnc_virtualizationUpdateGroupPosition;
 private _parksRemotely = (_helicopters findIf { !local _x }) != -1;
-if (!_needsParking || {!_parksRemotely}) then {
+if (!_needsParking) then {
     _groupData set ["idleHelicopterParked", true];
 };
 
@@ -115,16 +115,19 @@ if (_parksRemotely) then {
     _realGroup setVariable ["FLO_parkDispatchedAt", time];
 };
 
-private _parkPositions = [];
+private _uksf_token = (_realGroup getVariable ["uksf_parkToken", 0]) + 1;
+_realGroup setVariable ["uksf_parkToken", _uksf_token, true];
+private _uksf_waypoints = (waypoints _realGroup) apply { [waypointPosition _x, waypointType _x] };
+private _uksf_parked = 0;
 {
     private _parkPos = [_basePos, typeOf _x, _forEachIndex, 600] call FLO_fnc_virtualizationResolveIdleHelicopterParkPos;
-    [[_x], "PARK", [_parkPos, getDir _x]] call FLO_fnc_vehicleCommandWhereLocal;
-    _parkPositions pushBack _parkPos;
+    _uksf_parked = _uksf_parked + ([[_x], "PARK", [_parkPos, getDir _x, _realGroup, _uksf_token, _uksf_waypoints, isEngineOn _x]] call FLO_fnc_vehicleCommandWhereLocal);
 } forEach _helicopters;
 
-if (_parkPositions isNotEqualTo []) then {
+if (!_parksRemotely && {_uksf_parked == count _helicopters}) then {
+    _groupData set ["idleHelicopterParked", true];
     [_groupData, [_realGroup] call FLO_fnc_virtualizationCollectRealGroupVehicles] call FLO_fnc_virtualizationSetRealVehicles;
-    [_groupId, _parkPositions select 0] call FLO_fnc_virtualizationUpdateGroupPosition;
+    [_groupId, getPosATL (_helicopters select 0)] call FLO_fnc_virtualizationUpdateGroupPosition;
 };
 
 true

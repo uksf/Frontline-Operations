@@ -1,6 +1,11 @@
 /* Publish an already validated route and optional commander fields together. */
 params ["_groupId", "_groupData", "_candidate", ["_additionalFields", [], [[]]]];
 
+private _uksf_realGroup = _groupData get "realGroup";
+if (!isNull _uksf_realGroup) then {
+    _uksf_realGroup setVariable ["uksf_parkToken", (_uksf_realGroup getVariable ["uksf_parkToken", 0]) + 1, true];
+};
+
 private _physicalRouteAllowed = true;
 if (_candidate get "isActive") then {
     _physicalRouteAllowed = [_groupId, _candidate] call FLO_fnc_virtualizationApplyRealRoute;
