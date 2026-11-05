@@ -3,12 +3,13 @@
  * Description:
  *   Deletes a physical group's units and leaves group removal to the engine.
  *   Groups are created with deleteGroupWhenEmpty, which removes them once the
- *   deferred unit deletions land. A never-populated group created in the
- *   current frame can be explicitly deleted when the caller confirms it.
+ *   deferred unit deletions land. The engine never removes a group that never
+ *   held units, so the caller passes true to delete such an empty group.
+ *   A group that held units is never deleted here.
  *
  * Arguments:
  *   0: Group <GROUP>
- *   1: Never populated and created this frame <BOOL> (default false)
+ *   1: Group never held units <BOOL> (default false)
  * Return Value:
  *   None
  */

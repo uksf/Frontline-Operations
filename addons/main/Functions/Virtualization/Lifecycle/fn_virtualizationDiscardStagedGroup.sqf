@@ -16,5 +16,4 @@ private _stage = (FLO_VirtUpdate get "stagedGroups") deleteAt _groupId;
 if (isNil "_stage") exitWith {};
 private _stats = FLO_VirtUpdate get "stats";
 _stats set ["stagedGroupsDiscardedTotal", (_stats get "stagedGroupsDiscardedTotal") + 1];
-private _uksf_neverPopulated = (_stage get "nextIndex") == 0 && {(_stage get "uksf_createdFrame") == diag_frameNo};
-[_stage get "group", _uksf_neverPopulated] call FLO_fnc_virtualizationDiscardRealGroupUnits;
+[_stage get "group", (_stage get "nextIndex") == 0] call FLO_fnc_virtualizationDiscardRealGroupUnits;

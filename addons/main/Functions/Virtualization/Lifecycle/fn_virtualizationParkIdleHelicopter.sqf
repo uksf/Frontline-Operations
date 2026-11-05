@@ -117,12 +117,12 @@ if (_parksRemotely) then {
 
 private _uksf_token = (_realGroup getVariable ["uksf_parkToken", 0]) + 1;
 _realGroup setVariable ["uksf_parkToken", _uksf_token, true];
-private _uksf_waypoints = (waypoints _realGroup) apply { [waypointPosition _x, waypointType _x] };
+private _uksf_waypoints = [count waypoints _realGroup, currentWaypoint _realGroup];
 private _uksf_parked = 0;
 {
     private _parkPos = [_basePos, typeOf _x, _forEachIndex, 600] call FLO_fnc_virtualizationResolveIdleHelicopterParkPos;
     if (_parkPos isNotEqualTo []) then {
-        private _uksf_until = serverTime + 5;
+        private _uksf_until = serverTime + 15;
         private _uksf_reservations = missionNamespace getVariable ["uksf_parkReservations", []];
         _uksf_reservations pushBack [_x, _parkPos, _uksf_until, _realGroup, _uksf_token];
         missionNamespace setVariable ["uksf_parkReservations", _uksf_reservations];

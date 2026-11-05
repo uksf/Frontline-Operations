@@ -27,8 +27,8 @@ private _isFree = {
     !(surfaceIsWater _pos)
     && {!isOnRoad _pos}
     && {(_pos nearRoads 15) isEqualTo []}
-    && {(nearestObjects [_pos, ["AllVehicles"], 25]) isEqualTo []}
-    && {(_uksf_reservations findIf {(_x select 1) distance2D _pos < 25}) == -1}
+    && {(nearestObjects [_pos, ["AllVehicles"], 10]) isEqualTo []}
+    && {(_uksf_reservations findIf {(_x select 1) distance2D _pos < 15}) == -1}
 };
 
 private _pads = (nearestObjects [_basePos, ["HeliH"], 300]) select { [getPosATL _x] call _isFree };
