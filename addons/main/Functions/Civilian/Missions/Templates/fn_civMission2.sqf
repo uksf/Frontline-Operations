@@ -34,20 +34,24 @@ if ((FLO_ReputationHandle get "value") < 7) then {
     _hostileForce params ["_hostileSide", "_hostileUnits"];
     private _grp1 = createGroup [_hostileSide, true];
     private _ambushPos = [_deliveryPos, 50, 150, 3, 0, 20, 0] call BIS_fnc_findSafePos;
+    private _uksf_anyCreated = false;
     for "_i" from 1 to 4 do {
-        _grp1 createUnit [selectRandom _hostileUnits, _ambushPos, [], 0, "NONE"];
+        private _uksf_unit = _grp1 createUnit [selectRandom _hostileUnits, _ambushPos, [], 0, "NONE"];
+        if (!isNull _uksf_unit) then { _uksf_anyCreated = true };
     };
     if !([_grp1, _deliveryPos, 200] call FLO_fnc_taskPatrol) then {
-        [_grp1] call FLO_fnc_virtualizationDiscardRealGroupUnits;
+        [_grp1, !_uksf_anyCreated] call FLO_fnc_virtualizationDiscardRealGroupUnits;
     };
 
     private _grp2 = createGroup [_hostileSide, true];
     private _ambushPos2 = [_deliveryPos, 50, 150, 3, 0, 20, 0] call BIS_fnc_findSafePos;
+    _uksf_anyCreated = false;
     for "_i" from 1 to 4 do {
-        _grp2 createUnit [selectRandom _hostileUnits, _ambushPos2, [], 0, "NONE"];
+        private _uksf_unit = _grp2 createUnit [selectRandom _hostileUnits, _ambushPos2, [], 0, "NONE"];
+        if (!isNull _uksf_unit) then { _uksf_anyCreated = true };
     };
     if !([_grp2, _deliveryPos, 100] call FLO_fnc_taskPatrol) then {
-        [_grp2] call FLO_fnc_virtualizationDiscardRealGroupUnits;
+        [_grp2, !_uksf_anyCreated] call FLO_fnc_virtualizationDiscardRealGroupUnits;
     };
 };
 

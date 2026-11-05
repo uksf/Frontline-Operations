@@ -26,6 +26,7 @@ private _civilianRoutineState = _groupData get "civilianRoutineState";
 private _anchorPos = _groupData get "civilianAnchorPos";
 private _routineAnchorPos = _groupData get "civilianRoutineAnchorPos";
 private _realGroup = createGroup [civilian, true];
+private _uksf_anyCreated = false;
 private _spawnedUnits = [];
 private _spawnedVehicles = [];
 private _spawnFailed = false;
@@ -57,6 +58,7 @@ switch (_groupType) do {
 
             private _unit = _realGroup createUnit [_unitType, _spawnPos, [], 0, "NONE"];
             if (isNull _unit) exitWith { _spawnFailed = true; };
+            _uksf_anyCreated = true;
             _spawnedUnits pushBack _unit;
         };
     };
@@ -83,6 +85,7 @@ switch (_groupType) do {
         if (isNull _driver) then {
             _spawnFailed = true;
         } else {
+            _uksf_anyCreated = true;
             _driver moveInDriver _vehicle;
             _spawnedUnits pushBack _driver;
         };
@@ -94,6 +97,7 @@ switch (_groupType) do {
             private _passengerType = if (_spawnClass != "") then { _spawnClass } else { selectRandom _civilianMen };
             private _passenger = _realGroup createUnit [_passengerType, [0, 0, 0], [], 0, "NONE"];
             if (isNull _passenger) exitWith { _spawnFailed = true; };
+            _uksf_anyCreated = true;
             _passenger moveInCargo _vehicle;
             _spawnedUnits pushBack _passenger;
         };
@@ -106,7 +110,7 @@ switch (_groupType) do {
 };
 
 if (_spawnFailed) exitWith {
-    [_realGroup] call FLO_fnc_virtualizationDiscardRealGroupUnits;
+    [_realGroup, !_uksf_anyCreated] call FLO_fnc_virtualizationDiscardRealGroupUnits;
     { deleteVehicle _x; } forEach _spawnedVehicles;
     grpNull
 };

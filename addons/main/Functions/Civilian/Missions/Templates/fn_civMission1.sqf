@@ -49,13 +49,15 @@ if ((FLO_ReputationHandle get "value") < 7) then {
     _hostileForce params ["_hostileSide", "_hostileUnits"];
     private _grp = createGroup [_hostileSide, true];
     private _spawnPos = [_pos, 100, 200, 3, 0, 20, 0] call BIS_fnc_findSafePos;
+    private _uksf_anyCreated = false;
 
     for "_i" from 1 to 4 do {
-        _grp createUnit [selectRandom _hostileUnits, _spawnPos, [], 0, "NONE"];
+        private _uksf_unit = _grp createUnit [selectRandom _hostileUnits, _spawnPos, [], 0, "NONE"];
+        if (!isNull _uksf_unit) then { _uksf_anyCreated = true };
     };
 
     if !([_grp, _pos, 100] call FLO_fnc_taskPatrol) then {
-        [_grp] call FLO_fnc_virtualizationDiscardRealGroupUnits;
+        [_grp, !_uksf_anyCreated] call FLO_fnc_virtualizationDiscardRealGroupUnits;
     };
 };
 

@@ -132,9 +132,11 @@ switch (_modeKey) do {
             for "_i" from 1 to 2 do {
                 private _spawnPos = [_pos, 300, 400, 3, 0, 20, 0] call BIS_fnc_findSafePos;
                 private _grp = createGroup [_hostileSide, true];
+                private _uksf_anyCreated = false;
 
                 for "_j" from 1 to 4 do {
-                    _grp createUnit [selectRandom _hostileUnits, _spawnPos, [], 0, "NONE"];
+                    private _uksf_unit = _grp createUnit [selectRandom _hostileUnits, _spawnPos, [], 0, "NONE"];
+                    if (!isNull _uksf_unit) then { _uksf_anyCreated = true };
                 };
 
                 private _routeInstalled = [
@@ -146,7 +148,7 @@ switch (_modeKey) do {
                     true
                 ] call FLO_fnc_taskApplyRoute;
                 if (!_routeInstalled) then {
-                    [_grp] call FLO_fnc_virtualizationDiscardRealGroupUnits;
+                    [_grp, !_uksf_anyCreated] call FLO_fnc_virtualizationDiscardRealGroupUnits;
                     continue;
                 };
                 { _x setUnitPos "MIDDLE"; } forEach units _grp;
