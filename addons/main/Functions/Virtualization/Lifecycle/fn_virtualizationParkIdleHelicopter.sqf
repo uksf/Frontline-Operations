@@ -110,10 +110,8 @@ if (!_needsParking) then {
 };
 
 if (!_needsParking) exitWith { true };
-if (_parksRemotely && {time < (_realGroup getVariable ["FLO_parkDispatchedAt", -1e9]) + 5}) exitWith { true };
-if (_parksRemotely) then {
-    _realGroup setVariable ["FLO_parkDispatchedAt", time];
-};
+if (time < (_realGroup getVariable ["FLO_parkDispatchedAt", -1e9]) + 5) exitWith { true };
+_realGroup setVariable ["FLO_parkDispatchedAt", time];
 
 private _uksf_token = (_realGroup getVariable ["uksf_parkToken", 0]) + 1;
 _realGroup setVariable ["uksf_parkToken", _uksf_token, true];
@@ -126,7 +124,7 @@ private _uksf_parked = 0;
         private _uksf_reservations = missionNamespace getVariable ["uksf_parkReservations", []];
         _uksf_reservations pushBack [_x, _parkPos, _uksf_until, _realGroup, _uksf_token];
         missionNamespace setVariable ["uksf_parkReservations", _uksf_reservations];
-        _uksf_parked = _uksf_parked + ([[_x], "PARK", [_parkPos, getDir _x, _realGroup, _uksf_token, _uksf_waypoints, isEngineOn _x, _uksf_until]] call FLO_fnc_vehicleCommandWhereLocal);
+        _uksf_parked = _uksf_parked + ([[_x], "PARK", [_parkPos, getDir _x, _realGroup, _uksf_token, _uksf_waypoints, _uksf_until]] call FLO_fnc_vehicleCommandWhereLocal);
     };
 } forEach _helicopters;
 
