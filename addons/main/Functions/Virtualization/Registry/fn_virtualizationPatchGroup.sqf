@@ -62,6 +62,12 @@ private _candidate = [_groupData] call FLO_fnc_virtualizationCloneValue;
 
 _candidate set ["nextProcessAt", 0];
 [_candidate, _groupId] call FLO_fnc_virtualizationValidateGroup;
+if ("missionLock" in _changes && {(_candidate get "missionLock") != ""}) then {
+    private _uksf_realGroup = _groupData get "realGroup";
+    if (!isNull _uksf_realGroup) then {
+        _uksf_realGroup setVariable ["uksf_parkToken", (_uksf_realGroup getVariable ["uksf_parkToken", 0]) + 1, true];
+    };
+};
 {
     _groupData set [_x, _candidate get _x];
 } forEach (keys _changes);
