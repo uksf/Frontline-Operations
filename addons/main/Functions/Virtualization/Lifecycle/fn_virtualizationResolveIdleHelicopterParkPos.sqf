@@ -4,7 +4,9 @@
  * Description:
  *   Resolves a clear ground parking position for an idle helicopter. A free
  *   helipad near the base wins; otherwise the helicopter parks on clear flat
- *   ground at least 15 m from any road. Returns an empty array when no
+ *   ground at least 15 m from any road. A reservation lasts until its
+ *   helicopter is dead, within 10 m and under 3 m of the reserved position,
+ *   or 45 s past the dispatch deadline. Returns an empty array when no
  *   unreserved position can be found.
  */
 
@@ -17,8 +19,9 @@ params [
 
 private _uksf_reservations = missionNamespace getVariable ["uksf_parkReservations", []];
 _uksf_reservations = _uksf_reservations select {
-    _x params ["_uksf_vehicle", "_uksf_pos", "_uksf_until", "_uksf_group", "_uksf_token"];
-    !isNull _uksf_vehicle && {alive _uksf_vehicle} && {serverTime < _uksf_until} && {(_uksf_vehicle distance2D _uksf_pos) > 10}
+    _x params ["_uksf_vehicle", "_uksf_pos", "_uksf_until"];
+    private _uksf_reserveUntil = _uksf_until + 45;
+    !isNull _uksf_vehicle && {alive _uksf_vehicle} && {serverTime < _uksf_reserveUntil} && {!((_uksf_pos distance2D _uksf_vehicle) <= 10 && {(getPos _uksf_vehicle select 2) < 3})}
 };
 missionNamespace setVariable ["uksf_parkReservations", _uksf_reservations];
 
@@ -27,7 +30,7 @@ private _isFree = {
     !(surfaceIsWater _pos)
     && {!isOnRoad _pos}
     && {(_pos nearRoads 15) isEqualTo []}
-    && {(nearestObjects [_pos, ["AllVehicles"], 10]) isEqualTo []}
+    && {(nearestObjects [_pos, ["AllVehicles"], 10, true]) isEqualTo []}
     && {(_uksf_reservations findIf {(_x select 1) distance2D _pos < 15}) == -1}
 };
 
