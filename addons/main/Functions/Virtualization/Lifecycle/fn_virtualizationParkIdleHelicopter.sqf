@@ -110,17 +110,26 @@ if (!_needsParking) then {
 };
 
 if (!_needsParking) exitWith { true };
-if (time < (_realGroup getVariable ["FLO_parkDispatchedAt", -1e9]) + 5) exitWith { true };
-_realGroup setVariable ["FLO_parkDispatchedAt", time];
+private _uksf_operation = _realGroup getVariable ["uksf_parkOperation", [-1, 0]];
+_uksf_operation params ["_uksf_previousToken", "_uksf_previousUntil"];
+private _uksf_currentToken = _realGroup getVariable ["uksf_parkToken", 0];
+if (_uksf_previousToken == _uksf_currentToken && {serverTime < _uksf_previousUntil}) exitWith { true };
 
-private _uksf_token = (_realGroup getVariable ["uksf_parkToken", 0]) + 1;
+private _uksf_reservations = missionNamespace getVariable ["uksf_parkReservations", []];
+_uksf_reservations = _uksf_reservations select {
+    !((_x select 3) isEqualTo _realGroup && {(_x select 4) == _uksf_previousToken})
+};
+missionNamespace setVariable ["uksf_parkReservations", _uksf_reservations];
+
+private _uksf_token = _uksf_currentToken + 1;
+private _uksf_until = serverTime + 15;
+_realGroup setVariable ["uksf_parkOperation", [_uksf_token, _uksf_until]];
 _realGroup setVariable ["uksf_parkToken", _uksf_token, true];
 private _uksf_waypoints = [count waypoints _realGroup, currentWaypoint _realGroup];
 private _uksf_parked = 0;
 {
     private _parkPos = [_basePos, typeOf _x, _forEachIndex, 600] call FLO_fnc_virtualizationResolveIdleHelicopterParkPos;
     if (_parkPos isNotEqualTo []) then {
-        private _uksf_until = serverTime + 15;
         private _uksf_reservations = missionNamespace getVariable ["uksf_parkReservations", []];
         _uksf_reservations pushBack [_x, _parkPos, _uksf_until, _realGroup, _uksf_token];
         missionNamespace setVariable ["uksf_parkReservations", _uksf_reservations];
