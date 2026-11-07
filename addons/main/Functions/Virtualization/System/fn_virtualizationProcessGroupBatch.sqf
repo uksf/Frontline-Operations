@@ -23,7 +23,8 @@ if (_batchStart >= _totalGroups) then {
 private _batchEnd = (_batchStart + _batchSize - 1) min (_totalGroups - 1);
 private _processed = 0;
 private _due = 0;
-private _tracePhaseSampling = FLO_Debug_Level >= 5;
+private _sampleEveryGroup = missionNamespace getVariable ["FLO_VirtPhaseSampling", false];
+private _tracePhaseSampling = FLO_Debug_Level >= 5 || _sampleEveryGroup;
 _stats set ["lastBatchStart", _batchStart];
 _stats set ["lastBatchEnd", _batchEnd];
 
@@ -45,7 +46,7 @@ for "_i" from _batchStart to _batchEnd do {
     if (_tracePhaseSampling) then {
         private _sampleSequence = (_stats get "phaseSampleSequence") + 1;
         _stats set ["phaseSampleSequence", _sampleSequence];
-        _samplePhases = (_sampleSequence mod 16) == 0;
+        _samplePhases = _sampleEveryGroup || {(_sampleSequence mod 16) == 0};
     };
 
     private _groupStart = diag_tickTime;

@@ -76,7 +76,7 @@ if (FLO_PerformanceMonitorPfhId >= 0) exitWith {};
                 FLO_PerformanceMonitorLastVirtSampleAt = _now;
             };
 
-            if (isServer && {FLO_Debug_Level >= 5} && {_virtPhaseSamples > 0}) then {
+            if (isServer && {FLO_Debug_Level >= 5 || {missionNamespace getVariable ["FLO_VirtPhaseSampling", false]}} && {_virtPhaseSamples > 0}) then {
                 private _measuredPhaseMs = (
                     _virtPhaseProximityMs
                     + _virtPhaseScheduleMs
