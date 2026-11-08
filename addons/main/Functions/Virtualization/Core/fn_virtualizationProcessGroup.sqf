@@ -36,7 +36,6 @@ if (_now < (_groupData get "nextProcessAt")) exitWith {
 private _isActive = _groupData get "isActive";
 private _groupType = _groupData get "groupType";
 private _realGroup = _groupData get "realGroup";
-private _tracksAssets = [_groupType] call FLO_fnc_virtualizationUsesAssetStrength;
 private _inCombat = _groupData get "inCombat";
 private _replacementState = _groupData get "replacementState";
 private _activationDeferred = _groupData get "activationDeferred";
@@ -136,7 +135,9 @@ if (_profilePhases) then { _phaseStart = diag_tickTime; };
 if (!_isActive && {(_groupData get "position") isNotEqualTo _position}) then {
     _nearestDist = [_groupData get "position", _airGroup] call FLO_fnc_virtualizationGetNearestCachedPlayerDistance;
 };
-[_groupId, _groupData, _groupActivationDist, _nearestDist, _groupData get "forceVirtual", _groupData get "missionLock", _groupData get "replacementState", _groupData get "inCombat", _virtStats] call FLO_fnc_virtualizationProcessActivationState;
+if ((_groupData get "isActive") || {_groupData get "activationDeferred"} || {_nearestDist <= _groupActivationDist}) then {
+    [_groupId, _groupData, _groupActivationDist, _nearestDist, _groupData get "forceVirtual", _groupData get "missionLock", _groupData get "replacementState", _groupData get "inCombat", _virtStats] call FLO_fnc_virtualizationProcessActivationState;
+};
 if (_profilePhases) then {
     _virtStats set ["phaseActivationMsTotal", (_virtStats get "phaseActivationMsTotal") + ((diag_tickTime - _phaseStart) * 1000)];
 };
@@ -149,6 +150,7 @@ if (_isActive && {!isNull _realGroup}) then {
         _phaseStart = diag_tickTime;
         _virtStats set ["phaseActiveCallsTotal", (_virtStats get "phaseActiveCallsTotal") + 1];
     };
+    private _tracksAssets = [_groupType] call FLO_fnc_virtualizationUsesAssetStrength;
     [_groupId, _groupData, _realGroup, _tracksAssets, _groupData get "replacementState", _nearestDist, _now, _virtStats] call FLO_fnc_virtualizationProcessActiveState;
     if (_profilePhases) then {
         _virtStats set ["phaseActiveMsTotal", (_virtStats get "phaseActiveMsTotal") + ((diag_tickTime - _phaseStart) * 1000)];
