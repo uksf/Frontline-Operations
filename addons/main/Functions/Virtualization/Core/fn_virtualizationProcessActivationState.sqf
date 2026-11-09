@@ -50,6 +50,9 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
     if (!_blockActivation && {!(_groupId in (FLO_VirtUpdate get "stagedGroups"))}) then {
         private _deferredAt = _groupData get "activationDeferredAt";
         private _waited = [0, round (diag_tickTime - _deferredAt)] select (_activationDeferred && {_deferredAt >= 0});
+        if (_waited >= (missionNamespace getVariable ["FLO_VirtLateSpawnWait", 60]) && {[_groupId, _groupData] call FLO_fnc_virtualizationPullBackLateSpawn}) then {
+            _nearestDist = [_groupData get "position"] call FLO_fnc_virtualizationGetNearestCachedPlayerDistance;
+        };
         ["VIRTUALIZATION", 3, format["Activating %1 (dist: %2m, waited: %3s)", _groupId, round _nearestDist, _waited]] call FLO_fnc_log;
     };
 
