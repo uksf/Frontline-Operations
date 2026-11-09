@@ -71,11 +71,7 @@ while {alive _unit && {_unit getVariable ["FLO_isProtester", false]}} do {
             _unit setVariable ["FLO_ProtestLastThrowAt", diag_tickTime, false];
             _unit playMove "Acts_Ambient_Aggressive";
 
-            [_proj] spawn {
-                params ["_obj"];
-                sleep 10;
-                if (!isNull _obj) then { deleteVehicle _obj };
-            };
+            [{ if (!isNull _this) then { deleteVehicle _this } }, _proj, 10] call CBA_fnc_waitAndExecute;
         };
     };
 

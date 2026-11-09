@@ -37,40 +37,36 @@ if (isNil "FLO_GTN_ArtilleryRadioActive") then {
 
 private _sideKey = ["WEST", "EAST"] select (_side isEqualTo east);
 if (FLO_GTN_ArtilleryRadioActive get _sideKey) exitWith { false };
+if ((FLO_GTN_ArtilleryRadioQueues get _sideKey) isEqualTo []) exitWith { true };
 
 FLO_GTN_ArtilleryRadioActive set [_sideKey, true];
 
-[_side, _sideKey] spawn {
-    params ["_side", "_sideKey"];
+private _playStep = {
+    params ["_side", "_sideKey", "_sequence", "_index", "_lastOffset", "_playStep"];
 
-    while {true} do {
+    if (_index >= count _sequence) exitWith {
         private _queue = FLO_GTN_ArtilleryRadioQueues get _sideKey;
-        if (_queue isEqualTo []) exitWith {};
-
-        private _mission = _queue deleteAt 0;
-        private _sequence = _mission select 1;
-        private _lastOffset = 0;
-
-        {
-            _x params [
-                ["_sender", "HQ", [""]],
-                ["_text", "", [""]],
-                ["_offset", 0, [0]]
-            ];
-
-            private _sleepFor = (_offset - _lastOffset) max 0;
-            if (_sleepFor > 0) then {
-                sleep _sleepFor;
-            };
-
-            [_side, _sender, _text] call FLO_fnc_gtnCommanderRadioMessage;
-            _lastOffset = _offset;
-        } forEach _sequence;
-
-        sleep 0.75;
+        if (_queue isEqualTo []) exitWith {
+            FLO_GTN_ArtilleryRadioActive set [_sideKey, false];
+        };
+        private _nextSequence = (_queue deleteAt 0) select 1;
+        [_playStep, [_side, _sideKey, _nextSequence, 0, 0, _playStep], 0.75] call CBA_fnc_waitAndExecute;
     };
 
-    FLO_GTN_ArtilleryRadioActive set [_sideKey, false];
+    (_sequence select _index) params [
+        ["_sender", "HQ", [""]],
+        ["_text", "", [""]],
+        ["_offset", 0, [0]]
+    ];
+
+    [{
+        params ["_side", "_sideKey", "_sequence", "_index", "_offset", "_playStep", "_sender", "_text"];
+        [_side, _sender, _text] call FLO_fnc_gtnCommanderRadioMessage;
+        [_side, _sideKey, _sequence, _index + 1, _offset, _playStep] call _playStep;
+    }, [_side, _sideKey, _sequence, _index, _offset, _playStep, _sender, _text], (_offset - _lastOffset) max 0] call CBA_fnc_waitAndExecute;
 };
+
+private _firstSequence = ((FLO_GTN_ArtilleryRadioQueues get _sideKey) deleteAt 0) select 1;
+[_side, _sideKey, _firstSequence, 0, 0, _playStep] call _playStep;
 
 true

@@ -17,8 +17,4 @@ params ["_taskId", ["_cleanupDelay", 45]];
 if (_taskId isEqualTo "") exitWith {};
 
 [_taskId, "SUCCEEDED", true] call BIS_fnc_taskSetState;
-[_taskId, _cleanupDelay] spawn {
-    params ["_tid", "_delay"];
-    sleep _delay;
-    [_tid] call BIS_fnc_deleteTask;
-};
+[{ [_this] call BIS_fnc_deleteTask }, _taskId, _cleanupDelay] call CBA_fnc_waitAndExecute;

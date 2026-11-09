@@ -155,30 +155,25 @@ if (_radius > 0) then {
     _areaMarkerId setMarkerAlphaLocal _areaAlpha;
 };
 
-[_iconMarkerId, _areaMarkerId, _radius, _duration, _areaAlpha] spawn {
-    params ["_iconMarkerId", "_areaMarkerId", "_radius", "_duration", "_baseAreaAlpha"];
+private _fadeStep = {
+    params ["_iconMarkerId", "_areaMarkerId", "_radius", "_duration", "_baseAreaAlpha", "_step", "_fadeStep"];
 
-    sleep ((_duration * 0.6) max 5);
-
-    for "_i" from 1 to 5 do {
-        private _iconAlpha = 0.9 - (_i * 0.16);
-        if (_iconAlpha < 0) then { _iconAlpha = 0; };
-        _iconMarkerId setMarkerAlphaLocal _iconAlpha;
-
+    if (_step > 5) exitWith {
+        deleteMarkerLocal _iconMarkerId;
         if (_radius > 0) then {
-            private _areaStep = ((_baseAreaAlpha / 6) max 0.01);
-            private _areaAlpha = _baseAreaAlpha - (_i * _areaStep);
-            if (_areaAlpha < 0) then { _areaAlpha = 0; };
-            _areaMarkerId setMarkerAlphaLocal _areaAlpha;
+            deleteMarkerLocal _areaMarkerId;
         };
-
-        sleep ((_duration * 0.08) max 1);
     };
 
-    deleteMarkerLocal _iconMarkerId;
+    _iconMarkerId setMarkerAlphaLocal ((0.9 - (_step * 0.16)) max 0);
     if (_radius > 0) then {
-        deleteMarkerLocal _areaMarkerId;
+        private _areaStep = ((_baseAreaAlpha / 6) max 0.01);
+        _areaMarkerId setMarkerAlphaLocal ((_baseAreaAlpha - (_step * _areaStep)) max 0);
     };
+
+    [_fadeStep, [_iconMarkerId, _areaMarkerId, _radius, _duration, _baseAreaAlpha, _step + 1, _fadeStep], (_duration * 0.08) max 1] call CBA_fnc_waitAndExecute;
 };
+
+[_fadeStep, [_iconMarkerId, _areaMarkerId, _radius, _duration, _areaAlpha, 1, _fadeStep], (_duration * 0.6) max 5] call CBA_fnc_waitAndExecute;
 
 true
