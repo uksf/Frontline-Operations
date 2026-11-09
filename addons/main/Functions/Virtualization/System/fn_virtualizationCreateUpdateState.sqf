@@ -22,6 +22,7 @@ createHashMapFromArray [
     ["stagedGroups", createHashMap],
     ["deferredQueue", createHashMap],
     ["nextEvictionAt", 0],
+    ["evictionRefused", createHashMap],
     ["combatActivations", createHashMap],
     ["currentBatchIndex", 0],
     ["batchSize", _batchSize],

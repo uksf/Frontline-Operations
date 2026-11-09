@@ -4,7 +4,8 @@
  *   Frees cap space for a group waiting near a player. Deactivates the active
  *   group that is farthest from every player, when it is outside its own
  *   activation range and has no combat, mission, transport, or staging hold.
- *   Runs at most once per FLO_VirtEvictionInterval seconds.
+ *   Runs at most once per FLO_VirtEvictionInterval seconds. A group whose
+ *   deactivation is refused is skipped for FLO_VirtEvictionRetry seconds.
  *
  * Arguments:
  *   0: Group ID of the waiting group <STRING>
@@ -24,6 +25,7 @@ FLO_VirtUpdate set ["nextEvictionAt", diag_tickTime + (missionNamespace getVaria
 private _activationDist = ["activationDistance"] call FLO_fnc_virtualizationGetConfigValue;
 private _stagedGroups = FLO_VirtUpdate get "stagedGroups";
 private _combatActivations = FLO_VirtUpdate get "combatActivations";
+private _refused = FLO_VirtUpdate get "evictionRefused";
 private _bestId = "";
 private _bestData = createHashMap;
 private _bestMargin = 0;
@@ -42,6 +44,7 @@ private _bestMargin = 0;
         && {(_groupData get "attachedGroups") isEqualTo []}
         && {!(_x in _stagedGroups)}
         && {!(_x in _combatActivations)}
+        && {(_refused getOrDefault [_x, 0]) < diag_tickTime}
     ) then {
         private _airGroup = (_groupData get "groupType") in ["helicopter", "air", "jet"];
         private _groupActivationDist = [_activationDist, _activationDist * FLO_AirActivationDistanceMultiplier] select _airGroup;
@@ -59,7 +62,11 @@ if (_bestId == "") exitWith { false };
 
 private _load = [_bestData, true] call FLO_fnc_virtualizationGetGroupUnitLoad;
 ["VIRTUALIZATION", 3, format ["Evicting %1 (%2m beyond activation range) for %3", _bestId, round _bestMargin, _waitingGroupId]] call FLO_fnc_log;
-if !([_bestId, _bestData] call FLO_fnc_deactivateVirtualGroup) exitWith { false };
+if !([_bestId, _bestData] call FLO_fnc_deactivateVirtualGroup) exitWith {
+    _refused set [_bestId, diag_tickTime + (missionNamespace getVariable ["FLO_VirtEvictionRetry", 60])];
+    false
+};
+_refused deleteAt _bestId;
 
 private _virtStats = FLO_VirtUpdate get "stats";
 FLO_VirtUpdate set ["activeUnitCount", ((FLO_VirtUpdate get "activeUnitCount") - _load) max 0];
