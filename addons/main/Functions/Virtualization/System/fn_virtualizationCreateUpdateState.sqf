@@ -20,6 +20,8 @@ createHashMapFromArray [
     ["lastActivationFrame", -1],
     ["nextActivationAt", 0],
     ["stagedGroups", createHashMap],
+    ["deferredQueue", createHashMap],
+    ["nextEvictionAt", 0],
     ["combatActivations", createHashMap],
     ["currentBatchIndex", 0],
     ["batchSize", _batchSize],

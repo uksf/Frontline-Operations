@@ -24,7 +24,7 @@ if ((_position select 0) < 100 && (_position select 1) < 100) exitWith {_positio
 if ((FLO_VirtUpdate get "lastPlayerCacheTime") <= 0) then {
     call FLO_fnc_virtualizationCachePlayers;
 };
-private _groundPlayerPositions = ((FLO_VirtUpdate get "cachedPlayerPositions") select { !(_x select 1) }) apply { _x select 0 };
+private _groundPlayerPositions = ((FLO_VirtUpdate get "cachedPlayerPositions") select { !(_x select 1) || {_x param [3, false]} }) apply { _x select 0 };
 if (_groundPlayerPositions isEqualTo []) exitWith { _position };
 
 private _clearanceMeters = 150;

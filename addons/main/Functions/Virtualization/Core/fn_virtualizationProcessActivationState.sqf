@@ -14,6 +14,7 @@ if (_activationDeferred && {_nearestDist > (_activationDist + 10)}) then {
     _groupData set ["activationDeferred", false];
     _groupData set ["activationDeferredAt", -1];
     _activationDeferred = false;
+    (FLO_VirtUpdate get "deferredQueue") deleteAt _groupId;
 };
 
 if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWith {
@@ -31,10 +32,12 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
     private _activationLoad = [_groupData, true] call FLO_fnc_virtualizationGetGroupUnitLoad;
     private _projectedUnitCount = _activeUnitCount + _activationLoad + ([_groupId] call FLO_fnc_virtualizationGetStagedUnitLoad);
     private _blockActivation = false;
+    private _nearerDeferredLoad = 0;
 
     if (!_bypassBudget) then {
-        _blockActivation = _projectedUnitCount > _activationUnitCap;
-        if (_activationDeferred && {_activeUnitCount >= _activationResumeCap}) then {
+        _nearerDeferredLoad = [_groupId, _nearestDist] call FLO_fnc_virtualizationGetNearerDeferredLoad;
+        _blockActivation = (_projectedUnitCount + _nearerDeferredLoad) > _activationUnitCap;
+        if (_activationDeferred && {_nearerDeferredLoad > 0} && {_activeUnitCount >= _activationResumeCap}) then {
             _blockActivation = true;
         };
     };
@@ -44,9 +47,16 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
         true
     };
 
-    if (!_blockActivation && {[_groupId, _groupData] call FLO_fnc_virtualizationStageActivation}) exitWith { true };
+    if (!_blockActivation && {[_groupId, _groupData] call FLO_fnc_virtualizationStageActivation}) exitWith {
+        (FLO_VirtUpdate get "deferredQueue") deleteAt _groupId;
+        true
+    };
 
     if (_blockActivation) then {
+        (FLO_VirtUpdate get "deferredQueue") set [_groupId, [_nearestDist, _activationLoad, diag_tickTime]];
+        if (_nearerDeferredLoad == 0 && {_nearestDist <= (missionNamespace getVariable ["FLO_VirtEvictionDistance", 800])}) then {
+            [_groupId] call FLO_fnc_virtualizationEvictFarActiveGroup;
+        };
         if (!_activationDeferred) then {
             _groupData set ["activationDeferredAt", diag_tickTime];
         };
@@ -58,6 +68,7 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
     } else {
         ["VIRTUALIZATION", 3, format["Activating %1 (dist: %2m)", _groupId, round _nearestDist]] call FLO_fnc_log;
         if ([_groupId, _bypassBudget] call FLO_fnc_virtualizationTryActivateGroup) then {
+            (FLO_VirtUpdate get "deferredQueue") deleteAt _groupId;
             _groupData set ["activationDeferred", false];
             _groupData set ["activationDeferredAt", -1];
             _groupData set ["activationRetryAt", -1];
@@ -79,7 +90,12 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
 };
 
 // Separate boundaries prevent repeated spawn/delete as a player moves along the edge.
-if (_nearestDist > (_activationDist * (["deactivationDistanceMultiplier"] call FLO_fnc_virtualizationGetConfigValue)) && {_isActive}) then {
+private _deactivationDist = _activationDist * (["deactivationDistanceMultiplier"] call FLO_fnc_virtualizationGetConfigValue);
+if (_nearestDist > _deactivationDist && {_isActive} && {
+    private _leader = leader (_groupData get "realGroup");
+    private _holdPos = [getPosATL vehicle _leader, _groupData get "position"] select (isNull _leader);
+    ([_holdPos, (_groupData get "groupType") in ["helicopter", "air", "jet"], false, true] call FLO_fnc_virtualizationGetNearestCachedPlayerDistance) > _deactivationDist
+}) then {
     private _alwaysActive = _groupData get "alwaysActive";
     private _physicalContact = false;
     if (_inCombat) then {
