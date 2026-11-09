@@ -5,8 +5,8 @@
  *   group that waited FLO_VirtLateSpawnWait seconds for activation capacity
  *   must not appear next to players: it is pulled back, or held when no
  *   clear point exists. A staged group is checked again before its units
- *   are revealed, and its stage is discarded when a player has come inside
- *   the clearance while it staged.
+ *   are revealed, and its stage is discarded when any staged unit is inside
+ *   the clearance, for example because a player came closer while it staged.
  *
  * Arguments:
  *   0: Group ID <STRING>
@@ -24,7 +24,9 @@ params [["_groupId", "", [""]], ["_groupData", createHashMap, [createHashMap]]];
 private _stage = (FLO_VirtUpdate get "stagedGroups") getOrDefault [_groupId, createHashMap];
 if (_stage isNotEqualTo createHashMap) exitWith {
     private _clearance = (FLO_VirtUpdate get "lateSpawnClearance") getOrDefault [_groupId, 0];
-    if (_clearance <= 0 || {([_stage get "position", false, true, true] call FLO_fnc_virtualizationGetNearestCachedPlayerDistance) >= _clearance}) exitWith { true };
+    if (_clearance <= 0) exitWith { true };
+    private _positions = [_stage get "position"] + ((units (_stage get "group")) apply { getPosATL _x });
+    if ((_positions findIf { ([_x, false, true, true] call FLO_fnc_virtualizationGetNearestCachedPlayerDistance) < _clearance }) < 0) exitWith { true };
     ["VIRTUALIZATION", 3, format ["Discarding late stage %1: a player came inside %2m while it staged", _groupId, _clearance]] call FLO_fnc_log;
     [_groupId] call FLO_fnc_virtualizationDiscardStagedGroup;
     false
