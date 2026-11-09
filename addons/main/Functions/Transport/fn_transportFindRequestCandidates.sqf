@@ -63,6 +63,7 @@ private _updateCandidate = {
     private _groupData = _groups get _groupId;
     if (isNil "_groupData") then { continue };
     if (_side != sideUnknown && {(_groupData get "side") != _side}) then { continue };
+    if ((_groupData get "commanderIntent") != "") then { continue };
 
     private _groupType = _groupData get "groupType";
     private _transportRole = _groupData get "transportRole";
@@ -104,6 +105,7 @@ private _updateCandidate = {
     if ((_groupData get "side") != _side) then { continue };
     if ((_groupData get "attachedGroups") isNotEqualTo []) then { continue };
     if ((_groupData get "missionLock") != "") then { continue };
+    if ((_groupData get "commanderIntent") != "") then { continue };
     private _candidateRealGroup = _groupData get "realGroup";
     if (!isNull _candidateRealGroup && {!local _candidateRealGroup}) then { continue };
 
