@@ -121,6 +121,7 @@ if (_removedFromTransportPool) then {
 };
 
 [_groupId] call FLO_fnc_virtualizationSpatialRemove;
+if (!isNil "FLO_VirtUpdate") then { (FLO_VirtUpdate get "lateSpawnClearance") deleteAt _groupId; };
 private _removedSnapshot = [_groupId] call FLO_fnc_virtualizationSnapshotGroup;
 
 ["cleanup", _groupId] call FLO_fnc_virtualizationDebugManager;

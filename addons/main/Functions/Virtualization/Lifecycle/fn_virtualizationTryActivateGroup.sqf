@@ -49,9 +49,12 @@ if (!_bypassUnitCap && {_projectedUnitCount > _activationUnitCap}) exitWith {
     false
 };
 
+if !([_groupId, _groupData] call FLO_fnc_virtualizationCheckLateSpawn) exitWith { false };
+
 private _activated = [_groupId, _groupData] call FLO_fnc_activateVirtualGroup;
 if (_activated) then {
     FLO_VirtUpdate set ["activeUnitCount", _activeUnitCount + _activationLoad];
+    (FLO_VirtUpdate get "lateSpawnClearance") deleteAt _groupId;
 };
 
 _activated

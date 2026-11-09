@@ -28,6 +28,7 @@ if (_groupId in _stagedGroups && {((_stagedGroups get _groupId) get "plan") isNo
 };
 if (_plan isEqualTo []) exitWith { false };
 _plan params ["_kind", "_types"];
+if (!(_groupId in _stagedGroups) && {!([_groupId, _groupData] call FLO_fnc_virtualizationCheckLateSpawn)}) exitWith { false };
 if !(_groupId in _stagedGroups) then {
     private _group = [_groupData get "side", _groupId, _groupData get "groupType"] call FLO_fnc_virtualizationCreateRealGroup;
     if (isNull _group) exitWith {};

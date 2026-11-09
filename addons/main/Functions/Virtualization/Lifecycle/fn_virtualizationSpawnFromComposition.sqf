@@ -32,7 +32,7 @@ private _spawnFailed = false;
     } else {
         _position
     };
-    private _created = [_realGroup, _x, _spawnPos, _side, _groupType, _spawnParkedHelicopters] call FLO_fnc_activateSavedVirtualGroup;
+    private _created = [_realGroup, _x, _spawnPos, _side, _groupType, _spawnParkedHelicopters, _groupId] call FLO_fnc_activateSavedVirtualGroup;
     if (isNull _created) then {
         _spawnFailed = true;
     };

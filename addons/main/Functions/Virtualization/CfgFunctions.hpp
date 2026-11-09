@@ -123,6 +123,7 @@ class VirtualizationLifecycle {
     class virtualizationGetNearerDeferredLoad {};
     class virtualizationEvictFarActiveGroup {};
     class virtualizationPullBackLateSpawn {};
+    class virtualizationCheckLateSpawn {};
     class virtualizationProcessCombatActivations {};
     class virtualizationSpawnInfantryGroup {};
     class virtualizationSpawnGroundCombatGroup {};

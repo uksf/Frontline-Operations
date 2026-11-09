@@ -10,6 +10,8 @@
  * 2: Position <ARRAY> - Position [x,y,z] to create the unit at
  * 3: Side <SIDE> - Side of the unit (east, west, independent)
  * 4: Group Type <STRING> - Type of group ("infantry", "mechanized", etc.) for specialized settings
+ * 5: Spawn Parked Helicopter <BOOL> - Place a helicopter on the ground (optional, default: false)
+ * 6: Group ID <STRING> - Virtual group ID, which carries any late-spawn player clearance (optional, default: "")
  *
  * Return Value:
  * Created Unit <OBJECT>
@@ -21,7 +23,8 @@ params [
     ["_position", [0,0,0], [[]]],
     ["_side", east, [east]],
     ["_groupType", "", [""]],
-    ["_spawnParkedHelicopter", false, [false]]
+    ["_spawnParkedHelicopter", false, [false]],
+    ["_groupId", "", [""]]
 ];
 
 private _createdUnit = objNull;
@@ -61,7 +64,7 @@ switch (true) do {
 
     case (_isVehicle): {
         private _spawnPos = [
-            format ["saved_%1", _groupType],
+            [format ["saved_%1", _groupType], _groupId] select (_groupId != ""),
             _position,
             10,
             150,

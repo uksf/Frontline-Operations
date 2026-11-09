@@ -2,10 +2,11 @@
  * Function: FLO_fnc_virtualizationPullBackLateSpawn
  * Description:
  *   Keeps a land group that waited for activation capacity from appearing
- *   next to players. A group closer than FLO_VirtLateSpawnClearance metres to
- *   a ground player is moved to a point at least that far plus a margin,
- *   searched backwards along the route it already travelled, then directly
- *   away from the nearest player. The group keeps its current waypoint and
+ *   next to players. Call it through FLO_fnc_virtualizationCheckLateSpawn.
+ *   A group closer than FLO_VirtLateSpawnClearance metres plus a 50 m
+ *   placement margin to a ground player is moved to a point that far out,
+ *   searched backwards along up to 60 points of the route it already
+ *   travelled, then on three rings around the nearest player. The group keeps its current waypoint and
  *   walks back in. A group with no remaining route has nowhere to walk back
  *   to, so it stays where it is. While the group activates, ground vehicle
  *   placement keeps the same player clearance.
@@ -35,27 +36,28 @@ private _clearance = missionNamespace getVariable ["FLO_VirtLateSpawnClearance",
 (FLO_VirtUpdate get "lateSpawnClearance") set [_groupId, _clearance];
 private _position = _groupData get "position";
 private _distanceToPlayers = { [_this, false, true, true] call FLO_fnc_virtualizationGetNearestCachedPlayerDistance };
-if ((_position call _distanceToPlayers) >= _clearance) exitWith { true };
-
 private _targetClearance = _clearance + 50;
+if ((_position call _distanceToPlayers) >= _targetClearance) exitWith { true };
+
 private _clearOf = { !(surfaceIsWater _this) && {(_this call _distanceToPlayers) >= _targetClearance} };
 private _target = [];
 private _trail = [_position];
 for "_i" from (_currentIndex - 1) to 0 step -1 do {
     _trail pushBack ((_waypoints select _i) select 0);
 };
-private _walked = 0;
+private _probesLeft = 60;
 for "_i" from 0 to (count _trail - 2) do {
     private _from = _trail select _i;
     private _to = _trail select (_i + 1);
     private _length = _from distance2D _to;
     private _dir = _from getDir _to;
     for "_step" from 50 to _length step 50 do {
+        if (_probesLeft <= 0) exitWith {};
+        _probesLeft = _probesLeft - 1;
         private _probe = _from getPos [_step, _dir];
         if (_probe call _clearOf) exitWith { _target = _probe; };
     };
-    _walked = _walked + _length;
-    if (_target isNotEqualTo [] || {_walked > 3000}) exitWith {};
+    if (_target isNotEqualTo [] || {_probesLeft <= 0}) exitWith {};
 };
 
 if (_target isEqualTo []) then {
@@ -71,9 +73,13 @@ if (_target isEqualTo []) then {
     if (_nearest isEqualTo []) exitWith {};
     private _away = _nearest getDir _position;
     {
-        private _probe = _nearest getPos [_targetClearance + 50, _away + _x];
-        if (_probe call _clearOf) exitWith { _target = _probe; };
-    } forEach [0, 30, -30, 60, -60, 90, -90, 120, -120, 150, -150, 180];
+        private _radius = _x;
+        {
+            private _probe = _nearest getPos [_radius, _away + _x];
+            if (_probe call _clearOf) exitWith { _target = _probe; };
+        } forEach [0, 30, -30, 60, -60, 90, -90, 120, -120, 150, -150, 180];
+        if (_target isNotEqualTo []) exitWith {};
+    } forEach [_targetClearance + 50, _targetClearance + 250, _targetClearance + 500];
 };
 
 if (_target isEqualTo []) exitWith {

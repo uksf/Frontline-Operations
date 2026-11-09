@@ -53,7 +53,7 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
         private _deferredAt = _groupData get "activationDeferredAt";
         private _waited = [0, round (diag_tickTime - _deferredAt)] select (_activationDeferred && {_deferredAt >= 0});
         if (_waited >= (missionNamespace getVariable ["FLO_VirtLateSpawnWait", 60])) then {
-            _holdLateSpawn = !([_groupId, _groupData] call FLO_fnc_virtualizationPullBackLateSpawn);
+            _holdLateSpawn = !([_groupId, _groupData] call FLO_fnc_virtualizationCheckLateSpawn);
             _nearestDist = [_groupData get "position"] call FLO_fnc_virtualizationGetNearestCachedPlayerDistance;
         };
         if (!_holdLateSpawn) then {
@@ -88,7 +88,6 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
     } else {
         if ([_groupId, _bypassBudget || {_groupId in (FLO_VirtUpdate get "stagedGroups")}] call FLO_fnc_virtualizationTryActivateGroup) then {
             (FLO_VirtUpdate get "deferredQueue") deleteAt _groupId;
-            (FLO_VirtUpdate get "lateSpawnClearance") deleteAt _groupId;
             _groupData set ["activationDeferred", false];
             _groupData set ["activationDeferredAt", -1];
             _groupData set ["activationRetryAt", -1];
