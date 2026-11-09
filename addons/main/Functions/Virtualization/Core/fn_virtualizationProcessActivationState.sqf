@@ -35,7 +35,9 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
     private _nearerDeferredLoad = 0;
 
     if (!_bypassBudget) then {
-        _nearerDeferredLoad = [_groupId, _nearestDist] call FLO_fnc_virtualizationGetNearerDeferredLoad;
+        if !(_groupId in (FLO_VirtUpdate get "stagedGroups")) then {
+            _nearerDeferredLoad = [_groupId, _nearestDist] call FLO_fnc_virtualizationGetNearerDeferredLoad;
+        };
         _blockActivation = (_projectedUnitCount + _nearerDeferredLoad) > _activationUnitCap;
         if (_activationDeferred && {_nearerDeferredLoad > 0} && {_activeUnitCount >= _activationResumeCap}) then {
             _blockActivation = true;
