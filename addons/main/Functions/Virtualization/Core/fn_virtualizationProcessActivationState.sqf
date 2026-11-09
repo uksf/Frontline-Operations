@@ -34,10 +34,8 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
     private _blockActivation = false;
     private _nearerDeferredLoad = 0;
 
-    if (!_bypassBudget) then {
-        if !(_groupId in (FLO_VirtUpdate get "stagedGroups")) then {
-            _nearerDeferredLoad = [_groupId, _nearestDist] call FLO_fnc_virtualizationGetNearerDeferredLoad;
-        };
+    if (!_bypassBudget && {!(_groupId in (FLO_VirtUpdate get "stagedGroups"))}) then {
+        _nearerDeferredLoad = [_groupId, _nearestDist] call FLO_fnc_virtualizationGetNearerDeferredLoad;
         _blockActivation = (_projectedUnitCount + _nearerDeferredLoad) > _activationUnitCap;
         if (_activationDeferred && {_nearerDeferredLoad > 0} && {_activeUnitCount >= _activationResumeCap}) then {
             _blockActivation = true;
@@ -77,7 +75,7 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
         _virtStats set ["deferredGroupsLast", (_virtStats get "deferredGroupsLast") + ([1, 0] select (_activationDeferred))];
         _virtStats set ["activeUnitsLast", _activeUnitCount];
     } else {
-        if ([_groupId, _bypassBudget] call FLO_fnc_virtualizationTryActivateGroup) then {
+        if ([_groupId, _bypassBudget || {_groupId in (FLO_VirtUpdate get "stagedGroups")}] call FLO_fnc_virtualizationTryActivateGroup) then {
             (FLO_VirtUpdate get "deferredQueue") deleteAt _groupId;
             _groupData set ["activationDeferred", false];
             _groupData set ["activationDeferredAt", -1];
