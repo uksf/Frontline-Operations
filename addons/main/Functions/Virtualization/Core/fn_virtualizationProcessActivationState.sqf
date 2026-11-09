@@ -47,6 +47,12 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
         true
     };
 
+    if (!_blockActivation && {!(_groupId in (FLO_VirtUpdate get "stagedGroups"))}) then {
+        private _deferredAt = _groupData get "activationDeferredAt";
+        private _waited = [0, round (diag_tickTime - _deferredAt)] select (_activationDeferred && {_deferredAt >= 0});
+        ["VIRTUALIZATION", 3, format["Activating %1 (dist: %2m, waited: %3s)", _groupId, round _nearestDist, _waited]] call FLO_fnc_log;
+    };
+
     if (!_blockActivation && {[_groupId, _groupData] call FLO_fnc_virtualizationStageActivation}) exitWith {
         (FLO_VirtUpdate get "deferredQueue") deleteAt _groupId;
         true
@@ -66,7 +72,6 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
         _virtStats set ["deferredGroupsLast", (_virtStats get "deferredGroupsLast") + ([1, 0] select (_activationDeferred))];
         _virtStats set ["activeUnitsLast", _activeUnitCount];
     } else {
-        ["VIRTUALIZATION", 3, format["Activating %1 (dist: %2m)", _groupId, round _nearestDist]] call FLO_fnc_log;
         if ([_groupId, _bypassBudget] call FLO_fnc_virtualizationTryActivateGroup) then {
             (FLO_VirtUpdate get "deferredQueue") deleteAt _groupId;
             _groupData set ["activationDeferred", false];
