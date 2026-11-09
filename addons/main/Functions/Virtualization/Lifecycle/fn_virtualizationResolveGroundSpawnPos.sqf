@@ -33,6 +33,7 @@ if ((_searchCenter distance2D _position) > 1) then {
     ]] call FLO_fnc_log;
 };
 
+private _playerClearance = (FLO_VirtUpdate get "lateSpawnClearance") getOrDefault [_groupId, 150];
 private _spawnPos = [];
 private _bestRoadDistance = 1e12;
 if (_preferRoad) then {
@@ -40,7 +41,7 @@ if (_preferRoad) then {
         private _candidate = getPosATL _x;
         private _distanceFromOrigin = _candidate distance2D _position;
         if (_distanceFromOrigin < _minDist) then { continue };
-        if ([_candidate, _position, _maxDistance, _vehicleType, _safeRadius, 150] call FLO_fnc_virtualizationIsGroundSpawnPositionSafe) then {
+        if ([_candidate, _position, _maxDistance, _vehicleType, _safeRadius, _playerClearance] call FLO_fnc_virtualizationIsGroundSpawnPositionSafe) then {
             private _distanceFromSearch = _candidate distance2D _searchCenter;
             if (_distanceFromSearch < _bestRoadDistance) then {
                 _bestRoadDistance = _distanceFromSearch;
@@ -52,7 +53,7 @@ if (_preferRoad) then {
 
 if (_spawnPos isEqualTo []) then {
     private _emptyPosition = _searchCenter findEmptyPosition [_minDist, _searchRadius, _vehicleType];
-    if ([_emptyPosition, _position, _maxDistance, _vehicleType, _safeRadius, 150] call FLO_fnc_virtualizationIsGroundSpawnPositionSafe) then {
+    if ([_emptyPosition, _position, _maxDistance, _vehicleType, _safeRadius, _playerClearance] call FLO_fnc_virtualizationIsGroundSpawnPositionSafe) then {
         _spawnPos = _emptyPosition;
     };
 };
@@ -68,7 +69,7 @@ if (_spawnPos isEqualTo []) then {
             _waterCoef,
             0
         ] call BIS_fnc_findSafePos;
-        if ([_candidate, _position, _maxDistance, _vehicleType, _safeRadius, 150] call FLO_fnc_virtualizationIsGroundSpawnPositionSafe) exitWith {
+        if ([_candidate, _position, _maxDistance, _vehicleType, _safeRadius, _playerClearance] call FLO_fnc_virtualizationIsGroundSpawnPositionSafe) exitWith {
             _spawnPos = _candidate;
         };
     };
@@ -79,7 +80,7 @@ if (_spawnPos isEqualTo []) then {
         if (_spawnPos isNotEqualTo []) exitWith {};
         for "_bearing" from 0 to 330 step 30 do {
             private _candidate = _searchCenter getPos [_radius, _bearing];
-            if ([_candidate, _position, _maxDistance, _vehicleType, _safeRadius, 150] call FLO_fnc_virtualizationIsGroundSpawnPositionSafe) exitWith {
+            if ([_candidate, _position, _maxDistance, _vehicleType, _safeRadius, _playerClearance] call FLO_fnc_virtualizationIsGroundSpawnPositionSafe) exitWith {
                 _spawnPos = _candidate;
             };
         };

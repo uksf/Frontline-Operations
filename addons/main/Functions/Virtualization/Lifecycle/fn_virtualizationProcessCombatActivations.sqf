@@ -41,17 +41,18 @@ private _activationUnitCap = ["activationUnitCap"] call FLO_fnc_virtualizationGe
         [_groupData] call FLO_fnc_gtnCombatPrepareRealGroupForCombat;
         continue;
     };
+    private _alreadyStaging = _groupId in (FLO_VirtUpdate get "stagedGroups");
     private _projectedUnitCount = (FLO_VirtUpdate get "activeUnitCount")
         + ([_groupData, true] call FLO_fnc_virtualizationGetGroupUnitLoad)
         + ([_groupId] call FLO_fnc_virtualizationGetStagedUnitLoad);
-    if (_projectedUnitCount > _activationUnitCap) then {
+    if (!_alreadyStaging && {_projectedUnitCount > _activationUnitCap}) then {
         [_groupId] call FLO_fnc_virtualizationDiscardStagedGroup;
         continue;
     };
     if !([_groupId] call FLO_fnc_virtualizationClaimActivationSlot) exitWith {};
     if ([_groupId, _groupData] call FLO_fnc_virtualizationStageActivation) exitWith {};
     _queue deleteAt _groupId;
-    if ([_groupId] call FLO_fnc_virtualizationTryActivateGroup) then {
+    if ([_groupId, _alreadyStaging] call FLO_fnc_virtualizationTryActivateGroup) then {
         [_groupData] call FLO_fnc_gtnCombatPrepareRealGroupForCombat;
     };
 } forEach +_queue;

@@ -11,6 +11,10 @@ params [
 if (isNil "FLO_VirtUpdate" || {_forceReset}) then {
     FLO_VirtUpdate = [_batchSize, _playerCacheInterval] call FLO_fnc_virtualizationCreateUpdateState;
 } else {
+    {
+        if (isNil {FLO_VirtUpdate get _x}) then { FLO_VirtUpdate set [_x, _y]; };
+    } forEach ([_batchSize, _playerCacheInterval] call FLO_fnc_virtualizationCreateUpdateState);
+
     if ((FLO_VirtUpdate get "batchSize") != _batchSize) then {
         ["VIRTUALIZATION", 2, format [
             "Correcting stale virtualization batch size %1 -> %2",

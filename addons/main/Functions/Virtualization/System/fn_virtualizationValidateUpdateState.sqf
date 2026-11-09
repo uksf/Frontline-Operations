@@ -16,7 +16,13 @@ private _requiredKeys = [
     "batchSize",
     "playerCacheInterval",
     "stats",
-    "perf"
+    "perf",
+    "stagedGroups",
+    "deferredQueue",
+    "nextEvictionAt",
+    "evictionRefused",
+    "lateSpawnClearance",
+    "combatActivations"
 ];
 
 {
