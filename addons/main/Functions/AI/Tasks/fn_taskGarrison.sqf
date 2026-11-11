@@ -80,8 +80,19 @@ for "_index" from 0 to (_assignmentCount - 1) do {
     _unit disableAI "PATH";
     _unit setUnitPos (["UP", "MIDDLE"] select ((_index mod 3) == 2));
     _unit setVariable ["FLO_garrisonPosition", +_position];
+    _unit setVariable ["FLO_garrisonToken", format ["%1:%2:%3", clientOwner, diag_tickTime, netId _unit], true];
 
     private _handlers = [];
+    _handlers pushBack ["Local", _unit addEventHandler ["Local", {
+        params ["_unit", "_isLocal"];
+        if (!_isLocal) then {
+            private _group = group _unit;
+            _group setVariable ["FLO_buildingGarrisonAttempted", nil];
+            _group setVariable ["FLO_buildingGarrisonAnchor", nil];
+            _group setVariable ["FLO_buildingGarrisonAssigned", nil];
+            [_unit] call FLO_fnc_taskReleaseGarrisonUnit;
+        };
+    }]];
     _handlers pushBack ["Hit", _unit addEventHandler ["Hit", {
         params ["_unit"];
         [_unit] call FLO_fnc_taskReleaseGarrisonUnit;
