@@ -17,11 +17,14 @@ if (isNil "FLO_AftermathCleanup") exitWith { false };
 private _state = FLO_AftermathCleanup;
 if !(_state get "enabled") exitWith { false };
 
-{
+if (diag_tickTime >= (_state get "nextHolderReconciliation")) then {
     {
-        [_x, "weaponHolder"] call FLO_fnc_aftermathRegisterEntity;
-    } forEach (allMissionObjects _x);
-} forEach (_state get "weaponHolderClasses");
+        {
+            [_x, "weaponHolder"] call FLO_fnc_aftermathRegisterEntity;
+        } forEach (allMissionObjects _x);
+    } forEach (_state get "weaponHolderClasses");
+    _state set ["nextHolderReconciliation", diag_tickTime + 300];
+};
 
 private _trackedEntities = _state get "trackedEntities";
 private _playerPositions = call FLO_fnc_aftermathGetPlayerPositions;

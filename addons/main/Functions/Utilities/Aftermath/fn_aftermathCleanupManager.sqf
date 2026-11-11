@@ -20,6 +20,8 @@ if (isNil "FLO_AftermathCleanup") then {
         ["enabled", false],
         ["pfhId", -1],
         ["entityKilledEhId", -1],
+        ["entityCreatedEhId", -1],
+        ["nextHolderReconciliation", 0],
         ["interval", 30],
         ["playerEvidenceRadius", 300],
         ["corpseGraceTime", 900],
@@ -36,6 +38,16 @@ private _state = FLO_AftermathCleanup;
 
 switch (toLower _mode) do {
     case "init": {
+        if ((_state get "entityCreatedEhId") < 0) then {
+            private _ehId = addMissionEventHandler ["EntityCreated", {
+                params ["_entity"];
+                if (isNull _entity) exitWith {};
+                if (["GroundWeaponHolder", "WeaponHolder", "WeaponHolderSimulated"] findIf { _entity isKindOf _x } >= 0) then {
+                    [_entity, "weaponHolder"] call FLO_fnc_aftermathRegisterEntity;
+                };
+            }];
+            _state set ["entityCreatedEhId", _ehId];
+        };
         if ((_state get "entityKilledEhId") < 0) then {
             private _ehId = addMissionEventHandler ["EntityKilled", {
                 params ["_entity"];
@@ -105,6 +117,12 @@ switch (toLower _mode) do {
             _state set ["entityKilledEhId", -1];
         };
 
+        private _createdEhId = _state get "entityCreatedEhId";
+        if (_createdEhId >= 0) then {
+            removeMissionEventHandler ["EntityCreated", _createdEhId];
+            _state set ["entityCreatedEhId", -1];
+        };
+        _state set ["nextHolderReconciliation", 0];
         _state set ["trackedEntities", createHashMap];
         ["AFTERMATH_CLEANUP", 3, "Aftermath cleanup stopped"] call FLO_fnc_log;
         true

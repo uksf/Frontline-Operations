@@ -1,3 +1,11 @@
+/*
+ * Function: FLO_fnc_storeWeaponCombatPrice
+ * Author: Frontline Operations Development Group
+ * Description: Calculates a weapon's combat price from its compatible ammunition.
+ * Parameters: 0: Weapon class <STRING>, 1: Category <STRING>
+ * Return value: Price <NUMBER>
+ * Example: ["arifle_MX_F", "primary"] call FLO_fnc_storeWeaponCombatPrice
+ */
 params ["_className", "_category"];
 
 private _cfg = configFile >> "CfgWeapons" >> _className;
@@ -23,6 +31,7 @@ if !("this" in _muzzles) then {
     } else {
         getArray (_cfg >> _muzzle >> "magazines")
     };
+    _muzzleMagazines append (compatibleMagazines [_className, _muzzle]);
 
     {
         if (_x == "") then { continue };
