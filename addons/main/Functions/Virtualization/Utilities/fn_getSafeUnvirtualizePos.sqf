@@ -46,12 +46,8 @@ if (_nearestPlayerPosition isNotEqualTo [] && {_nearestDist < _clearanceMeters})
         for "_bearing" from 0 to 330 step 30 do {
             private _probe = _position getPos [_radius, _bearing];
             if !(surfaceIsWater _probe) then {
-                private _clear = true;
-                {
-                    if ((_probe distance2D _x) < _clearanceMeters) exitWith {
-                        _clear = false;
-                    };
-                } forEach _groundPlayerPositions;
+                private _nearPlayers = _groundPlayerPositions inAreaArray [_probe, _clearanceMeters, _clearanceMeters, 0, false];
+                private _clear = (_nearPlayers findIf {(_probe distance2D _x) < _clearanceMeters}) < 0;
 
                 if (_clear) exitWith {
                     _candidate = _probe;
