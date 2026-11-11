@@ -100,6 +100,7 @@ class VirtualizationLifecycle {
     class virtualizationForceActivateGroup {};
     class virtualizationCreateRealGroup {};
     class virtualizationBindRealGroup {};
+    class virtualizationTrackUnitLoss {};
     class virtualizationResolveActiveStraggler {};
     class virtualizationRequirePoolEntries {};
     class virtualizationGetGroundCombatVehiclePool {};
