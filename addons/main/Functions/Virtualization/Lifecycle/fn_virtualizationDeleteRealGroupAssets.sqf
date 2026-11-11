@@ -16,11 +16,14 @@ if !([_groupData, _realGroup, false] call FLO_fnc_virtualizationCanDeactivateGro
 private _deleteEmptyGroup = !isNull _realGroup && {(units _realGroup) isEqualTo []} && {local _realGroup};
 private _vehiclesToDelete = +(_groupData get "realVehicles");
 if (!isNull _realGroup) then {
-    // Deliberate virtualization owns removal; Empty must not retire its record.
     ["", _realGroup] call FLO_fnc_virtualizationBindRealGroup;
     _vehiclesToDelete append (assignedVehicles _realGroup);
 };
+if ((_groupData get "realGroup") isEqualTo _realGroup) then {
+    [_groupData] call FLO_fnc_virtualizationClearRealGroup;
+};
 _vehiclesToDelete = _vehiclesToDelete arrayIntersect _vehiclesToDelete;
+private _entitiesToDelete = [];
 {
     private _veh = vehicle _x;
     if (_veh == _x) then {
@@ -47,11 +50,11 @@ _vehiclesToDelete = _vehiclesToDelete arrayIntersect _vehiclesToDelete;
             continue;
         };
         _x hideObjectGlobal true;
-        _veh deleteVehicleCrew _x;
+        _entitiesToDelete pushBackUnique _x;
     } forEach (crew _veh);
 
     _veh hideObjectGlobal true;
-    deleteVehicle _veh;
+    _entitiesToDelete pushBackUnique _veh;
 } forEach _vehiclesToDelete;
 
 {
@@ -61,8 +64,10 @@ _vehiclesToDelete = _vehiclesToDelete arrayIntersect _vehiclesToDelete;
         continue;
     };
     _x hideObjectGlobal true;
-    deleteVehicle _x;
+    _entitiesToDelete pushBackUnique _x;
 } forEach units _realGroup;
+
+deleteVehicle _entitiesToDelete;
 
 if (_deleteEmptyGroup) then { deleteGroup _realGroup };
 

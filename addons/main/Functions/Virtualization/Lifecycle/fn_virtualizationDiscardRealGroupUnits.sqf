@@ -20,4 +20,4 @@ if (isNull _group) exitWith {};
 if ((units _group) isEqualTo []) exitWith {
     if (_uksf_neverPopulated && {local _group}) then { deleteGroup _group };
 };
-{ deleteVehicle _x } forEach units _group;
+deleteVehicle (units _group);

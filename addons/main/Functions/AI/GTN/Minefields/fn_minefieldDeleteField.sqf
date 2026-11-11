@@ -26,10 +26,7 @@ if (isNil "_field") exitWith { false };
 private _objectiveId = _field get "objectiveId";
 private _markerName = _field get "markerName";
 
-{
-    if (isNull _x) then { continue };
-    deleteVehicle _x;
-} forEach (_field get "mineObjects");
+deleteVehicle ((_field get "mineObjects") select { !isNull _x });
 
 if (_markerName != "" && {getMarkerColor _markerName != ""}) then {
     deleteMarker _markerName;

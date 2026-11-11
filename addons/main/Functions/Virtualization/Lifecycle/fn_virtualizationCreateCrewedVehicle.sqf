@@ -74,8 +74,7 @@ if (!_hasDriver && {_turrets isEqualTo []}) then {
 
 if (_crewFailed || {_crewCreated == 0}) exitWith {
     ["VIRTUALIZATION", 1, format ["Failed to create crew %1 for vehicle %2", _crewType, _vehicleType]] call FLO_fnc_log;
-    { deleteVehicle _x; } forEach _createdCrew;
-    deleteVehicle _vehicle;
+    deleteVehicle (_createdCrew + [_vehicle]);
     objNull
 };
 

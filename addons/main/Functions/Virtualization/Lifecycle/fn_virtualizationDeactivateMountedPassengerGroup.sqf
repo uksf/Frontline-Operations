@@ -49,14 +49,17 @@ _syncResult params ["", "_syncedCount"];
 
 ["", _realGroup] call FLO_fnc_virtualizationBindRealGroup;
 private _deleteEmptyGroup = (units _realGroup) isEqualTo [] && {local _realGroup};
+[_groupData] call FLO_fnc_virtualizationClearRealGroup;
+private _unitsToDelete = [];
 {
     if (!alive _x) then {
         [_x, "corpse"] call FLO_fnc_aftermathRegisterEntity;
         continue;
     };
     _x hideObjectGlobal true;
-    deleteVehicle _x;
+    _unitsToDelete pushBack _x;
 } forEach units _realGroup;
+deleteVehicle _unitsToDelete;
 
 if (_deleteEmptyGroup) then { deleteGroup _realGroup };
 
@@ -70,7 +73,6 @@ if (_syncedCount <= 0) exitWith {
     true
 };
 
-[_groupData] call FLO_fnc_virtualizationClearRealGroup;
 [_groupData] call FLO_fnc_virtualizationClearRealVehicles;
 [_groupData] call FLO_fnc_virtualizationClearMountedIn;
 _groupData set ["isActive", false];
