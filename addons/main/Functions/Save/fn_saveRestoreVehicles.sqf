@@ -75,6 +75,7 @@ private _loadedVehicles = 0;
         _veh setVariable ["FLO_SupportVehicleRoles", _supportVehicleRoles, true];
     };
     { _x params ["_hp", "_dmg"]; _veh setHitPointDamage [_hp, _dmg]; } forEach _damagedHitpoints;
+    forceHitPointsDamageSync _veh;
     if (_attr get "engineOn") then { _veh engineOn true; };
     [_veh, _type, _attr, _trackedCrewTypes] call FLO_fnc_initRestoreTrackedCrew;
     if (_attr get "storeVehicle") then {
