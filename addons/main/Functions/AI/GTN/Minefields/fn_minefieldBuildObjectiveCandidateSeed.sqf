@@ -68,7 +68,7 @@ private _primaryEnemyPos = [];
 if (_enemyLinkedObjectives isEqualTo []) exitWith { createHashMap };
 if (_primaryEnemyObjectiveId == "") exitWith { createHashMap };
 
-private _baseFacingDir = [_center, _primaryEnemyPos] call BIS_fnc_dirTo;
+private _baseFacingDir = _center getDir _primaryEnemyPos;
 private _enemyLinkCount = count _enemyLinkedObjectives;
 private _baseFrontageHalfWidth = (
     ((_radius * (FLO_MinefieldConfig get "frontageWidthScale")) max (FLO_MinefieldConfig get "frontageWidthMin"))
@@ -78,7 +78,7 @@ private _baseFrontageHalfWidth = (
 private _frontlineSpreadHalfWidth = 0;
 {
     private _distance = _center distance2D _x;
-    private _dirToEnemy = [_center, _x] call BIS_fnc_dirTo;
+    private _dirToEnemy = _center getDir _x;
     private _angleDelta = ((_dirToEnemy - _baseFacingDir + 540) % 360) - 180;
     private _lateralSpread = abs ((_distance max 1) * sin _angleDelta);
     if (_lateralSpread > _frontlineSpreadHalfWidth) then {

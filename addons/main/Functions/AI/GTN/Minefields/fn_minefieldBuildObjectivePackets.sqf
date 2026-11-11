@@ -97,7 +97,7 @@ private _roadCandidates = [];
     if ((_objectivePos distance2D _roadPos) <= (_objectiveRadius + _edgeBuffer)) then { continue };
     if (([_roadPos, [_objectiveId], _blockingObjectiveIds] call FLO_fnc_minefieldGetBlockingObjectiveId) != "") then { continue };
 
-    private _dirToRoad = [_objectivePos, _roadPos] call BIS_fnc_dirTo;
+    private _dirToRoad = _objectivePos getDir _roadPos;
     private _angleDelta = abs (((_dirToRoad - _facingDir + 540) % 360) - 180);
     if (_angleDelta > 80) then { continue };
 

@@ -29,7 +29,7 @@ private _maxLateralSpread = 0;
     if ((count _x) < 2) then { continue };
 
     private _distance = _anchorPos distance2D _x;
-    private _dirToPos = [_anchorPos, _x] call BIS_fnc_dirTo;
+    private _dirToPos = _anchorPos getDir _x;
     private _angleDelta = ((_dirToPos - _facingDir + 540) % 360) - 180;
     private _forwardDepth = (_distance * cos _angleDelta) max 0;
     private _lateralSpread = abs (_distance * sin _angleDelta);
