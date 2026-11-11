@@ -81,6 +81,7 @@ if (_useLiveCounting) then {
     _opforCount = { (side group _x) isEqualTo east } count _liveUnits;
 } else {
     private _units = [_pos, _radius, _radius, 0, false] nearEntities [["Man"], false, true, true];
+    _units = _units arrayIntersect _units;
 
     {
         if (!alive _x) then { continue };

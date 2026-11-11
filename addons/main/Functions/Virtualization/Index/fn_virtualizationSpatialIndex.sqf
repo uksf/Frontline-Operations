@@ -28,16 +28,14 @@ switch (toLower _mode) do {
         [_groupId] call FLO_fnc_virtualizationSpatialRemove
     };
     case "update": {
-        _args params ["_groupId", "_newPosition", ["_side", nil]];
-        [_groupId, _newPosition, _side] call FLO_fnc_virtualizationSpatialUpdate
+        _args call FLO_fnc_virtualizationSpatialUpdate
     };
     case "query": {
         _args params ["_position"];
         [_position] call FLO_fnc_virtualizationSpatialQuery
     };
     case "queryradius": {
-        _args params ["_position", "_radius", ["_filterSide", nil], ["_exact", false]];
-        [_position, _radius, _filterSide, _exact] call FLO_fnc_virtualizationSpatialQueryRadius
+        _args call FLO_fnc_virtualizationSpatialQueryRadius
     };
     case "rebuild": {
         call FLO_fnc_virtualizationSpatialRebuild
