@@ -75,7 +75,7 @@ private _seenPositions = [];
         } forEach _seenPositions;
         if (_duplicate) then { continue };
 
-        private _dirToCover = [_objectivePos, _coverPos] call BIS_fnc_dirTo;
+        private _dirToCover = _objectivePos getDir _coverPos;
         private _angleDelta = abs (((_dirToCover - _facingDir + 540) % 360) - 180);
         if (_angleDelta > 85) then { continue };
 

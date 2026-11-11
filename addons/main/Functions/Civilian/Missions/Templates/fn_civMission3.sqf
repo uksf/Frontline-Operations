@@ -42,7 +42,7 @@ _trigger setTriggerArea [20, 20, 0, false, 20];
 _trigger setTriggerInterval 2;
 _trigger setTriggerActivation ["NONE", "PRESENT", false];
 _trigger setTriggerStatements [
-    "(allMines select {position _x inArea thisTrigger}) isEqualTo []",
+    "(allMines inAreaArray thisTrigger) isEqualTo []",
     "['MINEFIELD_COMPLETE', [thisTrigger]] call FLO_fnc_civilianMissionResolveAction;",
     ""
 ];
