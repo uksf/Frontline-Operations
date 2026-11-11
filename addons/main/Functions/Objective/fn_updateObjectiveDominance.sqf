@@ -80,7 +80,7 @@ if (_useLiveCounting) then {
     _bluforCount = { (side group _x) isEqualTo west } count _liveUnits;
     _opforCount = { (side group _x) isEqualTo east } count _liveUnits;
 } else {
-    private _units = _pos nearEntities ["Man", _radius];
+    private _units = [_pos, _radius, _radius, 0, false] nearEntities [["Man"], false, true, true];
 
     {
         if (!alive _x) then { continue };

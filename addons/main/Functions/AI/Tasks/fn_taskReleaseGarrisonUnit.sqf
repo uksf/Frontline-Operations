@@ -1,9 +1,9 @@
-/* Releases one live unit from FLO-owned physical building-garrison state.
-   Handlers stay on the machine that assigned the garrison; the AI state is
-   restored where the unit is local, which differs after an HC transfer. */
-params [["_unit", objNull, [objNull]]];
+/* Releases one garrison assignment by token, clearing local handlers and restoring AI on the current owner. */
+params [["_unit", objNull, [objNull]], ["_token", "", [""]]];
 
 if (isNull _unit) exitWith { true };
+if (_token == "") then { _token = _unit getVariable ["FLO_garrisonToken", ""] };
+if (_token == "" || {_token != (_unit getVariable ["FLO_garrisonToken", ""])}) exitWith { true };
 
 {
     _x params ["_eventType", "_eventId"];
@@ -14,10 +14,11 @@ _unit setVariable ["FLO_garrisonEventHandlers", nil];
 _unit setVariable ["FLO_garrisonPosition", nil];
 
 if !(local _unit) exitWith {
-    [_unit] remoteExecCall ["FLO_fnc_taskReleaseGarrisonUnit", _unit];
+    [_unit, _token] remoteExecCall ["FLO_fnc_taskReleaseGarrisonUnit", _unit];
     true
 };
 
+_unit setVariable ["FLO_garrisonToken", nil, true];
 _unit enableAI "PATH";
 _unit setUnitPos "AUTO";
 

@@ -150,9 +150,17 @@ if (_insertMode == "AIR_LAND") then {
     private _carrierSpeed = vectorMagnitude (velocity _carrierVehicle);
 
     if !(_groupData get "transportLandCommandIssued") exitWith {
+        private _landingCenter = [_dismountPos, _carrierPos] select _unloadTriggeredByThreat;
+        private _leadVehiclePos = getPosATL _carrierVehicle;
         {
+            private _offset = (getPosATL _x) vectorDiff _leadVehiclePos;
+            _offset set [2, 0];
+            private _landingPos = _landingCenter vectorAdd _offset;
             _x flyInHeight FLO_Transport_AirLandAltitude;
-            _x land "GET OUT";
+            private _accepted = _x landAt [AGLToASL _landingPos, "GetOut", FLO_Transport_ActiveUnloadTimeout, true];
+            if (isNil "_accepted" || {!(_accepted isEqualType true)} || {!_accepted}) then {
+                _x land "GET OUT";
+            };
         } forEach _liveCarrierVehicles;
         [_groupId, createHashMapFromArray [
             ["transportLandCommandIssued", true]

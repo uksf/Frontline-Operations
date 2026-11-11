@@ -12,7 +12,7 @@ if (isNull _base || {_radius <= 0} || {!(_baseSide in [west, east])}) then {
 
 private _enemySide = [_baseSide] call FLO_fnc_opposingSide;
 private _basePos = getPosATL _base;
-private _nearEntities = _base nearEntities [["Man", "LandVehicle"], _radius];
+private _nearEntities = [_basePos, _radius, _radius, 0, false] nearEntities [["Man", "LandVehicle"], false, true, true];
 private _friendlyCount = 0;
 private _enemyCount = 0;
 

@@ -60,23 +60,20 @@ while {true} do {
     private _liveObjectives = [];
     private _allPlayers = [] call FLO_fnc_getConnectedHumanPlayers;
     
-    // === IDENTIFY ACTIVE OBJECTIVES (Near Players) ===
     {
-        private _pPos = getPosATL _x;
-        {
-            private _oId = _x;
-            private _objData = FLO_Objectives get _oId;
-            private _radius = _objData get "radius";
-            // Keep large objective areas active across their full capture radius.
-            private _dist = (_objData get "position") distance2D _pPos;
-            if (_dist < (1000 max _radius)) then {
-                _activeObjectives pushBackUnique _oId;
-            };
-            if (_dist < _radius) then {
-                _liveObjectives pushBackUnique _oId;
-            };
-        } forEach _objKeys;
-    } forEach _allPlayers;
+        private _oId = _x;
+        private _objData = FLO_Objectives get _oId;
+        private _pos = _objData get "position";
+        private _radius = _objData get "radius";
+        private _activeRadius = 1000 max _radius;
+        private _nearPlayers = _allPlayers inAreaArray [_pos, _activeRadius, _activeRadius, 0, false];
+        if (_nearPlayers findIf {(_x distance2D _pos) < _activeRadius} >= 0) then {
+            _activeObjectives pushBack _oId;
+        };
+        if (_nearPlayers findIf {(_x distance2D _pos) < _radius} >= 0) then {
+            _liveObjectives pushBack _oId;
+        };
+    } forEach _objKeys;
 
     // Build objective update set for this tick:
     // all active objectives + a bounded round-robin slice of inactive objectives.
