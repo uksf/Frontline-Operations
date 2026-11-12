@@ -10,6 +10,7 @@ params ["_entity"];
 if (isNil "IDS_Logistics_EntityDeletedEH") then {
     IDS_Logistics_EntityDeletedEH = addMissionEventHandler ["EntityDeleted", {
         params ["_entity"];
+        if (isNil { _entity getVariable "IDS_Logistics_KilledEH" } && {isNil { _entity getVariable "IDS_Logistics_VisibilityState" }}) exitWith {};
         IDS_Logistics_PlacedEntities = IDS_Logistics_PlacedEntities - [_entity];
         IDS_Logistics_ManipulatedEntities = IDS_Logistics_ManipulatedEntities - [_entity];
     }];
