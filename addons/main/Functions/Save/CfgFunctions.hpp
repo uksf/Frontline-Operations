@@ -19,4 +19,13 @@ class Save {
     class saveGetCompressedDamage {};
     class saveIsWeaponHolderClass {};
     class saveRequest {};
+    class saveRunStages {};
+    class saveStagePrepare {};
+    class saveStageCapture {};
+    class saveStageValidateGroups {};
+    class saveStageObjects {};
+    class saveStageMinefields {};
+    class saveStageSerializeGroups {};
+    class saveStageIds {};
+    class saveStageCommit {};
 };

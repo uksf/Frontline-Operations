@@ -29,11 +29,10 @@ if (FLO_MissionSaveInProgress) exitWith {
 };
 
 ["SAVE", 3, "Authorized manual campaign save requested"] call FLO_fnc_log;
-// Spawn locally after authentication so the worker owns a server-local execution context.
-[_owner] spawn {
+[{
     params ["_owner"];
     if !([_owner] call FLO_fnc_saveStart) then {
         ["Campaign saving is already in progress or initialization is incomplete.", "warning", false, _owner] call FLO_fnc_sendNotification;
     };
-};
+}, [_owner]] call CBA_fnc_execNextFrame;
 true

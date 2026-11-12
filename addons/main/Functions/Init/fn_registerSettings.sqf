@@ -64,7 +64,7 @@ _campaignLaunchMode call _settingsFn;
 
 FLO_AutosavePFH = -1;
 FLO_MissionSaveInProgress = false;
-FLO_SaveWorker = scriptNull;
+FLO_SaveWorker = -1;
 FLO_SaveSequence = 0;
 FLO_SaveRequester = -1;
 FLO_SaveStatus = createHashMapFromArray [
