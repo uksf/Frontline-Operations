@@ -4,6 +4,9 @@
  * Description:
  *   Ends expired or invalid civilian protests and starts new protests against
  *   connected players standing in hostile or contested-wary objectives.
+ *   Unscheduled calls index active civilian groups by objective once per call.
+ *   Scheduled calls scan the live group map for each player, because the map can
+ *   change while the call is suspended.
  *
  * Arguments:
  * 0: Civilian manager <HASHMAP>
@@ -82,6 +85,7 @@ private _endedObjectives = [];
 
 private _started = 0;
 private _civilianGroupsByObjective = nil;
+private _useObjectiveIndex = !canSuspend;
 {
     private _player = _x;
     private _playerSide = side group _player;
@@ -99,7 +103,7 @@ private _civilianGroupsByObjective = nil;
     };
     if (!_qualifies) then { continue };
 
-    if (isNil "_civilianGroupsByObjective") then {
+    if (_useObjectiveIndex && {isNil "_civilianGroupsByObjective"}) then {
         _civilianGroupsByObjective = createHashMap;
         {
             if ((_y get "side") != civilian || {!(_y get "isActive")}) then { continue };
@@ -108,8 +112,9 @@ private _civilianGroupsByObjective = nil;
             _objectiveGroups pushBack _x;
         } forEach _groups;
     };
-    private _objectiveGroupIds = _civilianGroupsByObjective getOrDefault [_objectiveId, []];
-    private _selectedGroups = [_objectiveId, _player, FLO_CivilianConfig get "PROTEST_MAX_GROUPS", _objectiveGroupIds] call FLO_fnc_civilianSelectObjectiveProtesters;
+    private _selectArgs = [_objectiveId, _player, FLO_CivilianConfig get "PROTEST_MAX_GROUPS"];
+    if (_useObjectiveIndex) then { _selectArgs pushBack (_civilianGroupsByObjective getOrDefault [_objectiveId, []]) };
+    private _selectedGroups = _selectArgs call FLO_fnc_civilianSelectObjectiveProtesters;
     if ((count _selectedGroups) < (FLO_CivilianConfig get "PROTEST_MIN_GROUPS")) then { continue };
 
     private _expiresAt = _nowTick + (FLO_CivilianConfig get "PROTEST_DURATION_SECONDS");
