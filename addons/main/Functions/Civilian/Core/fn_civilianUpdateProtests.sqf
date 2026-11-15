@@ -81,6 +81,7 @@ private _endedObjectives = [];
 } forEach _endedObjectives;
 
 private _started = 0;
+private _civilianGroupsByObjective = nil;
 {
     private _player = _x;
     private _playerSide = side group _player;
@@ -98,7 +99,17 @@ private _started = 0;
     };
     if (!_qualifies) then { continue };
 
-    private _selectedGroups = [_objectiveId, _player, FLO_CivilianConfig get "PROTEST_MAX_GROUPS"] call FLO_fnc_civilianSelectObjectiveProtesters;
+    if (isNil "_civilianGroupsByObjective") then {
+        _civilianGroupsByObjective = createHashMap;
+        {
+            if ((_y get "side") != civilian || {!(_y get "isActive")}) then { continue };
+            private _civilianObjective = _y getOrDefault ["civilianObjective", ""];
+            private _objectiveGroups = _civilianGroupsByObjective getOrDefault [_civilianObjective, [], true];
+            _objectiveGroups pushBack _x;
+        } forEach _groups;
+    };
+    private _objectiveGroupIds = _civilianGroupsByObjective getOrDefault [_objectiveId, []];
+    private _selectedGroups = [_objectiveId, _player, FLO_CivilianConfig get "PROTEST_MAX_GROUPS", _objectiveGroupIds] call FLO_fnc_civilianSelectObjectiveProtesters;
     if ((count _selectedGroups) < (FLO_CivilianConfig get "PROTEST_MIN_GROUPS")) then { continue };
 
     private _expiresAt = _nowTick + (FLO_CivilianConfig get "PROTEST_DURATION_SECONDS");
