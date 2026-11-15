@@ -2,6 +2,8 @@ class CivilianCore {
     file = "\z\flo\addons\main\Functions\Civilian\Core";
 
     class civilianManager {};
+    class civilianUpdateProtests {};
+    class civilianUpdateRoutines {};
     class bribeMilitia {};
     class civilianConfig {};
     class civilianResolveObjective {};
