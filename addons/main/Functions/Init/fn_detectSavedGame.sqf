@@ -22,6 +22,11 @@ if (isNil "_saveData") exitWith {
     [false, nil]
 };
 try {
+    if (_saveData isEqualType "") then {
+        private _decodeStart = diag_tickTime;
+        _saveData = [_saveData] call FLO_fnc_saveDecodePayload;
+        ["SAVE_DETECT", 3, format ["Decoded saved campaign text in %1 ms", round ((diag_tickTime - _decodeStart) * 1000)]] call FLO_fnc_log;
+    };
     [_saveData] call FLO_fnc_saveValidateCampaignRoot;
 } catch {
     ["SAVE_DETECT", 1, format ["Current campaign validation failed; Continue aborted: %1", _exception]] call FLO_fnc_log;

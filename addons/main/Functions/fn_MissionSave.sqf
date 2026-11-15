@@ -60,6 +60,7 @@ FLO_SaveWorker = [createHashMapFromArray [
         ["minefields", FLO_fnc_saveStageMinefields],
         ["serializeGroups", FLO_fnc_saveStageSerializeGroups],
         ["ids", FLO_fnc_saveStageIds],
+        ["encode", FLO_fnc_saveStageEncode],
         ["commit", FLO_fnc_saveStageCommit]
     ]]
 ]] call FLO_fnc_saveRunStages;

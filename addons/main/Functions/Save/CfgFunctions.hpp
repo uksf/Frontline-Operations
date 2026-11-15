@@ -27,5 +27,10 @@ class Save {
     class saveStageMinefields {};
     class saveStageSerializeGroups {};
     class saveStageIds {};
+    class saveStageEncode {};
+    class saveEncodeValue {};
+    class saveEncodeText {};
+    class saveDecodeValue {};
+    class saveDecodePayload {};
     class saveStageCommit {};
 };
