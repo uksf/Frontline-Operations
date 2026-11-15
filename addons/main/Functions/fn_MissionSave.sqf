@@ -57,7 +57,6 @@ FLO_SaveWorker = [createHashMapFromArray [
         ["capture", FLO_fnc_saveStageCapture],
         ["validateGroups", FLO_fnc_saveStageValidateGroups],
         ["objects", FLO_fnc_saveStageObjects],
-        ["minefields", FLO_fnc_saveStageMinefields],
         ["serializeGroups", FLO_fnc_saveStageSerializeGroups],
         ["ids", FLO_fnc_saveStageIds],
         ["encode", FLO_fnc_saveStageEncode],

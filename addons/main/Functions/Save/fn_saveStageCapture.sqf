@@ -1,4 +1,4 @@
-/* Save stage: the coherent campaign snapshot. The capture itself is one atomic unit.
+/* Save stage: the coherent campaign snapshot, including commander minefields. The capture itself is one atomic unit.
  * Arguments: 0: Save context <HASHMAP>
  * Returns: <BOOL> - true when the stage is complete
  */
@@ -10,6 +10,7 @@ _ctx set ["groupIds", keys (_campaignState get "virtualGroups")];
 _ctx set ["validateIndex", 0];
 _ctx set ["serializeIndex", 0];
 _ctx set ["serializedGroups", createHashMap];
+[_ctx] call FLO_fnc_saveStageMinefields;
 
 {
     _data set [_x, _campaignState get _x];

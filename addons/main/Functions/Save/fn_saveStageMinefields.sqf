@@ -1,4 +1,5 @@
-/* Save stage: commander minefields and minefield objective cooldowns.
+/* Captures commander minefields and a detached copy of minefield objective cooldowns.
+ * Called inside the capture stage so minefields and resources come from the same frame.
  * Arguments: 0: Save context <HASHMAP>
  * Returns: <BOOL> - true when the stage is complete
  */
@@ -24,7 +25,7 @@ try {
             typeName FLO_MinefieldObjectiveCooldowns
         ];
     };
-    _data set ["minefieldObjectiveCooldowns", FLO_MinefieldObjectiveCooldowns];
+    _data set ["minefieldObjectiveCooldowns", +FLO_MinefieldObjectiveCooldowns];
     ["SAVE", 3, format ["Commander minefields: %1", count _minefieldArray]] call FLO_fnc_log;
 } catch { throw format ["[SAVE] Commander minefields failed: %1", _exception]; };
 
