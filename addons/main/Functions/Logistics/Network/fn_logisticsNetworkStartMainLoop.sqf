@@ -90,6 +90,23 @@ _net set ["_loopStarted", true];
                                 _perf get "resourcesBefore",
                                 _perf get "resourcesAfter"
                             ];
+                            if ((_perf get "dispatchMs") > 10) then {
+                                diag_log format [
+                                    "[FLO][PERF] Logistics %1 dispatch detail pick=%2 delivery=%3 spawn=%4 spend=%5 create=%6 (group=%7 transit=%8 organic=%9 waypoint=%10) bookkeeping=%11 policyDenied=%12",
+                                    _net get "_managedSideKey",
+                                    _perf get "dispatchTargetPickMs",
+                                    _perf get "dispatchDeliveryPickMs",
+                                    _perf get "dispatchSpawnMs",
+                                    _perf get "dispatchSpendMs",
+                                    _perf get "dispatchCreateMs",
+                                    _perf get "dispatchCreateGroupMs",
+                                    _perf get "dispatchCreateTransitMs",
+                                    _perf get "dispatchCreateOrganicMs",
+                                    _perf get "dispatchCreateWaypointMs",
+                                    _perf get "dispatchBookkeepingMs",
+                                    _perf get "policyDenied"
+                                ];
+                            };
                         };
                     };
                 }, _interval, [_net]] call CBA_fnc_addPerFrameHandler;
