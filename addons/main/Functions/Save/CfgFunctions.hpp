@@ -31,6 +31,7 @@ class Save {
     class saveEncodeValue {};
     class saveEncodeText {};
     class saveDecodeValue {};
+    class saveScaleByPowerOfTwo {};
     class saveDecodePayload {};
     class saveStageCommit {};
 };

@@ -1,25 +1,26 @@
 /* Converts one campaign value into a form that str writes and parseSimpleArray reads back.
  * A HashMap becomes ["#HM", keys, values], a side becomes ["#SD", name], and an array whose
  * first element is a string starting with "#" becomes ["#AR", elements] so it cannot pass as a tag.
- * A number that 10 decimal places does not read back exactly becomes ["#NB", 20-decimal text].
- * Arguments: 0: Value <HASHMAP, ARRAY, SIDE, NUMBER, STRING, BOOL>, 1: Value is a HashMap key <BOOL>
+ * A number that 10 decimal places does not read back exactly becomes ["#NB", mantissa text, exponent],
+ * where the value is mantissa * 2^exponent and the mantissa is an integer of 24 significant bits.
+ * Arguments: 0: Value <HASHMAP, ARRAY, SIDE, NUMBER, STRING, BOOL>
  * Returns: <ANY> - encoded value
- * Throws when the value is nil, a non-finite number, a number that cannot be written within one
- * float rounding step (or exactly, for a HashMap key), or another type.
+ * Throws when the value is nil, a non-finite number, a number that does not read back exactly, or
+ * another type.
  */
-params ["_value", ["_isKey", false]];
+params ["_value"];
 if (isNil "_value") then { throw "Cannot save a nil value" };
 if (_value isEqualType 0) exitWith {
     if !(finite _value) then { throw format ["Cannot save non-finite number %1", _value] };
     if (((parseSimpleArray ("[" + (_value toFixed 10) + "]")) select 0) isEqualTo _value) exitWith { _value };
-    private _wideText = _value toFixed 20;
-    private _wide = parseNumber _wideText;
-    private _exact = _wide isEqualTo _value;
-    if (_isKey && {!_exact}) then { throw format ["Cannot save number key %1 exactly", _wideText] };
-    if (!_exact && {abs (_wide - _value) > (abs _value) * 2.4e-7}) then {
-        throw format ["Cannot save number %1 without loss", _wideText];
+    private _exponent = (floor ((ln abs _value) / (ln 2))) - 23;
+    private _mantissa = [_value, -_exponent] call FLO_fnc_saveScaleByPowerOfTwo;
+    while { abs _mantissa >= 16777216 } do { _exponent = _exponent + 1; _mantissa = _mantissa / 2 };
+    while { abs _mantissa < 8388608 } do { _exponent = _exponent - 1; _mantissa = _mantissa * 2 };
+    if (_mantissa != round _mantissa || {!(([_mantissa, _exponent] call FLO_fnc_saveScaleByPowerOfTwo) isEqualTo _value)}) then {
+        throw format ["Cannot save number %1 exactly", _value toFixed 20];
     };
-    ["#NB", _wideText]
+    ["#NB", _mantissa toFixed 0, _exponent]
 };
 if (_value isEqualTypeAny ["", true]) exitWith { _value };
 if (_value isEqualType []) exitWith {
@@ -33,7 +34,7 @@ if (_value isEqualType createHashMap) exitWith {
     private _keys = [];
     private _values = [];
     {
-        _keys pushBack ([_x, true] call FLO_fnc_saveEncodeValue);
+        _keys pushBack ([_x] call FLO_fnc_saveEncodeValue);
         if (isNil "_y") then { throw format ["Cannot save a nil value for key %1", _x] };
         _values pushBack ([_y] call FLO_fnc_saveEncodeValue);
     } forEach _value;
