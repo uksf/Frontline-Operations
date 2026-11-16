@@ -4,7 +4,7 @@
  * Arguments: 0: Encoded value <ANY>
  * Returns: <ANY> - decoded value
  * Throws on an unknown or malformed tag, a HashMap with unequal key and value counts or duplicate
- * keys, or a number token that is not an integer mantissa with an integer exponent.
+ * keys, or a number token whose parts are not integers in the ranges the encoder writes.
  */
 params ["_value"];
 if !(_value isEqualType []) exitWith { _value };
@@ -23,14 +23,11 @@ switch (_tag) do {
         _map
     };
     case "#NB": {
-        if !(count _value == 3 && {(_value select 1) isEqualType ""} && {(_value select 2) isEqualType 0}) then _malformed;
-        _value params ["", "_mantissaText", "_exponent"];
-        private _digits = if ((_mantissaText select [0, 1]) isEqualTo "-") then { _mantissaText select [1] } else { _mantissaText };
-        private _validMantissa = (count _digits) in [7, 8]
-            && {((toArray _digits) findIf { _x < 48 || {_x > 57} }) == -1}
-            && {(_digits select [0, 1]) isNotEqualTo "0"};
-        if !(_validMantissa && {finite _exponent} && {_exponent == round _exponent} && {abs _exponent <= 200}) then _malformed;
-        [parseNumber _mantissaText, _exponent] call FLO_fnc_saveScaleByPowerOfTwo
+        if !(count _value == 4 && {((_value select [1, 3]) findIf { !(_x isEqualType 0) || {!finite _x} || {_x != floor _x} }) == -1}) then _malformed;
+        _value params ["", "_high", "_low", "_exponent"];
+        if !((abs _high) >= 2048 && {(abs _high) < 4096} && {_low >= 0} && {_low < 4096} && {abs _exponent <= 200}) then _malformed;
+        private _magnitude = ((abs _high) * 4096) + _low;
+        [[_magnitude, -_magnitude] select (_high < 0), _exponent] call FLO_fnc_saveScaleByPowerOfTwo
     };
     case "#SD": {
         if !(count _value == 2 && {(_value select 1) isEqualType ""}) then _malformed;

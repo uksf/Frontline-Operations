@@ -1,8 +1,10 @@
 /* Converts one campaign value into a form that str writes and parseSimpleArray reads back.
  * A HashMap becomes ["#HM", keys, values], a side becomes ["#SD", name], and an array whose
  * first element is a string starting with "#" becomes ["#AR", elements] so it cannot pass as a tag.
- * A number that 10 decimal places does not read back exactly becomes ["#NB", mantissa text, exponent],
- * where the value is mantissa * 2^exponent and the mantissa is an integer of 24 significant bits.
+ * A number that 10 decimal places does not read back exactly becomes ["#NB", high, low, exponent].
+ * The value is (|high| * 4096 + low), negated when high is negative, * 2^exponent, where that mantissa is an integer
+ * of 24 significant bits. The mantissa is split because round and toFixed are not exact for odd
+ * integers of 24 bits, while floor and integers below 4096 are.
  * Arguments: 0: Value <HASHMAP, ARRAY, SIDE, NUMBER, STRING, BOOL>
  * Returns: <ANY> - encoded value
  * Throws when the value is nil, a non-finite number, a number that does not read back exactly, or
@@ -17,10 +19,12 @@ if (_value isEqualType 0) exitWith {
     private _mantissa = [_value, -_exponent] call FLO_fnc_saveScaleByPowerOfTwo;
     while { abs _mantissa >= 16777216 } do { _exponent = _exponent + 1; _mantissa = _mantissa / 2 };
     while { abs _mantissa < 8388608 } do { _exponent = _exponent - 1; _mantissa = _mantissa * 2 };
-    if (_mantissa != round _mantissa || {!(([_mantissa, _exponent] call FLO_fnc_saveScaleByPowerOfTwo) isEqualTo _value)}) then {
+    if (_mantissa != floor _mantissa || {!(([_mantissa, _exponent] call FLO_fnc_saveScaleByPowerOfTwo) isEqualTo _value)}) then {
         throw format ["Cannot save number %1 exactly", _value toFixed 20];
     };
-    ["#NB", _mantissa toFixed 0, _exponent]
+    private _magnitude = abs _mantissa;
+    private _high = floor (_magnitude / 4096);
+    ["#NB", [_high, -_high] select (_mantissa < 0), _magnitude - (_high * 4096), _exponent]
 };
 if (_value isEqualTypeAny ["", true]) exitWith { _value };
 if (_value isEqualType []) exitWith {
