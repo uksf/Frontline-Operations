@@ -4,7 +4,8 @@
  * Arguments: 0: Encoded value <ANY>
  * Returns: <ANY> - decoded value
  * Throws on an unknown or malformed tag, a HashMap with unequal key and value counts or duplicate
- * keys, or a number token whose parts are not integers in the ranges the encoder writes.
+ * keys, or a number token that is not exactly what the encoder writes for the number it rebuilds,
+ * so an overflow, an underflow, or a lost mantissa bit is rejected.
  */
 params ["_value"];
 if !(_value isEqualType []) exitWith { _value };
@@ -27,7 +28,10 @@ switch (_tag) do {
         _value params ["", "_high", "_low", "_exponent"];
         if !((abs _high) >= 2048 && {(abs _high) < 4096} && {_low >= 0} && {_low < 4096} && {abs _exponent <= 200}) then _malformed;
         private _magnitude = ((abs _high) * 4096) + _low;
-        [[_magnitude, -_magnitude] select (_high < 0), _exponent] call FLO_fnc_saveScaleByPowerOfTwo
+        private _number = [[_magnitude, -_magnitude] select (_high < 0), _exponent] call FLO_fnc_saveScaleByPowerOfTwo;
+        private _canonical = try { [_number] call FLO_fnc_saveEncodeValue } catch { [] };
+        if !(_canonical isEqualTo _value) then _malformed;
+        _number
     };
     case "#SD": {
         if !(count _value == 2 && {(_value select 1) isEqualType ""}) then _malformed;
