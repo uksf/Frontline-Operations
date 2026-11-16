@@ -44,7 +44,10 @@ private _selected = createHashMapFromArray [
     };
 
     private _wasActive = _groupData get "isActive";
-    if (!_wasActive && {!([_groupId] call FLO_fnc_virtualizationTryActivateGroup)}) then {
+    private _activated = _wasActive
+        || {[_groupId] call FLO_fnc_virtualizationTryActivateGroup}
+        || {([_groupId] call FLO_fnc_virtualizationEvictFarActiveGroup) && {[_groupId] call FLO_fnc_virtualizationTryActivateGroup}};
+    if (!_activated) then {
         _rejections set [_rejectionKey, _now + 60];
         _selected set ["activationFailures", (_selected get "activationFailures") + 1];
         continue;
