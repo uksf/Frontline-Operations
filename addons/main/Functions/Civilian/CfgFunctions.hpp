@@ -10,6 +10,7 @@ class CivilianCore {
     class civilianBuildRoleProfile {};
 
     class civilianBuildObjectivePoiCache {};
+    class civilianWarmPoiCaches {};
     class civilianRebaseSavedShorelineRoutine {};
     class civilianResolveObjectiveContext {};
     class civilianRefreshObjectiveContexts {};
