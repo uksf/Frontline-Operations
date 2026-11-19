@@ -2,6 +2,8 @@
 params ["_network"];
 
 private _nowTick = diag_tickTime;
+_network set ["_coverageSupplyChainMs", 0];
+_network set ["_coverageDepotMs", 0];
 if (_nowTick < (_network get "_nextDepotPlanningAtTick")) exitWith { "" };
 
 private _planningInterval = _network get "DEPOT_PLANNING_INTERVAL";
@@ -25,6 +27,7 @@ if (_minimumSourceHops < 1) then {
 _network set ["_nextDepotPlanningAtTick", _nowTick + _planningInterval];
 
 [_network] call FLO_fnc_logisticsNetworkEnsureSupplyChainFresh;
+_network set ["_coverageSupplyChainMs", (diag_tickTime - _nowTick) * 1000];
 private _routeInfo = _network get "_supplyRouteInfo";
 private _securedObjectiveCount = count (keys _routeInfo);
 if (_securedObjectiveCount == 0) exitWith { "" };
@@ -94,4 +97,7 @@ private _referenceId = format [
     _sourceHops
 ];
 
-[_network, _objectiveId, _referenceId] call FLO_fnc_logisticsNetworkEstablishForwardDepot
+private _depotStart = diag_tickTime;
+private _result = [_network, _objectiveId, _referenceId] call FLO_fnc_logisticsNetworkEstablishForwardDepot;
+_network set ["_coverageDepotMs", (diag_tickTime - _depotStart) * 1000];
+_result

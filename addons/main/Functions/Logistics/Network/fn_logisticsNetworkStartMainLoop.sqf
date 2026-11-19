@@ -53,15 +53,18 @@ _net set ["_loopStarted", true];
                     if (_net get "_enabled") then {
                         private _t0 = diag_tickTime;
                         [_net] call FLO_fnc_logisticsNetworkMaintainDepotCoverage;
+                        private _tCoverage = diag_tickTime;
                         [_net] call FLO_fnc_logisticsNetworkRefillNodes;
+                        private _tRefill = diag_tickTime;
                         [_net] call FLO_fnc_logisticsNetworkProcessDeliveries;
+                        private _tDeliveries = diag_tickTime;
                         [_net] call FLO_fnc_logisticsNetworkCheckAndReplace;
                         private _dt = diag_tickTime - _t0;
 
                         if (_dt > 0.01) then {
                             private _perf = _net get "_lastPerf";
                             diag_log format [
-                                "[FLO][PERF] Logistics %1 total=%2ms queue=%3 needed=%4 targets=%5 attempted=%6 created=%7 status=%8 | phases refresh=%9 compose=%10 reserve=%11 target=%12 dispatch=%13 | failures pool=%14 funds=%15 target=%16 delivery=%17 supply=%18 changed=%19 create=%20 | targetReject notIntegrated=%21 secureRatio=%22 collapseInbound=%23 inboundCap=%24 batchCap=%25 | resources=%26->%27",
+                                "[FLO][PERF] Logistics %1 total=%2ms queue=%3 needed=%4 targets=%5 attempted=%6 created=%7 status=%8 | phases refresh=%9 compose=%10 reserve=%11 target=%12 dispatch=%13 | failures pool=%14 funds=%15 target=%16 delivery=%17 supply=%18 changed=%19 create=%20 | targetReject notIntegrated=%21 secureRatio=%22 collapseInbound=%23 inboundCap=%24 batchCap=%25 | resources=%26->%27 | upkeep coverage=%28 (supplyChain=%29 depot=%30) refill=%31 deliveries=%32 (development=%33)",
                                 _net get "_managedSideKey",
                                 _dt * 1000,
                                 count (_net get "_reinforcementQueue"),
@@ -88,7 +91,13 @@ _net set ["_loopStarted", true];
                                 _perf get "targetRejectInboundCap",
                                 _perf get "targetRejectBatchCap",
                                 _perf get "resourcesBefore",
-                                _perf get "resourcesAfter"
+                                _perf get "resourcesAfter",
+                                (_tCoverage - _t0) * 1000,
+                                _net getOrDefault ["_coverageSupplyChainMs", 0],
+                                _net getOrDefault ["_coverageDepotMs", 0],
+                                (_tRefill - _tCoverage) * 1000,
+                                (_tDeliveries - _tRefill) * 1000,
+                                _net getOrDefault ["_deliveriesDevelopmentMs", 0]
                             ];
                             if ((_perf get "dispatchMs") > 10) then {
                                 diag_log format [

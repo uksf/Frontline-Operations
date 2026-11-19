@@ -1,6 +1,8 @@
 params ["_network"];
 
+private _developmentStart = diag_tickTime;
 private _accepted = [_network] call FLO_fnc_objectiveDevelopmentProcessDeliveries;
+_network set ["_deliveriesDevelopmentMs", (diag_tickTime - _developmentStart) * 1000];
 private _managedSide = _network get "_managedSide";
 private _deliveryRadius = _network get "NODE_DELIVERY_RADIUS";
 
