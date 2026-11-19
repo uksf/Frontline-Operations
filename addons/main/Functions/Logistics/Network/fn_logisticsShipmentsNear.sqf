@@ -3,11 +3,14 @@
  * Author: Frontline Operations Development Group
  * Description:
  *   Drops deleted, destroyed, and delivered crates from the shipment
- *   registry, then returns the undelivered shipments within a radius of a
- *   position, nearest first.
+ *   registry, then returns the undelivered shipments within a 3D radius of
+ *   the ground under a position, nearest first. The height of the position
+ *   is ignored because node and objective positions do not store a reliable
+ *   ground height. A crate loaded into ACE cargo (held 100 m below its
+ *   vehicle) stays out of range.
  *
  * Arguments:
- *   0: Centre position <ARRAY>
+ *   0: Centre position; only its map coordinates are used <ARRAY>
  *   1: Radius in metres <NUMBER>
  *
  * Return Value:
@@ -25,9 +28,10 @@ FLO_LogisticsShipments = FLO_LogisticsShipments select {
     alive _x && {!(_x getVariable ["FLO_LogisticsDelivered", false])}
 };
 
+private _centre = AGLToASL [_position select 0, _position select 1, 0];
 private _near = [];
 {
-    private _distance = _x distance2D _position;
+    private _distance = (getPosASL _x) vectorDistance _centre;
     if (_distance <= _radius) then { _near pushBack [_distance, _x]; };
 } forEach FLO_LogisticsShipments;
 _near sort true;
