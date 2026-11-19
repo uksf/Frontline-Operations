@@ -22,9 +22,9 @@ if (missionNamespace getVariable ["FLO_ClientFinalizeDone", false]) exitWith {};
 
 ["INIT", 3, "Client finalization started"] call FLO_fnc_log;
 
-// Wait for mission loaded screen to finish
-waitUntil { !isNull player };
-waitUntil { player == player };
+if (isNull player || {player != player}) exitWith {
+    [{ !isNull player && {player == player} }, { _this call FLO_fnc_initClientFinalize; }, _this] call CBA_fnc_waitUntilAndExecute;
+};
 
 if !([] call FLO_fnc_applyMissionConfigLocally) then {
     private _message = "Client finalization received no authoritative mission config";
@@ -51,46 +51,32 @@ if (_baseRespawnPos isEqualTo [0,0,0]) then {
     _baseRespawnPos = FLO_MissionConfig get "startPosition";
 };
 
-[_respawnMarkerName, _baseRespawnPos] spawn {
-    params ["_markerName", "_basePos"];
+if (_baseRespawnPos isNotEqualTo [0,0,0]) then {
+    [{ !isNil "FLO_Objectives" }, {
+        [{
+            (_this select 0) params ["_markerName", "_basePos"];
+            private _enemySide = [east, west] select (FLO_ActivePlayerSide isEqualTo east);
+            private _owner = sideUnknown;
+            {
+                private _objData = FLO_Objectives get _x;
+                if ([_basePos, _objData] call FLO_fnc_isPositionInObjective) exitWith {
+                    _owner = _objData get "owner";
+                };
+            } forEach (keys FLO_Objectives);
 
-    waitUntil {
-        sleep 0.5;
-        !isNil "FLO_Objectives"
-    };
-
-    while {true} do {
-        if (_basePos isEqualTo [0,0,0]) then {
-            sleep 5;
-            continue;
-        };
-
-        private _activeSide = FLO_ActivePlayerSide;
-        private _enemySide = if (_activeSide isEqualTo east) then { west } else { east };
-        private _owner = sideUnknown;
-
-        {
-            private _objData = FLO_Objectives get _x;
-            if ([_basePos, _objData] call FLO_fnc_isPositionInObjective) exitWith {
-                _owner = _objData get "owner";
+            if (_owner isEqualTo _enemySide) then {
+                if (_markerName in allMapMarkers) then {
+                    deleteMarker _markerName;
+                };
+            } else {
+                if !(_markerName in allMapMarkers) then {
+                    private _m = createMarkerLocal [_markerName, _basePos];
+                    _m setMarkerTypeLocal "hd_start";
+                    _m setMarkerTextLocal "Respawn";
+                };
             };
-        } forEach (keys FLO_Objectives);
-
-
-        if (_owner isEqualTo _enemySide) then {
-            if (_markerName in allMapMarkers) then {
-                deleteMarker _markerName;
-            };
-        } else {
-            if !(_markerName in allMapMarkers) then {
-                private _m = createMarkerLocal [_markerName, _basePos];
-                _m setMarkerTypeLocal "hd_start";
-                _m setMarkerTextLocal "Respawn";
-            };
-        };
-
-        sleep 5;
-    };
+        }, 5, _this] call CBA_fnc_addPerFrameHandler;
+    }, [_respawnMarkerName, _baseRespawnPos]] call CBA_fnc_waitUntilAndExecute;
 };
 
 // Initialize client-side systems

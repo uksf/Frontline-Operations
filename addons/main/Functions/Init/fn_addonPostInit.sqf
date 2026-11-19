@@ -95,7 +95,7 @@ if (isServer) then {
         FLO_GTN_CombatLastByObjective = createHashMap;
         Centerposition = [worldSize / 2, worldSize / 2, 0];
 
-        [] spawn FLO_fnc_heartbeat;
+        [] call FLO_fnc_heartbeat;
 
         waitUntil {
             sleep 0.1;
@@ -131,17 +131,14 @@ if (hasInterface) then {
         FLO_ClientUiReady = false;
 
         [] call FLO_fnc_initMissionConfigEvents;
-        [] spawn {
-            waitUntil {
-                sleep 1;
-                !isNull player
-                && {player == player}
-                && {
-                    (missionNamespace getVariable ["FLO_MissionReady", false])
-                    || {(missionNamespace getVariable ["FLO_InitPhase", 0]) == -1}
-                }
-            };
-
+        [{
+            !isNull player
+            && {player == player}
+            && {
+                (missionNamespace getVariable ["FLO_MissionReady", false])
+                || {(missionNamespace getVariable ["FLO_InitPhase", 0]) == -1}
+            }
+        }, {
             if ((missionNamespace getVariable ["FLO_InitPhase", 0]) == -1) exitWith {
                 private _error = missionNamespace getVariable ["FLO_InitError", "Unknown initialization error"];
                 ["INIT_CLIENT", 1, format ["Mission initialization failed: %1", _error]] call FLO_fnc_log;
@@ -152,7 +149,7 @@ if (hasInterface) then {
                 ["INIT_CLIENT", 3, "Mission-ready watchdog firing local client finalize"] call FLO_fnc_log;
                 ["FLO_INIT_COMPLETE", []] call FLO_fnc_initClientFinalize;
             };
-        };
+        }] call CBA_fnc_waitUntilAndExecute;
 
         private _loadTimeout = diag_tickTime + 300;
         waitUntil {

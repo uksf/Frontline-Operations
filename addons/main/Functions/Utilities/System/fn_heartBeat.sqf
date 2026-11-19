@@ -17,7 +17,7 @@
         Nothing
 
     Example:
-        [] spawn FLO_fnc_heartBeat;
+        [] call FLO_fnc_heartBeat;
 */
 
 if (!isServer) exitWith {};
@@ -69,43 +69,34 @@ publicVariable "FLO_Server_StartTick";
 // MAIN LOOP
 // ============================================================================
 
-[_restartTick, _notificationThresholds, _checkFrequencyNormal, _checkFrequencyUrgent] spawn {
-    params ["_restartTick", "_thresholds", "_freqNormal", "_freqUrgent"];
+[{
+    (_this select 0) params ["_restartTick", "_thresholds", "_freqNormal", "_freqUrgent", "_state"];
+    if (diag_tickTime < (_state get "nextCheckAt")) exitWith {};
 
-    // Track which thresholds we've already notified for
-    private _notifiedThresholds = createHashMap;
+    private _secondsLeft = _restartTick - diag_tickTime;
+    private _minutesLeft = floor (_secondsLeft / 60);
 
-    while {true} do {
-        // Calculate time remaining
-        private _secondsLeft = _restartTick - diag_tickTime;
-        private _minutesLeft = floor(_secondsLeft / 60);
+    FLO_Server_SecondsToRestart = _secondsLeft max 0;
+    publicVariable "FLO_Server_SecondsToRestart";
 
-        // Update public variable for client UI
-        FLO_Server_SecondsToRestart = _secondsLeft max 0;
-        publicVariable "FLO_Server_SecondsToRestart";
-
-        // Check if we've passed restart time (shouldn't happen, but safety)
-        if (_secondsLeft <= 0) exitWith {
-            diag_log "[FLO_HEARTBEAT] Restart time reached - notifications complete";
-        };
-
-        // Check each threshold
-        {
-            private _threshold = _x;
-
-            // If we're at or below this threshold and haven't notified
-            if (_minutesLeft <= _threshold && {!(_notifiedThresholds getOrDefault [_threshold, false])}) then {
-                // Send notification
-                [_threshold] call FLO_fnc_heartbeatNotifyRestart;
-
-                // Mark as notified
-                _notifiedThresholds set [_threshold, true];
-            };
-        } forEach _thresholds;
-
-        // Determine sleep time
-        private _sleepTime = [_freqNormal, _freqUrgent] select (_minutesLeft <= 5);
-
-        sleep _sleepTime;
+    if (_secondsLeft <= 0) exitWith {
+        diag_log "[FLO_HEARTBEAT] Restart time reached - notifications complete";
+        [_this select 1] call CBA_fnc_removePerFrameHandler;
     };
-};
+
+    private _notified = _state get "notified";
+    {
+        if (_minutesLeft <= _x && {!(_x in _notified)}) then {
+            [_x] call FLO_fnc_heartbeatNotifyRestart;
+            _notified set [_x, true];
+        };
+    } forEach _thresholds;
+
+    _state set ["nextCheckAt", diag_tickTime + ([_freqNormal, _freqUrgent] select (_minutesLeft <= 5))];
+}, _checkFrequencyUrgent, [
+    _restartTick,
+    _notificationThresholds,
+    _checkFrequencyNormal,
+    _checkFrequencyUrgent,
+    createHashMapFromArray [["nextCheckAt", 0], ["notified", createHashMap]]
+]] call CBA_fnc_addPerFrameHandler;

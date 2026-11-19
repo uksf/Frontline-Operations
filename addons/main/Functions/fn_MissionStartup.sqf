@@ -99,13 +99,7 @@ private _opCount = 0;
 ["STARTUP", 3, format ["Initialized %1 OPs", _opCount]] call FLO_fnc_log;
 [] call FLO_fnc_refreshRespawnMarkersByTerritory;
 
-[] spawn {
-    while {true} do {
-        [] call FLO_fnc_refreshRespawnMarkersByTerritory;
-        sleep 5;
-    };
-};
-
+[{ [] call FLO_fnc_refreshRespawnMarkersByTerritory; }, 5] call CBA_fnc_addPerFrameHandler;
 
 // ============================================================================
 // MOBILE RESPAWN MARKER SYSTEM
@@ -113,50 +107,43 @@ private _opCount = 0;
 
 ["STARTUP", 3, "Starting mobile respawn marker system..."] call FLO_fnc_log;
 
-// Spawn respawn marker loop with error handling
-[] spawn {
-    private _counter = 0;
-
-    while { true } do {
-        try {
-            // Clean up old respawn markers
-            private _oldMarkers = allMapMarkers select {
-                markerType _x == "b_unknown" && markerColor _x == "ColorYellow" && markerAlpha _x == 0.7
-            };
-            { deleteMarker _x } forEach _oldMarkers;
-
-            // Find requested mobile respawn vehicles and create markers
-            private _respawnVehs = vehicles select { alive _x && { _x getVariable ["FLO_MobileRespawnVehicle", false] } };
-            private _activeSide = FLO_ActivePlayerSide;
-            private _respawnKey = ["west", "east"] select (_activeSide isEqualTo east);
-            private _enemySide = if (_activeSide isEqualTo east) then { west } else { east };
-
-            {
-                private _vehPos = getPosATL _x;
-                private _owner = sideUnknown;
-                {
-                    private _objData = FLO_Objectives get _x;
-                    if ([_vehPos, _objData] call FLO_fnc_isPositionInObjective) exitWith {
-                        _owner = _objData get "owner";
-                    };
-                } forEach (keys FLO_Objectives);
-                if (_owner isEqualTo _enemySide) then { continue };
-
-                private _markerName = format ["respawn_%1_%2", _respawnKey, _counter];
-                _counter = _counter + 1;
-                private _marker = createMarker [_markerName, _vehPos];
-                _marker setMarkerTypeLocal "b_unknown";
-                _marker setMarkerColorLocal "ColorYellow";
-                _marker setMarkerSizeLocal [1, 1];
-                _marker setMarkerAlpha 0.7;
-            } forEach _respawnVehs;
-        } catch {
-            ["STARTUP", 1, format ["Respawn marker error: %1", _exception]] call FLO_fnc_log;
+[{
+    private _state = _this select 0;
+    try {
+        private _oldMarkers = allMapMarkers select {
+            markerType _x == "b_unknown" && markerColor _x == "ColorYellow" && markerAlpha _x == 0.7
         };
+        { deleteMarker _x } forEach _oldMarkers;
 
-        sleep 5;
+        private _respawnVehs = vehicles select { alive _x && { _x getVariable ["FLO_MobileRespawnVehicle", false] } };
+        private _activeSide = FLO_ActivePlayerSide;
+        private _respawnKey = ["west", "east"] select (_activeSide isEqualTo east);
+        private _enemySide = [east, west] select (_activeSide isEqualTo east);
+
+        {
+            private _vehPos = getPosATL _x;
+            private _owner = sideUnknown;
+            {
+                private _objData = FLO_Objectives get _x;
+                if ([_vehPos, _objData] call FLO_fnc_isPositionInObjective) exitWith {
+                    _owner = _objData get "owner";
+                };
+            } forEach (keys FLO_Objectives);
+            if (_owner isEqualTo _enemySide) then { continue };
+
+            private _counter = _state select 0;
+            _state set [0, _counter + 1];
+            private _markerName = format ["respawn_%1_%2", _respawnKey, _counter];
+            private _marker = createMarker [_markerName, _vehPos];
+            _marker setMarkerTypeLocal "b_unknown";
+            _marker setMarkerColorLocal "ColorYellow";
+            _marker setMarkerSizeLocal [1, 1];
+            _marker setMarkerAlpha 0.7;
+        } forEach _respawnVehs;
+    } catch {
+        ["STARTUP", 1, format ["Respawn marker error: %1", _exception]] call FLO_fnc_log;
     };
-};
+}, 5, [0]] call CBA_fnc_addPerFrameHandler;
 
 // ============================================================================
 // MOBILE SERVICE STATIONS
