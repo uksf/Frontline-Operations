@@ -11,11 +11,8 @@ private _deliveryRadius = _network get "NODE_DELIVERY_RADIUS";
     private _node = _y;
     if ((_node get "type") == "HQ" || {(_node get "state") == "DISABLED"}) then { continue };
 
-    private _shipments = nearestObjects [_node get "position", ["CargoNet_01_box_F"], _deliveryRadius] select {
-        alive _x
-        && {_x getVariable ["FLO_LogisticsShipment", false]}
-        && {!(_x getVariable ["FLO_LogisticsDelivered", false])}
-        && {(_x getVariable ["FLO_LogisticsSide", sideUnknown]) isEqualTo _managedSide}
+    private _shipments = ([_node get "position", _deliveryRadius] call FLO_fnc_logisticsShipmentsNear) select {
+        (_x getVariable ["FLO_LogisticsSide", sideUnknown]) isEqualTo _managedSide
         && {!([_x] call FLO_fnc_objectiveDevelopmentShipmentTargetsActiveProject)}
     };
     if (_shipments isEqualTo []) then { continue };

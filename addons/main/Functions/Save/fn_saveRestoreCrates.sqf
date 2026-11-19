@@ -102,6 +102,7 @@ private _loadedCrates = 0;
         _crate setVariable ["FLO_LogisticsContributorUID", _attr get "logisticsContributorUID", true];
         _crate setVariable ["FLO_LogisticsContributorName", _attr get "logisticsContributorName", true];
         _crate setVariable ["FLO_DevelopmentTargetObjectiveId", _attr get "developmentTargetObjectiveId", true];
+        if (_type == "CargoNet_01_box_F") then { [_crate] call FLO_fnc_logisticsShipmentRegister; };
     };
     {
         _x params ["_itemClass", "_count", "_itemType"];

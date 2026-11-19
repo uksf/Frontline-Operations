@@ -28,15 +28,8 @@ if ((_objective get "contested") || {_objective get "underAttack"} || {(_objecti
     0
 };
 
-private _shipments = nearestObjects [
-    _objective get "position",
-    ["CargoNet_01_box_F"],
-    _objective get "radius"
-] select {
-    alive _x
-    && {_x getVariable ["FLO_LogisticsShipment", false]}
-    && {!(_x getVariable ["FLO_LogisticsDelivered", false])}
-    && {(_x getVariable ["FLO_LogisticsSide", sideUnknown]) isEqualTo _side}
+private _shipments = ([_objective get "position", _objective get "radius"] call FLO_fnc_logisticsShipmentsNear) select {
+    (_x getVariable ["FLO_LogisticsSide", sideUnknown]) isEqualTo _side
     && {(_x getVariable ["FLO_DevelopmentTargetObjectiveId", ""]) == _objectiveId}
     && {[getPosATL _x, _objective] call FLO_fnc_isPositionInObjective}
 };

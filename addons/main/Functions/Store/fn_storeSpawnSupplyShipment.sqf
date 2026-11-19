@@ -21,6 +21,7 @@ _shipment setVariable ["FLO_LogisticsContributorUID", getPlayerUID _player, true
 _shipment setVariable ["FLO_LogisticsContributorName", name _player, true];
 _shipment setVariable ["FLO_DevelopmentTargetObjectiveId", "", true];
 _shipment setVariable ["FLO_save_crate", true, true];
+[_shipment] call FLO_fnc_logisticsShipmentRegister;
 [_shipment, true, [0, 2, 0], 0] remoteExec ["ace_dragging_fnc_setDraggable", 0, _shipment];
 
 ["STORE", 3, format ["Spawned supply shipment %1 from node %2", netId _shipment, _node get "id"]] call FLO_fnc_log;
