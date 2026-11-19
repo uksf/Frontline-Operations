@@ -21,6 +21,8 @@ private _civilianClass = [
     ["_objectiveContexts", createHashMap],
     ["_objectiveContextSignatures", createHashMap],
     ["_objectivePoiCaches", createHashMap],
+    ["_poiBuilds", 0],
+    ["_poiBuildMs", 0],
     ["_objectiveMemories", createHashMap],
     ["_lastUpdate", -1],
     ["_loopPfhId", -1],
@@ -88,8 +90,11 @@ private _civilianClass = [
             _poiCaches get _objectiveId
         };
 
+        private _buildStart = diag_tickTime;
         private _poiCache = [_objectiveId] call FLO_fnc_civilianBuildObjectivePoiCache;
         _poiCaches set [_objectiveId, _poiCache];
+        _self set ["_poiBuilds", (_self get "_poiBuilds") + 1];
+        _self set ["_poiBuildMs", (_self get "_poiBuildMs") + (diag_tickTime - _buildStart) * 1000];
         _poiCache
     }],
 
@@ -216,7 +221,7 @@ private _civilianClass = [
 
         if (_totalMs >= 5 || {FLO_Debug_Level >= 5}) then {
             diag_log format [
-                "[FLO][PERF] Civilian manager total=%1ms contexts=%2 rebuilt=%3 changedObjectives=%4 | build=%5 memory=%6 gossip=%7 routines=%8 protests=%9 retasked=%10",
+                "[FLO][PERF] Civilian manager total=%1ms contexts=%2 rebuilt=%3 changedObjectives=%4 | build=%5 memory=%6 gossip=%7 routines=%8 protests=%9 retasked=%10 | poiBuilds=%11 poiBuildMs=%12",
                 _totalMs,
                 _contextRefresh get "totalContexts",
                 _contextRefresh get "rebuiltContexts",
@@ -226,9 +231,13 @@ private _civilianClass = [
                 _gossipMs,
                 _routineMs,
                 _protestMs,
-                _retaskedCount
+                _retaskedCount,
+                _self get "_poiBuilds",
+                _self get "_poiBuildMs"
             ];
         };
+        _self set ["_poiBuilds", 0];
+        _self set ["_poiBuildMs", 0];
 
         ["CIVILIAN", 4, format [
             "Civilian manager refreshed %1/%2 objective contexts across %3 changed objectives at rep %4 | memories=%5 gossip=%6 retasked=%7 protests=%8 started=%9",
@@ -266,9 +275,8 @@ private _civilianClass = [
     }],
 
     ["init", {
-        _self call ["update", []];
-        _self call ["start", []];
-        ["CIVILIAN", 3, "Civilian manager initialized and worker started"] call FLO_fnc_log;
+        [_self] call FLO_fnc_civilianWarmPoiCaches;
+        ["CIVILIAN", 3, "Civilian manager initialized; warming objective POI caches before the worker starts"] call FLO_fnc_log;
         true
     }]
 ];
