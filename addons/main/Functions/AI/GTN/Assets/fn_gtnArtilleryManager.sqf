@@ -76,10 +76,8 @@ if (isNil "FLO_GTNArtilleryManager") then {
         ["_scheduleVirtualMissionRelease", {
             params ["_gid", ["_duration", 60]];
 
-            [_gid, _duration] spawn {
-                params ["_gid", "_duration"];
-                sleep _duration;
-
+            [{
+                params ["_gid"];
                 if (!isNil "FLO_VirtualForceRegistry") then {
                     private _groups = call FLO_fnc_virtualizationGetGroupMap;
                     if (_gid in _groups) then {
@@ -95,7 +93,7 @@ if (isNil "FLO_GTNArtilleryManager") then {
                         ["FLO_GTN_ArtilleryMissionStateChanged", [_missionRecord get "side", _missionRecord get "missionId", "COMPLETED"]] call CBA_fnc_localEvent;
                     };
                 };
-            };
+            }, [_gid], _duration] call CBA_fnc_waitAndExecute;
         }],
 
         ["_isCooldownActive", {
@@ -442,10 +440,8 @@ if (isNil "FLO_GTNArtilleryManager") then {
 
             // Wait for relocation then release
             private _scootTime = _self get "shootAndScootTime";
-            [_gid, _scootTime] spawn {
-                params ["_gid", "_scootTime"];
-                sleep _scootTime;
-
+            [{
+                params ["_gid"];
                 private _groups = call FLO_fnc_virtualizationGetGroupMap;
                 private _gdata = _groups get _gid;
                 if (!isNil "_gdata") then {
@@ -468,7 +464,7 @@ if (isNil "FLO_GTNArtilleryManager") then {
                 };
 
                 ["GTN Artillery", 3, format["Artillery %1 mission fully complete, revirtualized", _gid]] call FLO_fnc_log;
-            };
+            }, [_gid], _scootTime] call CBA_fnc_waitAndExecute;
         }]
     ]];
 
