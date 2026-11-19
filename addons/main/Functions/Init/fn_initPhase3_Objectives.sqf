@@ -138,8 +138,6 @@ if (!isNil "FLO_Objectives" && {FLO_Objectives isNotEqualTo []}) exitWith {
         _totalMs
     ];
 
-    // Start systems
-    [] spawn FLO_fnc_startObjectiveGraph;
     [] spawn FLO_fnc_monitorObjectiveDominance;
 
     true
@@ -202,10 +200,6 @@ diag_log "[FLO_INIT_P3] Building objective graph...";
 private _graphT0 = diag_tickTime;
 [] call FLO_fnc_buildObjectiveGraph;
 private _graphMs = (diag_tickTime - _graphT0) * 1000;
-
-// Start objective graph
-diag_log "[FLO_INIT_P3] Starting objective graph...";
-[] spawn FLO_fnc_startObjectiveGraph;
 
 // Start dominance monitoring
 diag_log "[FLO_INIT_P3] Starting objective dominance monitoring...";

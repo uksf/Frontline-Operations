@@ -14,7 +14,6 @@ class Objective {
     class seedObjectiveOwnership {};
     class monitorObjectiveDominance {};
     class collectVirtualObjectiveCounts {};
-    class startObjectiveGraph {};
     class updateObjectiveDominance {};
 };
 

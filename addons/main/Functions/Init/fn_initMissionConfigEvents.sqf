@@ -14,18 +14,16 @@
 if (!hasInterface) exitWith { false };
 if (!isNil "FLO_MissionConfigEventsInit" && {FLO_MissionConfigEventsInit}) exitWith { true };
 
-[] spawn {
-    waitUntil {
-        sleep 0.1;
+[
+    {
         !isNil "FLO_MissionConfig"
         && {FLO_MissionConfig isEqualType createHashMap}
         && {(keys FLO_MissionConfig) isNotEqualTo []}
         && {"bluforHandle" in FLO_MissionConfig}
         && {"playerSideKey" in FLO_MissionConfig}
-    };
-
-    [] call FLO_fnc_applyMissionConfigLocally;
-};
+    },
+    { [] call FLO_fnc_applyMissionConfigLocally; }
+] call CBA_fnc_waitUntilAndExecute;
 
 FLO_MissionConfigEventsInit = true;
 
