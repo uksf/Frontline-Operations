@@ -116,10 +116,13 @@ if (!_routeCommitted) exitWith {
         [_newGroupId, _organicGroupIds, "", ""] call FLO_fnc_virtualizationRollbackOrganicPackageCreation;
     };
     [_newGroupId] call FLO_fnc_virtualizationRemoveGroup;
+    private _routeBlockSeconds = missionNamespace getVariable ["FLO_LogisticsRouteBlockSeconds", 300];
+    (_net get "_routeBlockedUntil") set [format ["%1|%2", _deliveryObjectiveId, _allowTrails], diag_tickTime + _routeBlockSeconds];
     ["LOGISTICS", 2, format [
-        "Rejected %1 replacement dispatch to %2 because no land route was available",
+        "Rejected %1 replacement dispatch to %2 because no land route was available; skipping that delivery for %3s",
         _groupType,
-        _deliveryObjectiveId
+        _deliveryObjectiveId,
+        _routeBlockSeconds
     ]] call FLO_fnc_log;
     ""
 };

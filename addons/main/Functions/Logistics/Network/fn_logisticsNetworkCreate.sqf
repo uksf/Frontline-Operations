@@ -12,6 +12,7 @@ private _dispatchDelay = -1;
 // fresh mutable state explicitly.
 _network set ["_reinforcementQueue", []];
 _network set ["_reinforcementPickupRetryAt", createHashMap];
+_network set ["_routeBlockedUntil", createHashMap];
 _network set ["_recentReinforcementDispatches", []];
 _network set ["_nodes", createHashMap];
 _network set ["_supplyRouteInfo", createHashMap];

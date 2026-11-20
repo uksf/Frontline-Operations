@@ -23,6 +23,10 @@ while {_remaining isNotEqualTo []} do {
         _delivery = [_net, _requested, _throughput, _blocked, _deliveryInbound] call FLO_fnc_logisticsNetworkPickDeliveryObjective;
     };
     _perf set ["dispatchDeliveryPickMs", (_perf get "dispatchDeliveryPickMs") + (diag_tickTime - _started) * 1000];
+    if (_delivery != "" && {((_net get "_routeBlockedUntil") getOrDefault [format ["%1|%2", _delivery, _type in ["infantry"]], 0]) > diag_tickTime}) then {
+        _rejections set ["NO_ROUTE", (_rejections getOrDefault ["NO_ROUTE", 0]) + 1];
+        _delivery = "";
+    };
     if (_delivery != "") exitWith { _result = [_requested, _delivery]; };
 };
 _result
