@@ -27,6 +27,7 @@ params [
 ];
 
 private _virtStats = FLO_VirtUpdate get "stats";
+private _groupEntryAt = [0, diag_tickTime] select _profilePhases;
 
 if (_now < (_groupData get "nextProcessAt")) exitWith {
     _virtStats set ["scheduledSkipsTotal", (_virtStats get "scheduledSkipsTotal") + 1];
@@ -77,7 +78,10 @@ if !([_position] call FLO_fnc_validateGroupPosition) exitWith {
 };
 
 private _phaseStart = 0;
-if (_profilePhases) then { _phaseStart = diag_tickTime; };
+if (_profilePhases) then {
+    _phaseStart = diag_tickTime;
+    _virtStats set ["phaseGuardMsTotal", (_virtStats get "phaseGuardMsTotal") + ((_phaseStart - _groupEntryAt) * 1000)];
+};
 if (_isActive && {!isNull _realGroup} && {!isNull leader _realGroup}) then {
     _position = getPosATL vehicle leader _realGroup;
 };
@@ -106,7 +110,12 @@ if (_isActive && {isNull _realGroup}) exitWith {
 };
 
 if (!_isActive && {!_activationDeferred}) then {
-    if (!_inCombat || {[_groupData] call FLO_fnc_virtualizationCanMoveInCombat}) then {
+    if (_profilePhases) then { _phaseStart = diag_tickTime; };
+    private _canMove = !_inCombat || {[_groupData] call FLO_fnc_virtualizationCanMoveInCombat};
+    if (_profilePhases) then {
+        _virtStats set ["phasePauseMsTotal", (_virtStats get "phasePauseMsTotal") + ((diag_tickTime - _phaseStart) * 1000)];
+    };
+    if (_canMove) then {
         if (_profilePhases) then {
             _phaseStart = diag_tickTime;
             _virtStats set ["phaseMovementCallsTotal", (_virtStats get "phaseMovementCallsTotal") + 1];
@@ -116,6 +125,7 @@ if (!_isActive && {!_activationDeferred}) then {
             _virtStats set ["phaseMovementMsTotal", (_virtStats get "phaseMovementMsTotal") + ((diag_tickTime - _phaseStart) * 1000)];
         };
     } else {
+        if (_profilePhases) then { _phaseStart = diag_tickTime; };
             // Paused time is not travel credit when combat permits an advance.
             [_groupData] call FLO_fnc_virtualizationResetMovementClock;
             // A combat movement pause must still allow the carrier to unload.
@@ -123,6 +133,9 @@ if (!_isActive && {!_activationDeferred}) then {
         if ((_groupData get "waypoints") isNotEqualTo []) then {
             _virtStats set ["movementPauseSkipsTotal", (_virtStats get "movementPauseSkipsTotal") + 1];
             _virtStats set ["movementPauseSkipsThisBatch", (_virtStats get "movementPauseSkipsThisBatch") + 1];
+        };
+        if (_profilePhases) then {
+            _virtStats set ["phasePauseMsTotal", (_virtStats get "phasePauseMsTotal") + ((diag_tickTime - _phaseStart) * 1000)];
         };
     };
 };
@@ -136,7 +149,8 @@ if (!_isActive && {(_groupData get "position") isNotEqualTo _position}) then {
     _nearestDist = [_groupData get "position", _airGroup] call FLO_fnc_virtualizationGetNearestCachedPlayerDistance;
 };
 if ((_groupData get "isActive") || {_groupData get "activationDeferred"} || {_nearestDist <= _groupActivationDist}) then {
-    [_groupId, _groupData, _groupActivationDist, _nearestDist, _groupData get "forceVirtual", _groupData get "missionLock", _groupData get "replacementState", _groupData get "inCombat", _virtStats] call FLO_fnc_virtualizationProcessActivationState;
+    [_groupId, _groupData, _groupActivationDist, _nearestDist, _groupData get "forceVirtual", _groupData get "missionLock", _groupData get "replacementState", _groupData get "inCombat", _virtStats, _profilePhases] call FLO_fnc_virtualizationProcessActivationState;
+    if (_profilePhases) then { _virtStats set ["phaseActCallsTotal", (_virtStats get "phaseActCallsTotal") + 1]; };
 };
 if (_profilePhases) then {
     _virtStats set ["phaseActivationMsTotal", (_virtStats get "phaseActivationMsTotal") + ((diag_tickTime - _phaseStart) * 1000)];

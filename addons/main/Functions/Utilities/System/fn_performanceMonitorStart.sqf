@@ -29,6 +29,9 @@ if (FLO_PerformanceMonitorPfhId >= 0) exitWith {};
             private _virtPhaseCarrierSyncMs = 0;
             private _virtPhaseActivationMs = 0;
             private _virtPhaseActiveMs = 0;
+            private _virtPhaseGuardMs = 0;
+            private _virtPhasePauseMs = 0;
+            private _virtActSplit = [0, 0, 0, 0];
             private _virtPhaseAttachedHandled = 0;
             private _virtPhaseMovementCalls = 0;
             private _virtPhasePositionUpdates = 0;
@@ -64,6 +67,9 @@ if (FLO_PerformanceMonitorPfhId >= 0) exitWith {};
                     _virtPhaseCarrierSyncMs = _deltas get "phaseCarrierSyncMsTotal";
                     _virtPhaseActivationMs = _deltas get "phaseActivationMsTotal";
                     _virtPhaseActiveMs = _deltas get "phaseActiveMsTotal";
+                    _virtPhaseGuardMs = _deltas get "phaseGuardMsTotal";
+                    _virtPhasePauseMs = _deltas get "phasePauseMsTotal";
+                    _virtActSplit = ["phaseActStageMsTotal", "phaseActTryMsTotal", "phaseActDeactMsTotal", "phaseActCallsTotal"] apply { round ((_deltas get _x) * 100) / 100 };
                     _virtPhaseAttachedHandled = _deltas get "phaseAttachedHandledTotal";
                     _virtPhaseMovementCalls = _deltas get "phaseMovementCallsTotal";
                     _virtPhasePositionUpdates = _deltas get "phasePositionUpdatesTotal";
@@ -84,10 +90,12 @@ if (FLO_PerformanceMonitorPfhId >= 0) exitWith {};
                     + _virtPhaseMovementMs
                     + _virtPhaseActivationMs
                     + _virtPhaseActiveMs
+                    + _virtPhaseGuardMs
+                    + _virtPhasePauseMs
                 );
                 private _residualMs = (_virtPhaseSampleMs - _measuredPhaseMs) max 0;
                 diag_log format [
-                    "[FLO][PERF] Virtualization phases window=%1s samples=%2 sampleTotal=%3ms residual=%4ms | proximity=%5 schedule=%6 attached=%7/%8 movement=%9/%10 holding=%11 position=%12/%13 carrier=%14 activation=%15 active=%16/%17",
+                    "[FLO][PERF] Virtualization phases window=%1s samples=%2 sampleTotal=%3ms residual=%4ms | proximity=%5 schedule=%6 attached=%7/%8 movement=%9/%10 holding=%11 position=%12/%13 carrier=%14 activation=%15 active=%16/%17 guard=%18 pause=%19 actStage=%20 actTry=%21 actDeact=%22 actCalls=%23",
                     round (_virtWindowSeconds * 10) / 10,
                     _virtPhaseSamples,
                     round (_virtPhaseSampleMs * 100) / 100,
@@ -104,7 +112,13 @@ if (FLO_PerformanceMonitorPfhId >= 0) exitWith {};
                     round (_virtPhaseCarrierSyncMs * 100) / 100,
                     round (_virtPhaseActivationMs * 100) / 100,
                     round (_virtPhaseActiveMs * 100) / 100,
-                    _virtPhaseActiveCalls
+                    _virtPhaseActiveCalls,
+                    round (_virtPhaseGuardMs * 100) / 100,
+                    round (_virtPhasePauseMs * 100) / 100,
+                    _virtActSplit select 0,
+                    _virtActSplit select 1,
+                    _virtActSplit select 2,
+                    _virtActSplit select 3
                 ];
             };
 

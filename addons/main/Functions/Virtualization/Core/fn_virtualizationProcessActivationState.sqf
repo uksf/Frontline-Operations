@@ -2,7 +2,11 @@
  * Function: FLO_fnc_virtualizationProcessActivationState
  */
 
-params ["_groupId", "_groupData", "_activationDist", "_nearestDist", "_forceVirtual", "_missionLock", "_replacementState", "_inCombat", "_virtStats"];
+params ["_groupId", "_groupData", "_activationDist", "_nearestDist", "_forceVirtual", "_missionLock", "_replacementState", "_inCombat", "_virtStats", ["_profilePhases", false, [false]]];
+private _addPhaseMs = {
+    params ["_key", "_since"];
+    _virtStats set [_key, (_virtStats get _key) + ((diag_tickTime - _since) * 1000)];
+};
 
 private _isActive = _groupData get "isActive";
 private _activationDeferred = _groupData get "activationDeferred";
@@ -67,7 +71,10 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
         true
     };
 
-    if (!_blockActivation && {[_groupId, _groupData] call FLO_fnc_virtualizationStageActivation}) exitWith {
+    private _stageStart = diag_tickTime;
+    private _stagedNow = !_blockActivation && {[_groupId, _groupData] call FLO_fnc_virtualizationStageActivation};
+    if (_profilePhases && {!_blockActivation}) then { ["phaseActStageMsTotal", _stageStart] call _addPhaseMs; };
+    if (_stagedNow) exitWith {
         (FLO_VirtUpdate get "deferredQueue") deleteAt _groupId;
         true
     };
@@ -86,7 +93,10 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
         _virtStats set ["deferredGroupsLast", (_virtStats get "deferredGroupsLast") + ([1, 0] select (_activationDeferred))];
         _virtStats set ["activeUnitsLast", _activeUnitCount];
     } else {
-        if ([_groupId, _bypassBudget || {_groupId in (FLO_VirtUpdate get "stagedGroups")}] call FLO_fnc_virtualizationTryActivateGroup) then {
+        private _tryStart = diag_tickTime;
+        private _activated = [_groupId, _bypassBudget || {_groupId in (FLO_VirtUpdate get "stagedGroups")}] call FLO_fnc_virtualizationTryActivateGroup;
+        if (_profilePhases) then { ["phaseActTryMsTotal", _tryStart] call _addPhaseMs; };
+        if (_activated) then {
             (FLO_VirtUpdate get "deferredQueue") deleteAt _groupId;
             _groupData set ["activationDeferred", false];
             _groupData set ["activationDeferredAt", -1];
@@ -135,7 +145,10 @@ if (_nearestDist > _deactivationDist && {_isActive} && {
     } else {
         private _deactivationLoad = [_groupData, true] call FLO_fnc_virtualizationGetGroupUnitLoad;
         ["VIRTUALIZATION", 3, format["Deactivating %1 (dist: %2m)", _groupId, round _nearestDist]] call FLO_fnc_log;
-        if ([_groupId, _groupData] call FLO_fnc_deactivateVirtualGroup) then {
+        private _deactStart = diag_tickTime;
+        private _deactivated = [_groupId, _groupData] call FLO_fnc_deactivateVirtualGroup;
+        if (_profilePhases) then { ["phaseActDeactMsTotal", _deactStart] call _addPhaseMs; };
+        if (_deactivated) then {
             FLO_VirtUpdate set ["activeUnitCount", ((_activeUnitCount - _deactivationLoad) max 0)];
             _virtStats set ["deactivationsTotal", (_virtStats get "deactivationsTotal") + 1];
             _virtStats set ["deactivationsThisBatch", (_virtStats get "deactivationsThisBatch") + 1];
