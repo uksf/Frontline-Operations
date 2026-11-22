@@ -14,6 +14,7 @@ if ((_groupData get "replacementState") != "") exitWith { false };
 if ((_groupData get "missionLock") != "") exitWith { false };
 if ((_groupData get "attachedTo") != "") exitWith { false };
 if ((_groupData get "mountedIn") != "") exitWith { false };
+if ((_groupData get "commanderOrder") == "MOVE" && {(_groupData get "commanderIntent") != ""}) exitWith { false };
 if ([_groupData] call FLO_fnc_virtualizationIsTransportCarrier) exitWith { false };
 
 true
