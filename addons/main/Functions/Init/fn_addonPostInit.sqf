@@ -115,17 +115,14 @@ if (isServer) then {
 };
 
 if (hasInterface) then {
-    [] spawn {
-        if (missionNamespace getVariable ["FLO_AddonClientBootstrapStarted", false]) exitWith {
-            diag_log "[FLO_INIT_CLIENT] Addon client bootstrap already started";
-        };
-        missionNamespace setVariable ["FLO_AddonClientBootstrapStarted", true, false];
+    if (missionNamespace getVariable ["FLO_AddonClientBootstrapStarted", false]) exitWith {
+        diag_log "[FLO_INIT_CLIENT] Addon client bootstrap already started";
+    };
+    missionNamespace setVariable ["FLO_AddonClientBootstrapStarted", true, false];
 
-        waitUntil {
-            sleep 0.1;
-            !isNull player && {player == player}
-        };
-
+    [{
+        !isNull player && {player == player}
+    }, {
         StartingLocationDone = false;
         FLO_ClientFinalizeDone = false;
         FLO_ClientUiReady = false;
@@ -151,17 +148,17 @@ if (hasInterface) then {
             };
         }] call CBA_fnc_waitUntilAndExecute;
 
-        private _loadTimeout = diag_tickTime + 300;
-        waitUntil {
-            sleep 0.1;
-            (!isNil "MissionLoadedLitterally" && {MissionLoadedLitterally}) || {diag_tickTime > _loadTimeout}
+        private _markSetupSupplied = {
+            StartingLocationDone = true;
+            ["INIT_CLIENT", 3, "Mission setup is supplied by flops\\settings.sqf"] call FLO_fnc_log;
         };
-
-        if (diag_tickTime > _loadTimeout) then {
+        [{
+            !isNil "MissionLoadedLitterally" && {MissionLoadedLitterally}
+        }, {
+            call (_this select 0);
+        }, [_markSetupSupplied], 300, {
             ["INIT_CLIENT", 1, "Mission loading timeout reached"] call FLO_fnc_log;
-        };
-
-        StartingLocationDone = true;
-        ["INIT_CLIENT", 3, "Mission setup is supplied by flops\\settings.sqf"] call FLO_fnc_log;
-    };
+            call (_this select 0);
+        }] call CBA_fnc_waitUntilAndExecute;
+    }] call CBA_fnc_waitUntilAndExecute;
 };

@@ -59,7 +59,7 @@ _opBuilding addEventHandler ["Killed", {
     ["COP", 2, format ["COP destroyed at %1", getPos _unit]] call FLO_fnc_log;
 }];
 
-[_opBuilding, _config] spawn FLO_fnc_baseMonitorSiege;
+[_opBuilding, _config] call FLO_fnc_baseMonitorSiege;
 [_opBuilding getVariable "FLO_BaseSide", "HQ"] commandChat "COP Deployed";
 ["COP", 3, format ["COP initialization completed at %1", getPos _opBuilding]] call FLO_fnc_log;
 true
