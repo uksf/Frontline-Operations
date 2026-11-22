@@ -31,7 +31,7 @@ if (FLO_PerformanceMonitorPfhId >= 0) exitWith {};
             private _virtPhaseActiveMs = 0;
             private _virtPhaseGuardMs = 0;
             private _virtPhasePauseMs = 0;
-            private _virtActSplit = [0, 0, 0, 0];
+            private _virtActSplit = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
             private _virtPhaseAttachedHandled = 0;
             private _virtPhaseMovementCalls = 0;
             private _virtPhasePositionUpdates = 0;
@@ -69,7 +69,7 @@ if (FLO_PerformanceMonitorPfhId >= 0) exitWith {};
                     _virtPhaseActiveMs = _deltas get "phaseActiveMsTotal";
                     _virtPhaseGuardMs = _deltas get "phaseGuardMsTotal";
                     _virtPhasePauseMs = _deltas get "phasePauseMsTotal";
-                    _virtActSplit = ["phaseActStageMsTotal", "phaseActTryMsTotal", "phaseActDeactMsTotal", "phaseActCallsTotal"] apply { round ((_deltas get _x) * 100) / 100 };
+                    _virtActSplit = ["phaseActStageMsTotal", "phaseActTryMsTotal", "phaseActDeactMsTotal", "phaseActCallsTotal", "phaseActNearestMsTotal", "phaseActNearestCallsTotal", "phaseActInactiveMsTotal", "phaseActActiveMsTotal", "activationFrameSkipsTotal", "activationBlocksTotal", "activationCapBlocksTotal"] apply { round ((_deltas get _x) * 100) / 100 };
                     _virtPhaseAttachedHandled = _deltas get "phaseAttachedHandledTotal";
                     _virtPhaseMovementCalls = _deltas get "phaseMovementCallsTotal";
                     _virtPhasePositionUpdates = _deltas get "phasePositionUpdatesTotal";
@@ -119,6 +119,17 @@ if (FLO_PerformanceMonitorPfhId >= 0) exitWith {};
                     _virtActSplit select 1,
                     _virtActSplit select 2,
                     _virtActSplit select 3
+                ];
+                diag_log format [
+                    "[FLO][PERF] Virtualization activation split window=%1s nearest=%2/%3 inactive=%4 active=%5 frameSkips=%6 blocks=%7 capBlocks=%8",
+                    round (_virtWindowSeconds * 10) / 10,
+                    _virtActSplit select 4,
+                    _virtActSplit select 5,
+                    _virtActSplit select 6,
+                    _virtActSplit select 7,
+                    _virtActSplit select 8,
+                    _virtActSplit select 9,
+                    _virtActSplit select 10
                 ];
             };
 

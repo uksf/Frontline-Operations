@@ -147,10 +147,19 @@ if (_profilePhases) then { _phaseStart = diag_tickTime; };
 // Movement/transport processing can change both position and ownership this pass.
 if (!_isActive && {(_groupData get "position") isNotEqualTo _position}) then {
     _nearestDist = [_groupData get "position", _airGroup] call FLO_fnc_virtualizationGetNearestCachedPlayerDistance;
+    if (_profilePhases) then {
+        _virtStats set ["phaseActNearestMsTotal", (_virtStats get "phaseActNearestMsTotal") + ((diag_tickTime - _phaseStart) * 1000)];
+        _virtStats set ["phaseActNearestCallsTotal", (_virtStats get "phaseActNearestCallsTotal") + 1];
+    };
 };
 if ((_groupData get "isActive") || {_groupData get "activationDeferred"} || {_nearestDist <= _groupActivationDist}) then {
+    private _stateStart = diag_tickTime;
+    private _stateKey = ["phaseActInactiveMsTotal", "phaseActActiveMsTotal"] select (_groupData get "isActive");
     [_groupId, _groupData, _groupActivationDist, _nearestDist, _groupData get "forceVirtual", _groupData get "missionLock", _groupData get "replacementState", _groupData get "inCombat", _virtStats, _profilePhases] call FLO_fnc_virtualizationProcessActivationState;
-    if (_profilePhases) then { _virtStats set ["phaseActCallsTotal", (_virtStats get "phaseActCallsTotal") + 1]; };
+    if (_profilePhases) then {
+        _virtStats set ["phaseActCallsTotal", (_virtStats get "phaseActCallsTotal") + 1];
+        _virtStats set [_stateKey, (_virtStats get _stateKey) + ((diag_tickTime - _stateStart) * 1000)];
+    };
 };
 if (_profilePhases) then {
     _virtStats set ["phaseActivationMsTotal", (_virtStats get "phaseActivationMsTotal") + ((diag_tickTime - _phaseStart) * 1000)];
