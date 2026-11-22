@@ -88,6 +88,8 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
             _groupData set ["activationDeferredAt", diag_tickTime];
         };
         _groupData set ["activationDeferred", true];
+        _groupData set ["activationRetryAt", diag_tickTime + (missionNamespace getVariable ["FLO_VirtDeferredRecheck", 1])];
+        _virtStats set ["activationCapBlocksTotal", (_virtStats get "activationCapBlocksTotal") + 1];
         _virtStats set ["activationBlocksTotal", (_virtStats get "activationBlocksTotal") + 1];
         _virtStats set ["activationBlocksThisBatch", (_virtStats get "activationBlocksThisBatch") + 1];
         _virtStats set ["deferredGroupsLast", (_virtStats get "deferredGroupsLast") + ([1, 0] select (_activationDeferred))];
