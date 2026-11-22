@@ -189,6 +189,7 @@ class GTNAssets {
 
     class gtnAirAssetManager        {};
     class gtnAirTaskOrder           {};
+    class gtnAirMissionTimerTick    {};
     class gtnAirApplyVirtualCASEffect {};
     class gtnAirAuthorizeSortie {};
     class gtnAirDefenseActivateAgainstLiveAircraft {};

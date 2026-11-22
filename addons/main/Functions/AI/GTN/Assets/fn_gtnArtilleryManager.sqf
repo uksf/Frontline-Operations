@@ -398,8 +398,7 @@ if (isNil "FLO_GTNArtilleryManager") then {
             };
             [_requestSide, _missionRecord] call FLO_fnc_gtnBroadcastArtilleryRadio;
 
-            // Spawn the fire mission process
-            [_gid, _gdata, _realGroup, _targetPos, _rounds, _accuracy, _firePlan, _self] spawn FLO_fnc_gtnArtilleryFireMission;
+            [FLO_fnc_gtnArtilleryFireMission, [_gid, _gdata, _realGroup, _targetPos, _rounds, _accuracy, _firePlan, _self]] call CBA_fnc_execNextFrame;
 
             true
         }],

@@ -17,7 +17,7 @@
     7: Artillery Manager reference <HASHMAP>
 
     Example:
-    [_gid, _gdata, _realGroup, _targetPos, 6, 100, _firePlan, _mgr] spawn FLO_fnc_gtnArtilleryFireMission;
+    [FLO_fnc_gtnArtilleryFireMission, [_gid, _gdata, _realGroup, _targetPos, 6, 100, _firePlan, _mgr]] call CBA_fnc_execNextFrame;
 */
 
 params ["_gid", "_gdata", "_realGroup", "_targetPos", "_rounds", "_accuracy", ["_firePlan", createHashMap], "_mgr"];
