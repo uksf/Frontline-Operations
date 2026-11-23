@@ -29,5 +29,7 @@ if (_needsForces) then {
 };
 if (_needsForces && {_groupIds isEqualTo []}) exitWith { [0, 1] };
 if (!_needsForces) then { _supportAdmitted set [_kind, true] };
-[_commander, _kind, _objectiveId, _groupIds, _stageId, (_objectives get _stageId) get "position", _targetPos, -_negativeScore] call FLO_fnc_gtnCreateIntent;
+private _stagePos = (_objectives get _stageId) get "position";
+if (_kind == "CAPTURE") then { _stagePos = [_stagePos, _targetPos] call FLO_fnc_gtnResolveStagePosition };
+[_commander, _kind, _objectiveId, _groupIds, _stageId, _stagePos, _targetPos, -_negativeScore] call FLO_fnc_gtnCreateIntent;
 [1, 1]

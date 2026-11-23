@@ -70,6 +70,7 @@ class GTNCoreLogic {
     class gtnResolveAttackLandAnchor {};
     class gtnAdmitGoalAgenda {};
     class gtnAdmitGoal {};
+    class gtnResolveStagePosition {};
     class gtnAnalyzeManeuverGroup {};
 
     class gtnBuildGoalAgenda {};
