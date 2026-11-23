@@ -41,7 +41,13 @@ private _basePos = if (_infData get "isActive") then {
 } else {
     _transData get "position"
 };
-if (!(_infData get "isActive") && {surfaceIsWater _basePos}) exitWith { false };
+if !(_infData get "isActive") then {
+    _basePos = [_basePos] call FLO_fnc_virtualizationResolveLandRouteStart;
+};
+if (!(_infData get "isActive") && {[_basePos] call FLO_fnc_isRouteWater}) exitWith {
+    ["TRANSPORT", 2, format ["Cannot detach virtual %1 from %2: no shore within 500m of %3", _infantryGroupId, _transportId, _basePos]] call FLO_fnc_log;
+    false
+};
 private _transportVehicles = if (!isNull _transRealGroup) then {
     [_transRealGroup] call FLO_fnc_virtualizationCollectRealGroupVehicles
 } else {

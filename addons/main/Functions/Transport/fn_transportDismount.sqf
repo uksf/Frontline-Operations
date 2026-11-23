@@ -86,7 +86,15 @@ private _detached = if (_insertMode == "AIR_DROP" && {!isNull _realGroup}) then 
     [_transportGroupId, false] call FLO_fnc_transportDetachAll
 };
 
-// Clear dismount config
+private _stillAboard = ([_transportGroupId] call FLO_fnc_virtualizationGetGroup) get "attachedGroups";
+if (_stillAboard isNotEqualTo []) exitWith {
+    {
+        [_x, "TRANSPORT_DISMOUNT"] call FLO_fnc_transportApplyPostDismountWaypoint;
+    } forEach (_attachedIds - _stillAboard);
+    ["TRANSPORT", 2, format ["Transport %1 kept its dismount state: %2 still aboard", _transportGroupId, _stillAboard]] call FLO_fnc_log;
+    false
+};
+
 [_transportGroupId] call FLO_fnc_transportClearInsertState;
 
 [_transportGroupId] call FLO_fnc_transportPoolRelease;
