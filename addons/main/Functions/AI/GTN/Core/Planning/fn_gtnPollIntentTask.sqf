@@ -30,7 +30,15 @@ switch (_phase) do {
                     };
                 };
             } else {
-                if ((_scout get "position") distance2D (_scout get "orderTargetPos") < 80 && {diag_tickTime - (_intent get "phaseStartedAt") > 45}) then {
+                private _scoutFrozenSeconds = 120;
+                private _deferredAt = _scout get "activationDeferredAt";
+                private _frozen = (_scout get "activationDeferred") && {_deferredAt >= 0}
+                    && {diag_tickTime - _deferredAt > _scoutFrozenSeconds}
+                    && {diag_tickTime - (_intent get "phaseStartedAt") > _scoutFrozenSeconds};
+                if (_frozen) then {
+                    ["GTN", 3, format ["Scout %1 for intent %2 is held by the AI cap; ending scout attempt %3", _scoutId, _intentId, _intent get "scoutAttempt"]] call FLO_fnc_log;
+                };
+                if (_frozen || {(_scout get "position") distance2D (_scout get "orderTargetPos") < 80 && {diag_tickTime - (_intent get "phaseStartedAt") > 45}}) then {
                     if ((_intent get "scoutAttempt") >= 2) then { _failed = true } else {
                         _intent set ["scoutAttempt", (_intent get "scoutAttempt") + 1];
                         _intent set ["issued", []];
