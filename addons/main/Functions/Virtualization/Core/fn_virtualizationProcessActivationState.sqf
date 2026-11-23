@@ -9,6 +9,7 @@ private _addPhaseMs = {
 };
 
 private _isActive = _groupData get "isActive";
+FLO_VirtActBranch = ["inactiveOther", "active"] select _isActive;
 private _activationDeferred = _groupData get "activationDeferred";
 private _activationUnitCap = ["activationUnitCap"] call FLO_fnc_virtualizationGetConfigValue;
 private _activationResumeCap = ["activationResumeCap"] call FLO_fnc_virtualizationGetConfigValue;
@@ -25,6 +26,7 @@ if (_activationDeferred && {_nearestDist > (_activationDist + 10)}) then {
 if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWith {
     private _activationRetryAt = _groupData get "activationRetryAt";
     if (_activationRetryAt > diag_tickTime) exitWith {
+        FLO_VirtActBranch = "cooldown";
         _virtStats set ["activationBlocksTotal", (_virtStats get "activationBlocksTotal") + 1];
         _virtStats set ["activationBlocksThisBatch", (_virtStats get "activationBlocksThisBatch") + 1];
         _virtStats set ["activeUnitsLast", FLO_VirtUpdate get "activeUnitCount"];
@@ -48,6 +50,7 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
     };
 
     if (!_blockActivation && {!([_groupId] call FLO_fnc_virtualizationClaimActivationSlot)}) exitWith {
+        FLO_VirtActBranch = "frameSkip";
         _virtStats set ["activationFrameSkipsTotal", (_virtStats get "activationFrameSkipsTotal") + 1];
         true
     };
@@ -66,6 +69,7 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
     };
 
     if (_holdLateSpawn) exitWith {
+        FLO_VirtActBranch = "lateHold";
         (FLO_VirtUpdate get "deferredQueue") deleteAt _groupId;
         _groupData set ["activationRetryAt", diag_tickTime + _activationRetryCooldown];
         true
@@ -75,11 +79,13 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
     private _stagedNow = !_blockActivation && {[_groupId, _groupData] call FLO_fnc_virtualizationStageActivation};
     if (_profilePhases && {!_blockActivation}) then { ["phaseActStageMsTotal", _stageStart] call _addPhaseMs; };
     if (_stagedNow) exitWith {
+        FLO_VirtActBranch = "staged";
         (FLO_VirtUpdate get "deferredQueue") deleteAt _groupId;
         true
     };
 
     if (_blockActivation) then {
+        FLO_VirtActBranch = "capBlock";
         (FLO_VirtUpdate get "deferredQueue") set [_groupId, [_nearestDist, _activationLoad, diag_tickTime]];
         if (_nearerDeferredLoad == 0 && {_nearestDist <= (missionNamespace getVariable ["FLO_VirtEvictionDistance", 800])}) then {
             [_groupId] call FLO_fnc_virtualizationEvictFarActiveGroup;
@@ -98,6 +104,7 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
         private _tryStart = diag_tickTime;
         private _activated = [_groupId, _bypassBudget || {_groupId in (FLO_VirtUpdate get "stagedGroups")}] call FLO_fnc_virtualizationTryActivateGroup;
         if (_profilePhases) then { ["phaseActTryMsTotal", _tryStart] call _addPhaseMs; };
+        FLO_VirtActBranch = ["tryFail", "tryOk"] select _activated;
         if (_activated) then {
             (FLO_VirtUpdate get "deferredQueue") deleteAt _groupId;
             _groupData set ["activationDeferred", false];

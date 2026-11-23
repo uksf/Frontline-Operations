@@ -158,7 +158,12 @@ if ((_groupData get "isActive") || {_groupData get "activationDeferred"} || {_ne
     [_groupId, _groupData, _groupActivationDist, _nearestDist, _groupData get "forceVirtual", _groupData get "missionLock", _groupData get "replacementState", _groupData get "inCombat", _virtStats, _profilePhases] call FLO_fnc_virtualizationProcessActivationState;
     if (_profilePhases) then {
         _virtStats set ["phaseActCallsTotal", (_virtStats get "phaseActCallsTotal") + 1];
-        _virtStats set [_stateKey, (_virtStats get _stateKey) + ((diag_tickTime - _stateStart) * 1000)];
+        private _branchMs = (diag_tickTime - _stateStart) * 1000;
+        _virtStats set [_stateKey, (_virtStats get _stateKey) + _branchMs];
+        if (isNil "FLO_VirtActBranchStats") then { FLO_VirtActBranchStats = createHashMap };
+        private _branchTotals = FLO_VirtActBranchStats getOrDefault [FLO_VirtActBranch, [0, 0], true];
+        _branchTotals set [0, (_branchTotals select 0) + 1];
+        _branchTotals set [1, (_branchTotals select 1) + _branchMs];
     };
 };
 if (_profilePhases) then {
