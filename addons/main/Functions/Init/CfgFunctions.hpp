@@ -21,6 +21,8 @@ class Init {
     class initSideResourcesUninitialized {};
     class initActivatePlayer    {};
     class initDeployPlayer      {};
+    class initDeployPlayerPlace {};
+    class initDeployPlayerFail  {};
     class initClientFinalize    {};
     class playerSideAdapterApply {};
     class playerSideAdapterInit {};
