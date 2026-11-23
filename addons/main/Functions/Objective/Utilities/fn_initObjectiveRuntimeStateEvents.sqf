@@ -15,15 +15,10 @@
 if (!hasInterface) exitWith { false };
 if (!isNil "FLO_ObjectiveRuntimeStateEventsInit" && {FLO_ObjectiveRuntimeStateEventsInit}) exitWith { true };
 
-[] spawn {
-    waitUntil {
-        sleep 0.1;
-        !isNil "FLO_Objectives"
-        && {!isNil "FLO_ObjectiveRuntimeState"}
-    };
-
-    [FLO_ObjectiveRuntimeState] call FLO_fnc_syncObjectiveRuntimeState;
-};
+[
+    { !isNil "FLO_Objectives" && {!isNil "FLO_ObjectiveRuntimeState"} },
+    { [FLO_ObjectiveRuntimeState] call FLO_fnc_syncObjectiveRuntimeState; }
+] call CBA_fnc_waitUntilAndExecute;
 
 FLO_ObjectiveRuntimeStateEventsInit = true;
 

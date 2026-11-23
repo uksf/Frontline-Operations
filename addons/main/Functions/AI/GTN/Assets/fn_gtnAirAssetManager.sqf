@@ -240,34 +240,22 @@ if (isNil "FLO_GTNAirAssetManager") then {
         ["_scheduleRTBCompletion", {
             params ["_gid", "_rtbPos", ["_timeoutSeconds", 900]];
 
-            [_gid, +_rtbPos, _timeoutSeconds] spawn {
-                params ["_gid", "_rtbPos", "_timeoutSeconds"];
-
-                private _deadline = diag_tickTime + _timeoutSeconds;
+            [{
+                (_this select 0) params ["_gid", "_rtbPos", "_deadline"];
                 private _arrivalRadius = 300;
-
-                waitUntil {
-                    sleep 10;
-
-                    if (isNil "FLO_GTNAirAssetManager") exitWith { true };
-                    if (isNil "FLO_VirtualForceRegistry") exitWith { true };
-
-                    private _missions = FLO_GTNAirAssetManager get "missions";
-                    if !(_gid in _missions) exitWith { true };
-
-                    private _groups = call FLO_fnc_virtualizationGetGroupMap;
-                    if !(_gid in _groups) exitWith { true };
-
-                    private _gData = _groups get _gid;
-                    ((_gData get "position") distance2D _rtbPos <= _arrivalRadius) || {diag_tickTime >= _deadline}
+                if (isNil "FLO_GTNAirAssetManager" || {isNil "FLO_VirtualForceRegistry"}) exitWith {
+                    [_this select 1] call CBA_fnc_removePerFrameHandler;
                 };
-
-                if (isNil "FLO_GTNAirAssetManager" || {isNil "FLO_VirtualForceRegistry"}) exitWith {};
-
                 private _missions = FLO_GTNAirAssetManager get "missions";
-                if !(_gid in _missions) exitWith {};
-
+                if !(_gid in _missions) exitWith { [_this select 1] call CBA_fnc_removePerFrameHandler; };
                 private _groups = call FLO_fnc_virtualizationGetGroupMap;
+                if (
+                    _gid in _groups
+                    && {((_groups get _gid) get "position") distance2D _rtbPos > _arrivalRadius}
+                    && {diag_tickTime < _deadline}
+                ) exitWith {};
+                [_this select 1] call CBA_fnc_removePerFrameHandler;
+
                 if (_gid in _groups) then {
                     private _gData = _groups get _gid;
                     [_gData] call FLO_fnc_virtualizationClearMissionLock;
@@ -282,7 +270,7 @@ if (isNil "FLO_GTNAirAssetManager") then {
                 };
 
                 _missions deleteAt _gid;
-            };
+            }, 10, [_gid, +_rtbPos, diag_tickTime + _timeoutSeconds]] call CBA_fnc_addPerFrameHandler;
         }],
 
         ["_requestAirAsset", {

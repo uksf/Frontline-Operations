@@ -164,7 +164,7 @@ if (isNil "_liveGtnManager") then {
 // GTN Virtual Combat Resolver
 // ============================================
 ["INIT", 3, "Starting GTN virtual combat resolver..."] call FLO_fnc_log;
-[] spawn FLO_fnc_gtnVirtualCombatResolver;
+[] call FLO_fnc_gtnVirtualCombatResolver;
 ["INIT", 3, "GTN virtual combat resolver started"] call FLO_fnc_log;
 
 // ============================================
@@ -172,7 +172,7 @@ if (isNil "_liveGtnManager") then {
 // ============================================
 ["INIT", 3, "Evaluating GTN player task bridge..."] call FLO_fnc_log;
 if (FLO_GTN_EnablePlayerTaskBridge) then {
-    [] spawn FLO_fnc_gtnPlayerTaskBridge;
+    [] call FLO_fnc_gtnPlayerTaskBridge;
     ["INIT", 3, "GTN player task bridge started (enabled)"] call FLO_fnc_log;
 } else {
     ["INIT", 3, "GTN player task bridge disabled (FLO_GTN_EnablePlayerTaskBridge=false)"] call FLO_fnc_log;
@@ -190,7 +190,7 @@ if (FLO_GTN_EnablePlayerTaskBridge) then {
 // ============================================
 ["INIT", 3, "Evaluating GTN commander visual debug..."] call FLO_fnc_log;
 if (FLO_GTN_CommanderDebugEnabled) then {
-    [] spawn FLO_fnc_gtnCommanderVisualDebug;
+    [] call FLO_fnc_gtnCommanderVisualDebug;
     ["INIT", 3, "GTN commander visual debug started"] call FLO_fnc_log;
 } else {
     ["INIT", 3, "GTN commander visual debug disabled (FLO_GTN_CommanderDebugEnabled=false)"] call FLO_fnc_log;

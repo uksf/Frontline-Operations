@@ -137,6 +137,7 @@ class GTNTasks {
     class gtnClearPrimaryTaskState {};
     class gtnDeleteTaskIfPresent {};
     class gtnPlayerTaskBridge {};
+    class gtnPlayerTaskBridgeTick {};
     class gtnPlayerTaskDescription {};
     class gtnPlayerTaskTitle {};
     class gtnPublishPlayerTask {};
@@ -179,6 +180,8 @@ class GTNDebug {
     class gtnCommanderDebugSideLabel {};
     class gtnCommanderDebugUpsertMarker {};
     class gtnCommanderVisualDebug {};
+    class gtnCommanderVisualDebugReinforcements {};
+    class gtnCommanderVisualDebugTick {};
 };
 
 class GTNAssets {
@@ -186,6 +189,7 @@ class GTNAssets {
 
     class gtnAirAssetManager        {};
     class gtnAirTaskOrder           {};
+    class gtnAirMissionTimerTick    {};
     class gtnAirApplyVirtualCASEffect {};
     class gtnAirAuthorizeSortie {};
     class gtnAirDefenseActivateAgainstLiveAircraft {};

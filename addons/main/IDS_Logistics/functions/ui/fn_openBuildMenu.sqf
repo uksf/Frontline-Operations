@@ -56,13 +56,12 @@ if (lbSize _categoryList > 0) then {
     [_categoryList, 0] call IDS_Logistics_fnc_updateEntityList;
     
     // Update preview with first entity if available
-    [_entitiesList] spawn {
+    [{
         params ["_entitiesList"];
-        sleep 0.1;
         if (lbSize _entitiesList > 0) then {
             [_entitiesList, 0] call IDS_Logistics_fnc_updatePreview;
         };
-    };
+    }, [_entitiesList], 0.1] call CBA_fnc_waitAndExecute;
 };
 
 // Clear entity info panel

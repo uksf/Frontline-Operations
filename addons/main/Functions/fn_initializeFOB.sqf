@@ -59,7 +59,7 @@ _fobBuilding addEventHandler ["Killed", {
     ["FOB", 2, format ["FOB destroyed at %1", getPos _unit]] call FLO_fnc_log;
 }];
 
-[_fobBuilding, _config] spawn FLO_fnc_baseMonitorSiege;
+[_fobBuilding, _config] call FLO_fnc_baseMonitorSiege;
 [_fobBuilding getVariable "FLO_BaseSide", "HQ"] commandChat "FOB Deployed";
 ["FOB", 3, format ["FOB initialization completed at %1", getPos _fobBuilding]] call FLO_fnc_log;
 true

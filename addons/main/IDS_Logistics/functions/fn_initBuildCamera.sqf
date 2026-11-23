@@ -481,13 +481,12 @@ IDS_Logistics_cameraKeyDownHandler = (findDisplay 46) displayAddEventHandler ["K
 }];
 
 // The worker captures its owner; cleanup from an older session cannot touch a new one.
-[_local, _session, player] spawn {
-    params ["_camera", "_session", "_player"];
-    waitUntil {
-        isNull _camera || {!alive _player} || {player isNotEqualTo _player} || {isNull findDisplay 46}
-    };
-    [_session] call IDS_Logistics_fnc_closeBuildCamera;
-};
+[{
+    params ["_camera", "", "_player"];
+    isNull _camera || {!alive _player} || {player isNotEqualTo _player} || {isNull findDisplay 46}
+}, {
+    [_this select 1] call IDS_Logistics_fnc_closeBuildCamera;
+}, [_local, _session, player]] call CBA_fnc_waitUntilAndExecute;
 
 // Keep the complete controls guide legible without repeating key/type labels.
 private _buildText = ["B  Build menu disabled", "B  Open build menu"] select (!IDS_Logistics_BuildMenuDisabled);
