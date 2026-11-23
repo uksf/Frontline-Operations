@@ -98,14 +98,13 @@ player createDiaryRecord ["Diary", ["Mission Status",
     ]
 ]];
 
-[] spawn {
-    if !([] call FLO_fnc_initDeployPlayer) exitWith {};
-
-    uiSleep 0.5;
-    titleText ["", "BLACK IN", 2, true, true];
+[{
     [{
-        FLO_ClientUiReady = true;
-        ["FLO_ClientUIReady", []] call CBA_fnc_localEvent;
-        ["INIT", 3, "Client deployment and UI readiness complete"] call FLO_fnc_log;
-    }, [], 2] call CBA_fnc_waitAndExecute;
-};
+        titleText ["", "BLACK IN", 2, true, true];
+        [{
+            FLO_ClientUiReady = true;
+            ["FLO_ClientUIReady", []] call CBA_fnc_localEvent;
+            ["INIT", 3, "Client deployment and UI readiness complete"] call FLO_fnc_log;
+        }, [], 2] call CBA_fnc_waitAndExecute;
+    }, [], 0.5] call CBA_fnc_waitAndExecute;
+}] call FLO_fnc_initDeployPlayer;
