@@ -76,6 +76,7 @@ class GTNCoreLogic {
     class gtnBuildStrategicPicture {};
     class gtnExecuteIntents {};
     class gtnExecuteIntent {};
+    class gtnIntentPhaseExpired {};
     class gtnRunCycleStep {};
     class gtnReleaseObsoleteHolds {};
     class gtnSelectIntentForces {};
