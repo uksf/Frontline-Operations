@@ -25,7 +25,8 @@ private _state = createHashMapFromArray [
     ["intent", _intent], ["objectives", _world get "_objectives"], ["ownSide", _world get "_ownSide"]
 ];
 if !([_state, [_id]] call FLO_fnc_gtnIntentGoalValid) then { _reason = "OBJECTIVE_OR_SUPPLY_LOST" };
-if ([_intent, _groups] call FLO_fnc_gtnIntentPhaseExpired) then { _reason = "PHASE_TIMEOUT" };
+private _phaseLimit = [1800, 3600] select ((_intent get "phase") == "SECURE");
+if (diag_tickTime - (_intent get "phaseStartedAt") > _phaseLimit) then { _reason = "PHASE_TIMEOUT" };
 if (_reason != "") exitWith {
     [_commander, _intent, false, _reason] call FLO_fnc_gtnRetireIntent;
     [0, 0, 1, 0, 0]
