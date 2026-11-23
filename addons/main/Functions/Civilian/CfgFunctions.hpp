@@ -43,6 +43,7 @@ class CivilianBehavior {
     class civilianRecordIntelInteraction {};
     class civilianSelectObjectiveProtesters {};
     class civilianRunProtestBehavior {};
+    class civilianProtestBehaviorTick {};
     class civilianDetaineeCommand {};
     class civilianDetainActions {};
     class civilianProtest {};

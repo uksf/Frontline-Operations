@@ -53,7 +53,7 @@ private _protesters = [];
 
         if !(_x getVariable ["FLO_ProtestWorkerRunning", false]) then {
             _x setVariable ["FLO_ProtestWorkerRunning", true, false];
-            [_x] spawn FLO_fnc_civilianRunProtestBehavior;
+            [_x] call FLO_fnc_civilianRunProtestBehavior;
         };
 
         [[_x]] call FLO_fnc_civilianActions;
