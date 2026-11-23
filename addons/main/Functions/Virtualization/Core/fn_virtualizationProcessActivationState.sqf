@@ -39,9 +39,10 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
     private _activationLoad = [_groupData, true] call FLO_fnc_virtualizationGetGroupUnitLoad;
     private _projectedUnitCount = _activeUnitCount + _activationLoad + ([_groupId] call FLO_fnc_virtualizationGetStagedUnitLoad);
     private _blockActivation = false;
-    private _nearerDeferredLoad = 0;
+    private _nearerDeferredLoad = -1;
 
     if (!_bypassBudget && {!(_groupId in (FLO_VirtUpdate get "stagedGroups"))}) then {
+        if (_projectedUnitCount > _activationUnitCap) exitWith { _blockActivation = true };
         _nearerDeferredLoad = [_groupId, _nearestDist] call FLO_fnc_virtualizationGetNearerDeferredLoad;
         _blockActivation = (_projectedUnitCount + _nearerDeferredLoad) > _activationUnitCap;
         if (_activationDeferred && {_nearerDeferredLoad > 0} && {_activeUnitCount >= _activationResumeCap}) then {
@@ -87,8 +88,13 @@ if (!_forceVirtual && {_nearestDist <= _activationDist} && {!_isActive}) exitWit
     if (_blockActivation) then {
         FLO_VirtActBranch = "capBlock";
         (FLO_VirtUpdate get "deferredQueue") set [_groupId, [_nearestDist, _activationLoad, diag_tickTime]];
-        if (_nearerDeferredLoad == 0 && {_nearestDist <= (missionNamespace getVariable ["FLO_VirtEvictionDistance", 800])}) then {
-            [_groupId] call FLO_fnc_virtualizationEvictFarActiveGroup;
+        if (_nearestDist <= (missionNamespace getVariable ["FLO_VirtEvictionDistance", 800]) && {diag_tickTime >= (FLO_VirtUpdate get "nextEvictionAt")}) then {
+            if (_nearerDeferredLoad < 0) then {
+                _nearerDeferredLoad = [_groupId, _nearestDist] call FLO_fnc_virtualizationGetNearerDeferredLoad;
+            };
+            if (_nearerDeferredLoad == 0) then {
+                [_groupId] call FLO_fnc_virtualizationEvictFarActiveGroup;
+            };
         };
         if (!_activationDeferred) then {
             _groupData set ["activationDeferredAt", diag_tickTime];
