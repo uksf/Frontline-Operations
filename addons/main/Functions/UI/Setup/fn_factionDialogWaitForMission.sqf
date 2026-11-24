@@ -25,7 +25,6 @@ hint "Initializing mission systems...";
 
     if (_ready) then {
         ["UI", 3, "Mission initialization complete - ready to play"] call FLO_fnc_log;
-        titleText ["Deploying...", "BLACK FADED", 0.1, true, true];
         hintSilent "Mission ready. Deploying...";
     } else {
         private _errorMsg = if (!isNil "FLO_InitError") then { FLO_InitError } else { "Unknown error" };
