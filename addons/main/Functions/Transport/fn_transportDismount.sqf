@@ -35,6 +35,10 @@ if (_dismountIdx < 0) exitWith { false };
 private _currentIdx = _transData get "currentWaypointIndex";
 if (!_forceNow && {_currentIdx < _dismountIdx}) exitWith { false };
 
+private _retryAtByCarrier = missionNamespace getVariable ["FLO_TransportDismountRetryAt", createHashMap];
+missionNamespace setVariable ["FLO_TransportDismountRetryAt", _retryAtByCarrier];
+if (!_forceNow && {diag_tickTime < (_retryAtByCarrier getOrDefault [_transportGroupId, -1])}) exitWith { false };
+
 // Get attached groups before detaching
 private _attachedIds = +([_transData] call FLO_fnc_virtualizationGetTransportPassengers);
 private _insertMode = _transData get "transportInsertMode";
@@ -91,9 +95,11 @@ if (_stillAboard isNotEqualTo []) exitWith {
     {
         [_x, "TRANSPORT_DISMOUNT"] call FLO_fnc_transportApplyPostDismountWaypoint;
     } forEach (_attachedIds - _stillAboard);
+    _retryAtByCarrier set [_transportGroupId, diag_tickTime + 10];
     ["TRANSPORT", 2, format ["Transport %1 kept its dismount state: %2 still aboard", _transportGroupId, _stillAboard]] call FLO_fnc_log;
     false
 };
+_retryAtByCarrier deleteAt _transportGroupId;
 
 [_transportGroupId] call FLO_fnc_transportClearInsertState;
 

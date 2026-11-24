@@ -38,6 +38,11 @@ private _dismounted = [_groupId] call FLO_fnc_transportDismount;
 // Dismount may publish a reserve return route. The caller's insertion route
 // no longer owns the cursor and must not be written back over that route.
 if (_dismounted && {(_groupData get "waypoints") isNotEqualTo _waypoints}) exitWith {};
+private _unloadPending = !_dismounted
+    && {(_groupData get "attachedGroups") isNotEqualTo []}
+    && {(_groupData get "dismountAtWaypoint") >= 0}
+    && {_currentIdx >= (_groupData get "dismountAtWaypoint")};
+if (_unloadPending) exitWith {};
 
 if (_waypoints isEqualTo [] || _currentIdx >= count _waypoints) exitWith {
     [_groupData, "idle"] call FLO_fnc_virtualizationSetRuntimeState;
