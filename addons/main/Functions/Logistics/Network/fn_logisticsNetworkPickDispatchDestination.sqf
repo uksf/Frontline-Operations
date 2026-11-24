@@ -7,6 +7,18 @@ private _enemyKey = ["opforCount", "bluforCount"] select ((_net get "_managedSid
 if ((keys _sources) findIf {
     !(_x in _blocked) && {((_sources get _x) get "throughput") >= _throughput} && {((FLO_Objectives get _x) get _enemyKey) == 0}
 } < 0) exitWith { ["", ""] };
+private _trailsKey = _type in ["infantry"];
+private _routeBlockedUntil = _net get "_routeBlockedUntil";
+private _isRouteBlocked = { (_routeBlockedUntil getOrDefault [format ["%1|%2", _this, _trailsKey], 0]) > diag_tickTime };
+private _deliveryInboundForPick = +_deliveryInbound;
+private _routeBlockedCount = 0;
+{
+    (_x splitString "|") params ["_objectiveId", "_trails"];
+    if (_trails == str _trailsKey && {_objectiveId call _isRouteBlocked}) then {
+        _deliveryInboundForPick set [_objectiveId, _net get "REINFORCEMENT_DELIVERY_INBOUND_CAP"];
+        _routeBlockedCount = _routeBlockedCount + 1;
+    };
+} forEach keys _routeBlockedUntil;
 private _remaining = +_candidates;
 private _result = ["", ""];
 while {_remaining isNotEqualTo []} do {
@@ -18,14 +30,13 @@ while {_remaining isNotEqualTo []} do {
     _started = diag_tickTime;
     private _delivery = "";
     if (_type == "static_aa") then {
-        if ((_deliveryInbound getOrDefault [_requested, 0]) < (_net get "REINFORCEMENT_DELIVERY_INBOUND_CAP") && {([_net, _requested, _blocked, _throughput] call FLO_fnc_logisticsNetworkFindSupplySourceObjective) != ""}) then { _delivery = _requested; };
+        if ((_deliveryInboundForPick getOrDefault [_requested, 0]) < (_net get "REINFORCEMENT_DELIVERY_INBOUND_CAP") && {([_net, _requested, _blocked, _throughput] call FLO_fnc_logisticsNetworkFindSupplySourceObjective) != ""}) then { _delivery = _requested; };
     } else {
-        _delivery = [_net, _requested, _throughput, _blocked, _deliveryInbound] call FLO_fnc_logisticsNetworkPickDeliveryObjective;
+        _delivery = [_net, _requested, _throughput, _blocked, _deliveryInboundForPick] call FLO_fnc_logisticsNetworkPickDeliveryObjective;
     };
     _perf set ["dispatchDeliveryPickMs", (_perf get "dispatchDeliveryPickMs") + (diag_tickTime - _started) * 1000];
-    if (_delivery != "" && {((_net get "_routeBlockedUntil") getOrDefault [format ["%1|%2", _delivery, _type in ["infantry"]], 0]) > diag_tickTime}) then {
+    if (_delivery == "" && {_routeBlockedCount > 0}) then {
         _rejections set ["NO_ROUTE", (_rejections getOrDefault ["NO_ROUTE", 0]) + 1];
-        _delivery = "";
     };
     if (_delivery != "") exitWith { _result = [_requested, _delivery]; };
 };
