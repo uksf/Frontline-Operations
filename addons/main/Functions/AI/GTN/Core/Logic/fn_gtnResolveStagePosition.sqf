@@ -25,12 +25,21 @@ private _clearance = (["activationDistance"] call FLO_fnc_virtualizationGetConfi
 if (([_stagePos] call FLO_fnc_virtualizationGetNearestCachedPlayerDistance) >= _clearance) exitWith { +_stagePos };
 
 private _away = _targetPos getDir _stagePos;
+private _crossesWater = {
+    params ["_to"];
+    private _steps = ceil ((_stagePos distance2D _to) / 50);
+    private _wet = false;
+    for "_i" from 1 to _steps do {
+        if ([_stagePos getPos [(_stagePos distance2D _to) * _i / _steps, _stagePos getDir _to]] call FLO_fnc_isRouteWater) exitWith { _wet = true };
+    };
+    _wet
+};
 private _resolved = [];
 for "_step" from 200 to 2000 step 200 do {
     {
         private _candidate = _stagePos getPos [_step, _away + _x];
         _candidate set [2, 0];
-        if (!([_candidate] call FLO_fnc_isRouteWater) && {([_candidate] call FLO_fnc_virtualizationGetNearestCachedPlayerDistance) >= _clearance}) exitWith {
+        if (!([_candidate] call FLO_fnc_isRouteWater) && {([_candidate] call FLO_fnc_virtualizationGetNearestCachedPlayerDistance) >= _clearance} && {!([_candidate] call _crossesWater)}) exitWith {
             _resolved = _candidate;
         };
     } forEach [0, 30, -30, 60, -60];
