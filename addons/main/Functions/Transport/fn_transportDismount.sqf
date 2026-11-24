@@ -37,7 +37,17 @@ if (!_forceNow && {_currentIdx < _dismountIdx}) exitWith { false };
 
 private _retryAtByCarrier = missionNamespace getVariable ["FLO_TransportDismountRetryAt", createHashMap];
 missionNamespace setVariable ["FLO_TransportDismountRetryAt", _retryAtByCarrier];
-if (!_forceNow && {diag_tickTime < (_retryAtByCarrier getOrDefault [_transportGroupId, -1])}) exitWith { false };
+private _retryState = _retryAtByCarrier getOrDefault [_transportGroupId, [-1, 0]];
+if (!_forceNow && {diag_tickTime < (_retryState select 0)}) exitWith { false };
+private _failedUnloads = _retryState select 1;
+if (_failedUnloads >= 6 && {!(_transData get "isActive")}) then {
+    private _shore = [_transData get "position", 3000] call FLO_fnc_getSafeLandPos;
+    if ([_shore] call FLO_fnc_isRouteWater) exitWith {
+        ["TRANSPORT", 1, format ["Transport %1 has no shore within 3000m after %2 failed unloads", _transportGroupId, _failedUnloads]] call FLO_fnc_log;
+    };
+    ["TRANSPORT", 2, format ["Transport %1 moved to shore %2 after %3 failed unloads", _transportGroupId, _shore, _failedUnloads]] call FLO_fnc_log;
+    [_transportGroupId, [_shore select 0, _shore select 1, 0]] call FLO_fnc_virtualizationUpdateGroupPosition;
+};
 
 // Get attached groups before detaching
 private _attachedIds = +([_transData] call FLO_fnc_virtualizationGetTransportPassengers);
@@ -95,12 +105,10 @@ if (_stillAboard isNotEqualTo []) exitWith {
     {
         [_x, "TRANSPORT_DISMOUNT"] call FLO_fnc_transportApplyPostDismountWaypoint;
     } forEach (_attachedIds - _stillAboard);
-    _retryAtByCarrier set [_transportGroupId, diag_tickTime + 10];
+    _retryAtByCarrier set [_transportGroupId, [diag_tickTime + 10, _failedUnloads + 1]];
     ["TRANSPORT", 2, format ["Transport %1 kept its dismount state: %2 still aboard", _transportGroupId, _stillAboard]] call FLO_fnc_log;
     false
 };
-_retryAtByCarrier deleteAt _transportGroupId;
-
 [_transportGroupId] call FLO_fnc_transportClearInsertState;
 
 [_transportGroupId] call FLO_fnc_transportPoolRelease;
