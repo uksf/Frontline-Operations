@@ -35,5 +35,6 @@ private _changes = createHashMapFromArray [
     ["missionType", ""]
 ];
 [_groupId, _changes] call FLO_fnc_virtualizationPatchGroup;
+(missionNamespace getVariable ["FLO_TransportDismountRetryAt", createHashMap]) deleteAt _groupId;
 
 true
