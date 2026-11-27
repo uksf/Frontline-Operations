@@ -21,24 +21,14 @@ if (!isServer) exitWith { false };
 if (isNull _entity) exitWith { false };
 if (_entity getVariable ["FLO_NoAftermathCleanup", false]) exitWith { false };
 
-switch (_kind) do {
-    case "corpse": {
-        if (alive _entity) exitWith { false };
-        if !(_entity isKindOf "CAManBase") exitWith { false };
-    };
-    case "wreck": {
-        if (alive _entity) exitWith { false };
-        if !(_entity isKindOf "LandVehicle" || {_entity isKindOf "Air"} || {_entity isKindOf "Ship"}) exitWith { false };
-    };
-    case "weaponHolder": {
-        if !(_entity isKindOf "GroundWeaponHolder" || {_entity isKindOf "WeaponHolder"} || {_entity isKindOf "WeaponHolderSimulated"}) exitWith { false };
-    };
-    default {
-        false
-    };
+private _isKindValid = switch (_kind) do {
+    case "corpse": { !alive _entity && {_entity isKindOf "CAManBase"} };
+    case "wreck": { !alive _entity && {_entity isKindOf "LandVehicle" || {_entity isKindOf "Air"} || {_entity isKindOf "Ship"}} };
+    case "weaponHolder": { _entity isKindOf "GroundWeaponHolder" || {_entity isKindOf "WeaponHolder"} || {_entity isKindOf "WeaponHolderSimulated"} };
+    default { false };
 };
 
-if !(_kind in ["corpse", "wreck", "weaponHolder"]) exitWith { false };
+if (!_isKindValid) exitWith { false };
 
 private _state = FLO_AftermathCleanup;
 private _trackedEntities = _state get "trackedEntities";
