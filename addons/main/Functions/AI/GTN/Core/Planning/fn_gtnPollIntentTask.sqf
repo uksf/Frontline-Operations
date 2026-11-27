@@ -11,6 +11,12 @@ private _ids = _intent get "groupIds";
 private _kind = _intent get "kind";
 private _next = "";
 private _failed = false;
+private _canMove = {
+    (_this get "attachedTo") == ""
+    && {(_this get "mountedIn") == ""}
+    && {(_this getOrDefault ["missionLock", ""]) == ""}
+    && {(_this getOrDefault ["replacementState", ""]) == ""}
+};
 switch (_phase) do {
     case "SCOUT": {
         if (_objective get "enemyStrengthKnown" && {(_objective get "enemyIntelConfidence") >= 0.5}) then {
@@ -21,7 +27,7 @@ switch (_phase) do {
             private _scout = _groups get _scoutId;
             private _issued = _intent get "issued";
             if !(_scoutId in _issued) then {
-                if (_commander call ["_hasStrategicOrderBudget", []] && {(_scout get "attachedTo") == ""} && {(_scout get "mountedIn") == ""}) then {
+                if (_commander call ["_hasStrategicOrderBudget", []] && {_scout call _canMove}) then {
                     private _heading = (_intent get "targetPos") getDir (_intent get "stagePos");
                     private _attempt = _intent get "scoutAttempt";
                     private _scoutPos = (_intent get "targetPos") getPos [((_objective get "radius") + 150) min 700, _heading + ([0, 45, -45] select _attempt)];
@@ -74,7 +80,7 @@ switch (_phase) do {
                 if (_x in (_intent get "issued")) then { continue };
                 private _group = _groups get _x;
                 if (_group get "inCombat") then { continue };
-                if ((_group get "attachedTo") != "" || {(_group get "mountedIn") != ""} || {(_group getOrDefault ["missionLock", ""]) != ""}) then { continue };
+                if !(_group call _canMove) then { continue };
                 if !([_commander, _intent, _x, _order, _pos] call FLO_fnc_gtnIssueIntentOrder) exitWith { _failed = true };
             } forEach _ids;
             if (!_failed && {count (_intent get "issued") == count _ids}) then {
