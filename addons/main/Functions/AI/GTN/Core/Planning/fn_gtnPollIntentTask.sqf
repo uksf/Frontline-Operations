@@ -74,7 +74,7 @@ switch (_phase) do {
                 if (_x in (_intent get "issued")) then { continue };
                 private _group = _groups get _x;
                 if (_group get "inCombat") then { continue };
-                if ((_group get "attachedTo") != "" || {(_group get "mountedIn") != ""}) then { continue };
+                if ((_group get "attachedTo") != "" || {(_group get "mountedIn") != ""} || {(_group getOrDefault ["missionLock", ""]) != ""}) then { continue };
                 if !([_commander, _intent, _x, _order, _pos] call FLO_fnc_gtnIssueIntentOrder) exitWith { _failed = true };
             } forEach _ids;
             if (!_failed && {count (_intent get "issued") == count _ids}) then {
